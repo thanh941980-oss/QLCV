@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Đăng nhập & Đăng ký Firebase</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      width: 350px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .toggle {
+      margin-top: 15px;
+      color: blue;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .message {
+      margin-top: 10px;
+      color: red;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2 id="form-title">Đăng nhập</h2>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Mật khẩu" required>
+  <input type="password" id="confirmPassword" placeholder="Nhập lại mật khẩu" style="display:none;">
+  <button id="submitBtn">Đăng nhập</button>
+  <p class="toggle" id="toggleForm">Chưa có tài khoản? Đăng ký</p>
+  <p class="message" id="message"></p>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    onAuthStateChanged 
+  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBWKTyXVK1y2dqxWUWprIxd5CCHMzSMc_o",
+    authDomain: "quan-ly-cong-van-dede3.firebaseapp.com",
+    databaseURL: "https://quan-ly-cong-van-dede3-default-rtdb.firebaseio.com",
+    projectId: "quan-ly-cong-van-dede3",
+    storageBucket: "quan-ly-cong-van-dede3.firebasestorage.app",
+    messagingSenderId: "1080528314069",
+    appId: "1:1080528314069:web:831f1b3c497ba082f80c5c"
+  };
+
+  // Init Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // DOM
+  const formTitle = document.getElementById("form-title");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const confirmPasswordInput = document.getElementById("confirmPassword");
+  const submitBtn = document.getElementById("submitBtn");
+  const toggleForm = document.getElementById("toggleForm");
+  const message = document.getElementById("message");
+
+  let isLogin = true;
+
+  // Toggle form
+  toggleForm.addEventListener("click", () => {
+    isLogin = !isLogin;
+    formTitle.innerText = isLogin ? "Đăng nhập" : "Đăng ký";
+    submitBtn.innerText = isLogin ? "Đăng nhập" : "Đăng ký";
+    toggleForm.innerText = isLogin 
+      ? "Chưa có tài khoản? Đăng ký" 
+      : "Đã có tài khoản? Đăng nhập";
+    confirmPasswordInput.style.display = isLogin ? "none" : "block";
+    message.innerText = "";
+  });
+
+  // Submit
+  submitBtn.addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    const confirmPassword = confirmPasswordInput.value.trim();
+
+    if (!email || !password) {
+      message.innerText = "Vui lòng nhập đầy đủ thông tin!";
+      return;
+    }
+
+    if (!isLogin && password !== confirmPassword) {
+      message.innerText = "Mật khẩu xác nhận không khớp!";
+      return;
+    }
+
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password);
+      }
+    } catch (error) {
+      message.innerText = "Lỗi: " + error.message;
+    }
+  });
+
+  // Theo dõi trạng thái đăng nhập
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // Nếu login thành công thì chuyển sang dashboard.html
+      window.location.href = "dashboard.html";
+    }
+  });
+</script>
+</body>
+</html>

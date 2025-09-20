@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tổng hợp công văn theo tên văn bản</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    
+    body {
+      background-color: #f0f2f5;
+      color: #333;
+      line-height: 1.5;
+      padding: 15px;
+      font-size: 14px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 20px;
+    }
+    
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eaeaea;
+      flex-wrap: wrap;
+    }
+    
+    h1 {
+      color: #1a73e8;
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    .back-btn {
+      background: #5f6368;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      font-size: 13px;
+      transition: all 0.2s;
+      margin-bottom: 10px;
+    }
+    
+    .back-btn:hover {
+      background: #4e5154;
+    }
+    
+    .comparison-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .comparison-section {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      flex: 1;
+      min-width: 300px;
+    }
+    
+    .comparison-section h3 {
+      color: #1a73e8;
+      margin-bottom: 15px;
+      text-align: center;
+      font-size: 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #1a73e8;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #5f6368;
+      font-size: 13px;
+    }
+    
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+    
+    tr:hover {
+      background-color: #f1f3f4;
+    }
+    
+    .count-cell {
+      text-align: center;
+      font-weight: 600;
+      width: 70px;
+    }
+    
+    .count-di {
+      color: #0f9d58;
+    }
+    
+    .count-den {
+      color: #1a73e8;
+    }
+    
+    .total-row {
+      background-color: #e8f0fe !important;
+      font-weight: 600;
+    }
+    
+    .total-row td {
+      border-top: 2px solid #1a73e8;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: #5f6368;
+      font-size: 14px;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      padding: 12px 18px;
+      border-radius: 6px;
+      color: white;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      font-weight: 500;
+      font-size: 13px;
+    }
+    
+    .success {
+      background: #34a853;
+    }
+    
+    .error {
+      background: #ea4335;
+    }
+    
+    /* Mobile styles */
+    @media (max-width: 768px) {
+      .comparison-container {
+        flex-direction: column;
+      }
+      
+      .comparison-section {
+        min-width: 100%;
+      }
+      
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      h1 {
+        font-size: 20px;
+      }
+      
+      table {
+        font-size: 12px;
+      }
+      
+      th, td {
+        padding: 8px 10px;
+      }
+    }
+    
+    /* Small mobile styles */
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        padding: 15px;
+      }
+      
+      table {
+        font-size: 11px;
+      }
+      
+      th, td {
+        padding: 6px 8px;
+      }
+      
+      .count-cell {
+        width: 50px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>TỔNG HỢP CÔNG VĂN THEO TÊN VĂN BẢN</h1>
+      <a href="dashboard.html" class="back-btn">← Quay lại</a>
+    </header>
+    
+    <div class="comparison-container">
+      <div class="comparison-section">
+        <h3>CÔNG VĂN ĐI</h3>
+        <table id="table-cong-van-di">
+          <thead>
+            <tr>
+              <th>Tên văn bản</th>
+              <th class="count-cell">Số lượng</th>
+            </tr>
+          </thead>
+          <tbody id="body-cong-van-di">
+            <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="comparison-section">
+        <h3>CÔNG VĂN ĐẾN</h3>
+        <table id="table-cong-van-den">
+          <thead>
+            <tr>
+              <th>Tên văn bản</th>
+              <th class="count-cell">Số lượng</th>
+            </tr>
+          </thead>
+          <tbody id="body-cong-van-den">
+            <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="successNotification" class="notification success"></div>
+  <div id="errorNotification" class="notification error"></div>
+  
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWKTyXVK1y2dqxWUWprIxd5CCHMzSMc_o",
+      authDomain: "quan-ly-cong-van-dede3.firebaseapp.com",
+      databaseURL: "https://quan-ly-cong-van-dede3-default-rtdb.firebaseio.com",
+      projectId: "quan-ly-cong-van-dede3",
+      storageBucket: "quan-ly-cong-van-dede3.firebasestorage.app",
+      messagingSenderId: "1080528314069",
+      appId: "1:1080528314069:web:831f1b3c497ba082f80c5c"
+    };
+
+    // Khởi tạo Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+
+    // Biến toàn cục
+    let currentUser = null;
+    let allCongVanDi = [];
+    let allCongVanDen = [];
+
+    // Hiển thị thông báo
+    function showNotification(message, isSuccess = true) {
+      const notification = document.getElementById(isSuccess ? 'successNotification' : 'errorNotification');
+      notification.textContent = message;
+      notification.style.display = 'block';
+      
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 3000);
+    }
+
+    // Tổng hợp số lượng công văn theo tên văn bản
+    function aggregateData() {
+      // Tổng hợp công văn đi
+      const diCounts = {};
+      allCongVanDi.forEach(item => {
+        const documentName = item.documentName || 'Không xác định';
+        diCounts[documentName] = (diCounts[documentName] || 0) + 1;
+      });
+      
+      // Tổng hợp công văn đến
+      const denCounts = {};
+      allCongVanDen.forEach(item => {
+        const documentName = item.tenVanBan || 'Không xác định';
+        denCounts[documentName] = (denCounts[documentName] || 0) + 1;
+      });
+      
+      // Hiển thị kết quả
+      displayCongVanDi(diCounts);
+      displayCongVanDen(denCounts);
+    }
+
+    // Hiển thị công văn đi
+    function displayCongVanDi(counts) {
+      const tableBody = document.getElementById('body-cong-van-di');
+      tableBody.innerHTML = '';
+      
+      if (Object.keys(counts).length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="2" style="text-align: center;">Không có dữ liệu</td></tr>';
+        return;
+      }
+      
+      // Sắp xếp theo tên văn bản
+      const sortedDocumentNames = Object.keys(counts).sort();
+      
+      // Hiển thị từng dòng
+      sortedDocumentNames.forEach(documentName => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${documentName}</td>
+          <td class="count-cell count-di">${counts[documentName]}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+      
+      // Hiển thị tổng cộng
+      const totalDi = Object.values(counts).reduce((sum, count) => sum + count, 0);
+      const totalRow = document.createElement('tr');
+      totalRow.className = 'total-row';
+      totalRow.innerHTML = `
+        <td>TỔNG CỘNG</td>
+        <td class="count-cell count-di">${totalDi}</td>
+      `;
+      tableBody.appendChild(totalRow);
+    }
+
+    // Hiển thị công văn đến
+    function displayCongVanDen(counts) {
+      const tableBody = document.getElementById('body-cong-van-den');
+      tableBody.innerHTML = '';
+      
+      if (Object.keys(counts).length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="2" style="text-align: center;">Không có dữ liệu</td></tr>';
+        return;
+      }
+      
+      // Sắp xếp theo tên văn bản
+      const sortedDocumentNames = Object.keys(counts).sort();
+      
+      // Hiển thị từng dòng
+      sortedDocumentNames.forEach(documentName => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${documentName}</td>
+          <td class="count-cell count-den">${counts[documentName]}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+      
+      // Hiển thị tổng cộng
+      const totalDen = Object.values(counts).reduce((sum, count) => sum + count, 0);
+      const totalRow = document.createElement('tr');
+      totalRow.className = 'total-row';
+      totalRow.innerHTML = `
+        <td>TỔNG CỘNG</td>
+        <td class="count-cell count-den">${totalDen}</td>
+      `;
+      tableBody.appendChild(totalRow);
+    }
+
+    // Khởi tạo trang
+    document.addEventListener('DOMContentLoaded', function() {
+      // Kiểm tra trạng thái đăng nhập
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          
+          // Lấy dữ liệu công văn đi
+          const congVanDiRef = ref(database, 'congVanDi');
+          onValue(congVanDiRef, (snapshot) => {
+            if (snapshot.exists()) {
+              allCongVanDi = Object.values(snapshot.val());
+            } else {
+              allCongVanDi = [];
+            }
+            
+            // Lấy dữ liệu công văn đến
+            const congVanDenRef = ref(database, 'congVanDen');
+            onValue(congVanDenRef, (snapshot) => {
+              if (snapshot.exists()) {
+                allCongVanDen = Object.values(snapshot.val());
+              } else {
+                allCongVanDen = [];
+              }
+              
+              // Tổng hợp và hiển thị dữ liệu
+              aggregateData();
+              
+            }, (error) => {
+              console.error('Lỗi khi tải dữ liệu công văn đến:', error);
+              showNotification('Có lỗi xảy ra khi tải dữ liệu', false);
+            });
+          }, (error) => {
+            console.error('Lỗi khi tải dữ liệu công văn đi:', error);
+            showNotification('Có lỗi xảy ra khi tải dữ liệu', false);
+            document.getElementById('body-cong-van-di').innerHTML = '<tr><td colspan="2" style="text-align: center; color: #ea4335;">Lỗi tải dữ liệu</td></tr>';
+            document.getElementById('body-cong-van-den').innerHTML = '<tr><td colspan="2" style="text-align: center; color: #ea4335;">Lỗi tải dữ liệu</td></tr>';
+          });
+        } else {
+          window.location.href = 'index.html';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

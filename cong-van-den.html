@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Công Văn Đến - Hệ Thống Quản Lý Công Văn</title>
+    <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    
+    body {
+      background-color: #f0f2f5;
+      color: #333;
+      line-height: 1.5; /* Giảm khoảng cách dòng */
+      padding: 15px; /* Giảm padding */
+      font-size: 14px; /* Giảm cỡ chữ tổng thể */
+    }
+    
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px; /* Giảm border radius */
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* Giảm shadow */
+      padding: 20px; /* Giảm padding */
+    }
+    
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px; /* Giảm margin */
+      padding-bottom: 12px; /* Giảm padding */
+      border-bottom: 1px solid #eaeaea; /* Giảm độ dày border */
+    }
+    
+    h1 {
+      color: #1a73e8;
+      font-size: 22px; /* Giảm cỡ chữ tiêu đề */
+      font-weight: 600;
+    }
+    
+    .back-btn {
+      background: #5f6368;
+      color: white;
+      border: none;
+      padding: 8px 14px; /* Giảm padding nút */
+      border-radius: 5px; /* Giảm border radius */
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      font-size: 13px; /* Giảm cỡ chữ nút */
+      transition: all 0.2s;
+    }
+    
+    .back-btn:hover {
+      background: #4e5154;
+    }
+    
+    .form-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px; /* Giảm khoảng cách giữa các ô */
+      margin-bottom: 20px; /* Giảm margin */
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 1px; /* Giảm khoảng cách giữa các nhóm form */
+    }
+    
+    .form-group-full {
+      grid-column: 1 / -1;
+    }
+    
+    .form-group label {
+      margin-bottom: 6px; /* Giảm khoảng cách dưới nhãn */
+      font-weight: 600;
+      color: #0e4d9b;
+      font-size: 13px; /* Giảm cỡ chữ nhãn */
+    }
+    
+    .form-group input, 
+    .form-group select, 
+    .form-group textarea {
+      padding: 8px 10px; /* Giảm padding cho các trường nhập */
+      border: 1px solid #dadce0;
+      border-radius: 5px; /* Giảm border radius */
+      font-size: 13px; /* Giảm cỡ chữ nhập liệu */
+      transition: border 0.2s;
+      line-height: 1.3; /* Giảm khoảng cách dòng */
+      height: 38px; /* Giảm chiều cao các trường nhập */
+    }
+    
+    textarea {
+      height: auto; /* Đảm bảo textarea không bị ảnh hưởng */
+      min-height: 80px; /* Giảm chiều cao tối thiểu */
+    }
+    
+    .form-group input:focus, 
+    .form-group select:focus, 
+    .form-group textarea:focus {
+      border-color: #1a73e8;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+    }
+    
+    .input-group {
+      display: flex;
+      gap: 6px; /* Giảm khoảng cách giữa select và nút */
+    }
+    
+    .input-group select {
+      flex: 1;
+    }
+    
+    .btn {
+      padding: 7px 12px; /* Giảm padding nút */
+      border: none;
+      border-radius: 5px; /* Giảm border radius */
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 13px; /* Giảm cỡ chữ nút */
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.3; /* Giảm khoảng cách dòng */
+      height: 38px; /* Thiết lập chiều cao cố định */
+    }
+    
+    .btn-sm {
+      padding: 5px 8px; /* Giảm padding nút nhỏ */
+      font-size: 12px; /* Giảm cỡ chữ nút nhỏ */
+      height: 30px; /* Giảm chiều cao nút nhỏ */
+    }
+    
+    .btn-primary {
+      background: #1a73e8;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1967d2;
+    }
+    
+    .btn-secondary {
+      background: #5f6368;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #4e5154;
+    }
+    
+    .btn-update {
+      background: #f57c00;
+      color: white;
+    }
+    
+    .btn-update:hover {
+      background: #e65100;
+    }
+    
+    .form-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px; /* Giảm khoảng cách giữa các nút */
+      margin-bottom: 20px; /* Giảm margin */
+    }
+    
+    .section-title {
+      font-size: 16px; /* Giảm cỡ chữ tiêu đề section */
+      font-weight: 600;
+      color: #1a73e8;
+      margin: 20px 0 12px 0; /* Giảm margin */
+      padding-bottom: 6px; /* Giảm padding */
+      border-bottom: 1px solid #eaeaea;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0; /* Giảm margin */
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04); /* Giảm shadow */
+      border: 1px solid #e0e0e0;
+      border-radius: 6px; /* Giảm border radius */
+      overflow: hidden;
+      font-size: 13px; /* Giảm cỡ chữ bảng */
+    }
+    
+    th, td {
+      padding: 10px 12px; /* Giảm padding cho ô bảng */
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+      line-height: 1.3; /* Giảm khoảng cách dòng */
+    }
+    
+    th {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #5f6368;
+      font-size: 13px; /* Giảm cỡ chữ tiêu đề bảng */
+    }
+    
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+    
+    tr:hover {
+      background-color: #f1f3f4;
+    }
+    
+    .action-icon {
+      color: #1a73e8;
+      text-decoration: none;
+      margin-right: 8px; /* Giảm khoảng cách bên phải */
+      cursor: pointer;
+      font-weight: 500;
+      padding: 4px 6px; /* Giảm padding cho liên kết hành động */
+      border-radius: 3px; /* Giảm border radius */
+      transition: all 0.2s;
+      font-size: 12px; /* Giảm cỡ chữ */
+      display: inline-block;
+    }
+    
+    .action-icon:hover {
+      background: #e8f0fe;
+    }
+    
+    .delete-icon {
+      color: #ea4335;
+    }
+    
+    .delete-icon:hover {
+      background: #fce8e6;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px; /* Giảm padding */
+      color: #5f6368;
+      font-size: 14px; /* Giảm cỡ chữ */
+    }
+    
+    .notification {
+      position: fixed;
+      top: 15px; /* Điều chỉnh vị trí */
+      right: 15px; /* Điều chỉnh vị trí */
+      padding: 12px 18px; /* Giảm padding */
+      border-radius: 6px; /* Giảm border radius */
+      color: white;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* Giảm shadow */
+      font-weight: 500;
+      font-size: 13px; /* Giảm cỡ chữ */
+      line-height: 1.3; /* Giảm khoảng cách dòng */
+    }
+    
+    .success {
+      background: #34a853;
+    }
+    
+    .error {
+      background: #ea4335;
+    }
+    
+    @media (max-width: 1024px) {
+      .form-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px; /* Giảm khoảng cách trên màn hình nhỏ */
+      }
+      
+      body {
+        font-size: 13.5px; /* Giảm cỡ chữ trên tablet */
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .form-container {
+        grid-template-columns: 1fr;
+        gap: 10px; /* Giảm khoảng cách trên mobile */
+      }
+      
+      .form-buttons {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+        margin-bottom: 6px; /* Giảm khoảng cách giữa các nút */
+      }
+      
+      body {
+        padding: 12px; /* Giảm padding */
+        font-size: 13px; /* Giảm cỡ chữ trên mobile */
+      }
+      
+      .container {
+        padding: 15px 12px; /* Giảm padding */
+      }
+      
+      th, td {
+        padding: 8px 10px; /* Giảm padding ô trên mobile */
+        font-size: 12.5px; /* Giảm cỡ chữ */
+      }
+    }
+
+    /* Tùy chỉnh bổ sung cho select và input */
+    select, input[type="text"], input[type="date"] {
+      height: 36px; /* Giảm chiều cao cho các trường nhập */
+    }
+    
+    /* Tùy chỉnh file input */
+    input[type="file"] {
+      padding: 6px; /* Giảm padding */
+      font-size: 13px; /* Giảm cỡ chữ */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>QUẢN LÝ CÔNG VĂN ĐẾN</h1>
+      <a href="dashboard.html" class="back-btn">← Quay lại</a>
+    </header>
+    
+    <div class="form-container">
+      <div class="form-group">
+        <label for="nam">Năm</label>
+        <select id="nam">
+          <option value="">Chọn năm</option>
+          <option value="2023">2023</option>
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="so-den">Số đến</label>
+        <input type="text" id="so-den" placeholder="Nhập số đến">
+      </div>
+      <div class="form-group">
+        <label for="nguoi-nhan">Người nhận</label>
+        <div class="input-group">
+          <select id="nguoi-nhan">
+            <option value="">Chọn người nhận</option>
+            <option value="Nguyễn Văn A">Nguyễn Văn A</option>
+            <option value="Trần Thị B">Trần Thị B</option>
+            <option value="Lê Văn C">Lê Văn C</option>
+          </select>
+          <button class="btn btn-sm btn-primary" id="them-nguoi-nhan-btn">+</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="ngay-nhan">Ngày nhận</label>
+        <input type="date" id="ngay-nhan">
+      </div>
+      <div class="form-group">
+        <label for="so-cong-van">Số công văn</label>
+        <input type="text" id="so-cong-van" placeholder="Nhập số công văn">
+      </div>
+      <div class="form-group">
+        <label for="ten-van-ban">Tên văn bản</label>
+        <div class="input-group">
+          <select id="ten-van-ban">
+            <option value="">Chọn tên văn bản</option>
+            <option value="Công văn hỏa tốc">Công văn hỏa tốc</option>
+            <option value="Công văn thường">Công văn thường</option>
+            <option value="Công văn mật">Công văn mật</option>
+          </select>
+          <button class="btn btn-sm btn-primary" id="them-ten-van-ban-btn">+</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="ngay-ky">Ngày ký</label>
+        <input type="date" id="ngay-ky">
+      </div>
+      <div class="form-group">
+        <label for="nguoi-ky">Người ký</label>
+        <div class="input-group">
+          <select id="nguoi-ky">
+            <option value="">Chọn người ký</option>
+            <option value="Nguyễn Văn A">Nguyễn Văn A</option>
+            <option value="Trần Thị B">Trần Thị B</option>
+            <option value="Lê Văn C">Lê Văn C</option>
+          </select>
+          <button class="btn btn-sm btn-primary" id="them-nguoi-ky-btn">+</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="noi-ban-hanh">Nơi ban hành</label>
+        <div class="input-group">
+          <select id="noi-ban-hanh">
+            <option value="">Chọn nơi ban hành</option>
+            <option value="Phòng Tổ chức">Phòng Tổ chức</option>
+            <option value="Phòng Kế hoạch">Phòng Kế hoạch</option>
+            <option value="Phòng Tài chính">Phòng Tài chính</option>
+          </select>
+          <button class="btn btn-sm btn-primary" id="them-noi-ban-hanh-btn">+</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="so-to">Số tờ</label>
+        <input type="text" id="so-to" placeholder="Nhập số tờ">
+      </div>
+      <div class="form-group form-group-full">
+        <label for="noi-dung">Nội dung</label>
+        <textarea id="noi-dung" placeholder="Nhập nội dung công văn"></textarea>
+      </div>
+      <div class="form-group form-group-full">
+        <label for="file-dinh-kem">File đính kèm</label>
+        <input type="file" id="file-dinh-kem">
+      </div>
+    </div>
+    
+    <div class="form-buttons">
+      <button class="btn btn-secondary" id="reset-cvden-btn">Làm mới</button>
+      <button class="btn btn-primary" id="save-cvden-btn">Lưu công văn</button>
+      <button class="btn btn-update" id="update-cvden-btn">Cập nhật</button>
+    </div>
+    
+    <div class="section-title">Danh sách công văn đến</div>
+    <div class="loading" id="loading">Đang tải dữ liệu...</div>
+    <table id="documentsTable">
+      <thead>
+        <tr>
+          <th width="5%">STT</th>
+          <th width="8%">Năm</th>
+          <th width="8%">Số đến</th>
+          <th width="10%">Người nhận</th>
+          <th width="10%">Ngày nhận</th>
+          <th width="10%">Số CV</th>
+          <th width="15%">Tên VB</th>
+          <th width="10%">Ngày ký</th>
+          <th width="10%">Người ký</th>
+          <th width="10%">Nơi BH</th>
+          <th width="4%">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody id="documentsBody">
+        <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
+      </tbody>
+    </table>
+  </div>
+
+  <div id="successNotification" class="notification success"></div>
+  <div id="errorNotification" class="notification error"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWKTyXVK1y2dqxWUWprIxd5CCHMzSMc_o",
+      authDomain: "quan-ly-cong-van-dede3.firebaseapp.com",
+      databaseURL: "https://quan-ly-cong-van-dede3-default-rtdb.firebaseio.com",
+      projectId: "quan-ly-cong-van-dede3",
+      storageBucket: "quan-ly-cong-van-dede3.firebasestorage.app",
+      messagingSenderId: "1080528314069",
+      appId: "1:1080528314069:web:831f1b3c497ba082f80c5c"
+    };
+
+    // Khởi tạo Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+
+    // Biến toàn cục
+    let currentUser = null;
+    let editingId = null;
+
+    // Hiển thị thông báo
+    function showNotification(message, isSuccess = true) {
+      const notification = document.getElementById(isSuccess ? 'successNotification' : 'errorNotification');
+      notification.textContent = message;
+      notification.style.display = 'block';
+      
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 3000);
+    }
+
+    // Làm mới form
+    function refreshForm() {
+      document.getElementById('nam').value = '';
+      document.getElementById('so-den').value = '';
+      document.getElementById('nguoi-nhan').value = '';
+      document.getElementById('ngay-nhan').valueAsDate = new Date();
+      document.getElementById('so-cong-van').value = '';
+      document.getElementById('ten-van-ban').value = '';
+      document.getElementById('ngay-ky').valueAsDate = new Date();
+      document.getElementById('nguoi-ky').value = '';
+      document.getElementById('noi-ban-hanh').value = '';
+      document.getElementById('so-to').value = '';
+      document.getElementById('noi-dung').value = '';
+      document.getElementById('file-dinh-kem').value = '';
+      editingId = null;
+      document.getElementById('update-cvden-btn').style.display = 'none';
+      document.getElementById('save-cvden-btn').style.display = 'block';
+    }
+
+    // Lưu công văn đến
+    async function saveDocument() {
+      const year = document.getElementById('nam').value;
+      const soDen = document.getElementById('so-den').value;
+      const nguoiNhan = document.getElementById('nguoi-nhan').value;
+      const ngayNhan = document.getElementById('ngay-nhan').value;
+      const soCongVan = document.getElementById('so-cong-van').value;
+      const tenVanBan = document.getElementById('ten-van-ban').value;
+      const ngayKy = document.getElementById('ngay-ky').value;
+      const nguoiKy = document.getElementById('nguoi-ky').value;
+      const noiBanHanh = document.getElementById('noi-ban-hanh').value;
+      const soTo = document.getElementById('so-to').value;
+      const content = document.getElementById('noi-dung').value;
+      const fileInput = document.getElementById('file-dinh-kem');
+      const fileName = fileInput.files[0] ? fileInput.files[0].name : '';
+
+      // Kiểm tra dữ liệu đầu vào
+      if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) {
+        showNotification('Vui lòng điền đầy đủ thông tin', false);
+        return;
+      }
+
+      try {
+        const documentData = {
+          year,
+          soDen,
+          nguoiNhan,
+          ngayNhan,
+          soCongVan,
+          tenVanBan,
+          ngayKy,
+          nguoiKy,
+          noiBanHanh,
+          soTo,
+          content,
+          fileName,
+          createdAt: new Date().toISOString(),
+          createdBy: currentUser.email
+        };
+
+        if (editingId) {
+          // Cập nhật công văn đã có
+          await set(ref(database, `congVanDen/${editingId}`), documentData);
+          showNotification('Cập nhật công văn thành công!');
+        } else {
+          // Thêm công văn mới
+          const newDocRef = push(ref(database, 'congVanDen'));
+          await set(newDocRef, documentData);
+          showNotification('Thêm công văn thành công!');
+        }
+
+        refreshForm();
+      } catch (error) {
+        console.error('Lỗi khi lưu công văn:', error);
+        showNotification('Có lỗi xảy ra khi lưu công văn', false);
+      }
+    }
+
+    // Xóa công văn
+    async function deleteDocument(id) {
+      if (!confirm('Bạn có chắc chắn muốn xóa công văn này?')) return;
+      
+      try {
+        await remove(ref(database, `congVanDen/${id}`));
+        showNotification('Xóa công văn thành công!');
+      } catch (error) {
+        console.error('Lỗi khi xóa công văn:', error);
+        showNotification('Có lỗi xảy ra khi xóa công văn', false);
+      }
+    }
+
+    // Chỉnh sửa công văn
+    function editDocument(id, data) {
+      document.getElementById('nam').value = data.year;
+      document.getElementById('so-den').value = data.soDen;
+      document.getElementById('nguoi-nhan').value = data.nguoiNhan;
+      document.getElementById('ngay-nhan').value = data.ngayNhan;
+      document.getElementById('so-cong-van').value = data.soCongVan;
+      document.getElementById('ten-van-ban').value = data.tenVanBan;
+      document.getElementById('ngay-ky').value = data.ngayKy;
+      document.getElementById('nguoi-ky').value = data.nguoiKy;
+      document.getElementById('noi-ban-hanh').value = data.noiBanHanh;
+      document.getElementById('so-to').value = data.soTo;
+      document.getElementById('noi-dung').value = data.content;
+      
+      editingId = id;
+      document.getElementById('update-cvden-btn').style.display = 'block';
+      document.getElementById('save-cvden-btn').style.display = 'none';
+      
+      // Cuộn lên đầu form
+      window.scrollTo(0, 0);
+    }
+
+    // Hiển thị danh sách công văn
+    function displayDocuments(snapshot) {
+      const documentsBody = document.getElementById('documentsBody');
+      documentsBody.innerHTML = '';
+      
+      if (!snapshot.exists()) {
+        documentsBody.innerHTML = '<tr><td colspan="11" style="text-align: center;">Chưa có công văn nào</td></tr>';
+        return;
+      }
+      
+      const documents = snapshot.val();
+      let stt = 1;
+      
+      for (const id in documents) {
+        const doc = documents[id];
+        const row = document.createElement('tr');
+        
+        row.innerHTML = `
+          <td>${stt}</td>
+          <td>${doc.year}</td>
+          <td>${doc.soDen}</td>
+          <td>${doc.nguoiNhan}</td>
+          <td>${doc.ngayNhan}</td>
+          <td>${doc.soCongVan}</td>
+          <td>${doc.tenVanBan}</td>
+          <td>${doc.ngayKy}</td>
+          <td>${doc.nguoiKy}</td>
+          <td>${doc.noiBanHanh}</td>
+          <td>
+            <a class="action-icon" onclick="window.editDocument('${id}', ${JSON.stringify(doc).replace(/"/g, '&quot;')})">Sửa</a>
+            <a class="action-icon delete-icon" onclick="window.deleteDocument('${id}')">Xóa</a>
+          </td>
+        `;
+        
+        documentsBody.appendChild(row);
+        stt++;
+      }
+    }
+
+    // Thêm mới option và lưu vào Firebase
+    async function themMoi(selectId, category) {
+      const tenMoi = prompt('Nhập giá trị mới:');
+      if (tenMoi && tenMoi.trim() !== '') {
+        try {
+          const tenMoiTrimmed = tenMoi.trim();
+          
+          // Kiểm tra trùng lặp
+          const select = document.getElementById(selectId);
+          for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === tenMoiTrimmed) {
+              showNotification('Giá trị này đã tồn tại!', false);
+              return;
+            }
+          }
+
+          // Tạo dữ liệu để lưu
+          const newData = {
+            name: tenMoiTrimmed,
+            createdAt: new Date().toISOString(),
+            createdBy: currentUser ? currentUser.email : 'unknown'
+          };
+          
+          // Lưu vào Firebase
+          const newItemRef = push(ref(database, `categories/${category}`));
+          await set(newItemRef, newData);
+          
+          // Thêm vào dropdown
+          const option = document.createElement('option');
+          option.value = tenMoiTrimmed;
+          option.textContent = tenMoiTrimmed;
+          select.appendChild(option);
+          select.value = tenMoiTrimmed;
+          
+          showNotification('Thêm mới thành công!');
+          
+        } catch (error) {
+          console.error('Lỗi khi thêm mới:', error);
+          showNotification('Có lỗi xảy ra khi thêm mới', false);
+        }
+      } else if (tenMoi !== null) {
+        showNotification('Vui lòng nhập giá trị hợp lệ!', false);
+      }
+    }
+
+    // Tải danh sách các option từ Firebase
+    function loadCategories(selectId, category) {
+      const categoriesRef = ref(database, `categories/${category}`);
+      onValue(categoriesRef, (snapshot) => {
+        const select = document.getElementById(selectId);
+        
+        // Giữ lại các option mặc định (những option đầu tiên)
+        const defaultOptions = [];
+        for (let i = 0; i < select.options.length; i++) {
+          defaultOptions.push(select.options[i]);
+        }
+        
+        // Xóa tất cả options
+        select.innerHTML = '';
+        
+        // Thêm lại các option mặc định
+        defaultOptions.forEach(option => {
+          select.appendChild(option);
+        });
+        
+        // Thêm các option từ Firebase
+        if (snapshot.exists()) {
+          const categories = snapshot.val();
+          for (const key in categories) {
+            const categoryItem = categories[key];
+            const option = document.createElement('option');
+            option.value = categoryItem.name;
+            option.textContent = categoryItem.name;
+            select.appendChild(option);
+          }
+        }
+      });
+    }
+
+    // Kiểm tra kết nối Firebase
+    function checkDatabaseConnection() {
+      const connectedRef = ref(database, ".info/connected");
+      onValue(connectedRef, (snap) => {
+        if (snap.val() === true) {
+          console.log("Đã kết nối đến Firebase");
+        } 
+        //else {
+        //  console.log("Mất kết nối Firebase");
+        //  showNotification("Mất kết nối đến server", false);
+        //}
+      });
+    }
+
+    // Khởi tạo trang
+    document.addEventListener('DOMContentLoaded', function() {
+      // Thiết lập ngày mặc định
+      const today = new Date();
+      document.getElementById('ngay-nhan').valueAsDate = today;
+      document.getElementById('ngay-ky').valueAsDate = today;
+      
+      // Ẩn nút cập nhật ban đầu
+      document.getElementById('update-cvden-btn').style.display = 'none';
+      
+      // Xử lý sự kiện nút làm mới
+      document.getElementById('reset-cvden-btn').addEventListener('click', refreshForm);
+      
+      // Xử lý sự kiện nút lưu
+      document.getElementById('save-cvden-btn').addEventListener('click', saveDocument);
+      
+      // Xử lý sự kiện nút cập nhật
+      document.getElementById('update-cvden-btn').addEventListener('click', saveDocument);
+      
+      // Xử lý sự kiện nút thêm mới
+      document.getElementById('them-nguoi-nhan-btn').addEventListener('click', () => themMoi('nguoi-nhan', 'receivers'));
+      document.getElementById('them-ten-van-ban-btn').addEventListener('click', () => themMoi('ten-van-ban', 'documentTypes'));
+      document.getElementById('them-nguoi-ky-btn').addEventListener('click', () => themMoi('nguoi-ky', 'signers'));
+      document.getElementById('them-noi-ban-hanh-btn').addEventListener('click', () => themMoi('noi-ban-hanh', 'issuingPlaces'));
+      
+      // Kiểm tra kết nối
+      checkDatabaseConnection();
+      
+      // Kiểm tra trạng thái đăng nhập
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          
+          // Tải các danh mục từ Firebase
+          loadCategories('nguoi-nhan', 'receivers');
+          loadCategories('ten-van-ban', 'documentTypes');
+          loadCategories('nguoi-ky', 'signers');
+          loadCategories('noi-ban-hanh', 'issuingPlaces');
+          
+          // Hiển thị loading
+          document.getElementById('loading').style.display = 'block';
+          
+          // Lấy dữ liệu công văn đến từ Firebase
+          const documentsRef = ref(database, 'congVanDen');
+          onValue(documentsRef, (snapshot) => {
+            document.getElementById('loading').style.display = 'none';
+            displayDocuments(snapshot);
+          }, (error) => {
+            document.getElementById('loading').style.display = 'none';
+            console.error('Lỗi khi tải dữ liệu:', error);
+            showNotification('Có lỗi xảy ra khi tải dữ liệu', false);
+          });
+        } else {
+          window.location.href = 'index.html';
+        }
+      });
+    });
+
+    // Cho phép sử dụng các hàm toàn cục
+    window.editDocument = editDocument;
+    window.deleteDocument = deleteDocument;
+    window.themMoi = themMoi;
+  </script>
+</body>
+</html>
