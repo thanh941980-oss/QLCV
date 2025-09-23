@@ -68,85 +68,83 @@
 
     <!-- Card Thông tin chính -->
     <div class="card">
-      <div class="card-header">Thông tin công văn</div>
-      <div class="card-body row g-3">
-        <div class="col-md-3">
-          <label class="form-label">Năm</label>
-          <div class="input-group">
-            <select id="nam" class="form-select">
-              <option value="">Chọn năm</option>
-              <option>2023</option>
-              <option>2024</option>
-              <option>2025</option>
-              <option>2026</option>
-            </select>
-            <button class="btn btn-outline-primary" id="them-nam-btn"><i class="fa fa-plus"></i></button>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <label class="form-label">Số công văn</label>
-          <input type="text" id="so-vb" class="form-control" placeholder="Nhập số công văn">
-        </div>
-
-        <div class="col-md-3">
-          <label class="form-label">Tên văn bản</label>
-          <div class="input-group">
-            <select id="ten-vb" class="form-select">
-              <option value="">Chọn tên văn bản</option>
-              <option>Công văn hỏa tốc</option>
-              <option>Công văn thường</option>
-              <option>Công văn mật</option>
-            </select>
-            <button class="btn btn-outline-primary" id="them-ten-vb-btn"><i class="fa fa-plus"></i></button>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <label class="form-label">Ngày ký</label>
-          <input type="date" id="ngay-ky" class="form-control">
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label">Người ký</label>
-          <div class="input-group">
-            <select id="nguoi-ky" class="form-select">
-              <option value="">Chọn người ký</option>
-              <option>Nguyễn Văn A</option>
-              <option>Trần Thị B</option>
-              <option>Lê Văn C</option>
-            </select>
-            <button class="btn btn-outline-primary" id="them-nguoi-ky-btn"><i class="fa fa-plus"></i></button>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label">Nơi ban hành</label>
-          <div class="input-group">
-            <select id="noi-ban-hanh" class="form-select">
-              <option value="">Chọn nơi ban hành</option>
-            </select>
-            <button class="btn btn-outline-primary" id="them-noi-ban-hanh-btn"><i class="fa fa-plus"></i></button>
-          </div>
+  <div class="card-header">Thông tin công văn</div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Năm</label>
+        <div class="input-group">
+          <select id="nam" class="form-select">
+            <option value="">Chọn năm</option>
+            <option>2023</option>
+            <option>2024</option>
+            <option>2025</option>
+            <option>2026</option>
+          </select>
+          <button class="btn btn-outline-primary" id="them-nam-btn"><i class="fa fa-plus"></i></button>
         </div>
       </div>
-    </div>
 
-    <!-- Card Nội dung -->
-    <div class="card">
-      <div class="card-header">Nội dung</div>
-      <div class="card-body">
+      <div class="col-md-6">
+        <label class="form-label">Số công văn</label>
+        <input type="text" id="so-vb" class="form-control" placeholder="Nhập số công văn">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Tên văn bản</label>
+        <div class="input-group">
+          <select id="ten-vb" class="form-select">
+            <option value="">Chọn tên văn bản</option>
+            <option>Công văn hỏa tốc</option>
+            <option>Công văn thường</option>
+            <option>Công văn mật</option>
+          </select>
+          <button class="btn btn-outline-primary" id="them-ten-vb-btn"><i class="fa fa-plus"></i></button>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Ngày ký</label>
+        <input type="date" id="ngay-ky" class="form-control">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Người ký</label>
+        <div class="input-group">
+          <select id="nguoi-ky" class="form-select">
+            <option value="">Chọn người ký</option>
+            <option>Nguyễn Văn A</option>
+            <option>Trần Thị B</option>
+            <option>Lê Văn C</option>
+          </select>
+          <button class="btn btn-outline-primary" id="them-nguoi-ky-btn"><i class="fa fa-plus"></i></button>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Nơi ban hành</label>
+        <div class="input-group">
+          <select id="noi-ban-hanh" class="form-select">
+            <option value="">Chọn nơi ban hành</option>
+          </select>
+          <button class="btn btn-outline-primary" id="them-noi-ban-hanh-btn"><i class="fa fa-plus"></i></button>
+        </div>
+      </div>
+
+      <!-- Nội dung full width -->
+      <div class="col-12">
+        <label class="form-label">Nội dung</label>
         <textarea id="noi-dung" class="form-control" rows="4" placeholder="Nhập nội dung công văn"></textarea>
       </div>
-    </div>
 
-    <!-- Card File -->
-    <div class="card">
-      <div class="card-header">File đính kèm</div>
-      <div class="card-body">
+      <!-- File đính kèm full width -->
+      <div class="col-12">
+        <label class="form-label">File đính kèm</label>
         <input type="file" id="file-dinh-kem" class="form-control">
       </div>
     </div>
+  </div>
+</div>
 
     <!-- Nút hành động -->
     <div class="d-flex justify-content-end gap-2 mb-4">
@@ -531,4 +529,5 @@ function loadCategories(selectId, category) {
 </body>
 
 </html>
+
 
