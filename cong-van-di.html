@@ -4,431 +4,182 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Công Văn Đi - Hệ Thống Quản Lý Công Văn</title>
-    <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Arial, sans-serif;
-    }
-    
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <style>
     body {
-      background-color: #f0f2f5;
-      color: #333;
-      line-height: 1.5; /* Giảm khoảng cách dòng */
-      padding: 15px; /* Giảm padding */
-      font-size: 14px; /* Giảm cỡ chữ tổng thể */
+      background-color: #f4f6f9;
+      font-size: 14px;
     }
-    
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 8px; /* Giảm border radius */
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* Giảm shadow */
-      padding: 20px; /* Giảm padding */
+    .card {
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
-    
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px; /* Giảm margin */
-      padding-bottom: 12px; /* Giảm padding */
-      border-bottom: 1px solid #eaeaea; /* Giảm độ dày border */
-    }
-    
-    h1 {
-      color: #1a73e8;
-      font-size: 22px; /* Giảm cỡ chữ tiêu đề */
-      font-weight: 600;
-    }
-    
-    .back-btn {
-      background: #5f6368;
-      color: white;
-      border: none;
-      padding: 8px 14px; /* Giảm padding nút */
-      border-radius: 5px; /* Giảm border radius */
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      font-size: 13px; /* Giảm cỡ chữ nút */
-      transition: all 0.2s;
-    }
-    
-    .back-btn:hover {
-      background: #4e5154;
-    }
-    
-    .form-container {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px; /* Giảm khoảng cách giữa các ô */
-      margin-bottom: 20px; /* Giảm margin */
-    }
-    
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 1px; /* Giảm khoảng cách giữa các nhóm form */
-    }
-    
-    .form-group-full {
-      grid-column: 1 / -1;
-    }
-    
-    .form-group label {
-      margin-bottom: 6px; /* Giảm khoảng cách dưới nhãn */
-      font-weight: 600;
-      color: #0e4d9b;
-      font-size: 13px; /* Giảm cỡ chữ nhãn */
-    }
-    
-    .form-group input, 
-    .form-group select, 
-    .form-group textarea {
-      padding: 8px 10px; /* Giảm padding cho các trường nhập */
-      border: 1px solid #dadce0;
-      border-radius: 5px; /* Giảm border radius */
-      font-size: 13px; /* Giảm cỡ chữ nhập liệu */
-      transition: border 0.2s;
-      line-height: 1.3; /* Giảm khoảng cách dòng */
-      height: 38px; /* Giảm chiều cao các trường nhập */
-    }
-    
-    textarea {
-      height: auto; /* Đảm bảo textarea không bị ảnh hưởng */
-      min-height: 80px; /* Giảm chiều cao tối thiểu */
-    }
-    
-    .form-group input:focus, 
-    .form-group select:focus, 
-    .form-group textarea:focus {
-      border-color: #1a73e8;
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
-    }
-    
-    .input-group {
-      display: flex;
-      gap: 6px; /* Giảm khoảng cách giữa select và nút */
-    }
-    
-    .input-group select {
-      flex: 1;
-    }
-    
-    .btn {
-      padding: 7px 12px; /* Giảm padding nút */
-      border: none;
-      border-radius: 5px; /* Giảm border radius */
-      cursor: pointer;
-      font-weight: 500;
-      font-size: 13px; /* Giảm cỡ chữ nút */
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 1.3; /* Giảm khoảng cách dòng */
-      height: 38px; /* Thiết lập chiều cao cố định */
-    }
-    
-    .btn-sm {
-      padding: 5px 8px; /* Giảm padding nút nhỏ */
-      font-size: 12px; /* Giảm cỡ chữ nút nhỏ */
-      height: 30px; /* Giảm chiều cao nút nhỏ */
-    }
-    
-    .btn-primary {
+    .card-header {
       background: #1a73e8;
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background: #1967d2;
-    }
-    
-    .btn-secondary {
-      background: #5f6368;
-      color: white;
-    }
-    
-    .btn-secondary:hover {
-      background: #4e5154;
-    }
-    
-    .btn-update {
-      background: #f57c00;
-      color: white;
-    }
-    
-    .btn-update:hover {
-      background: #e65100;
-    }
-    
-    .form-buttons {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px; /* Giảm khoảng cách giữa các nút */
-      margin-bottom: 20px; /* Giảm margin */
-    }
-    
-    .section-title {
-      font-size: 16px; /* Giảm cỡ chữ tiêu đề section */
+      color: #fff;
       font-weight: 600;
-      color: #1a73e8;
-      margin: 20px 0 12px 0; /* Giảm margin */
-      padding-bottom: 6px; /* Giảm padding */
-      border-bottom: 1px solid #eaeaea;
     }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 15px 0; /* Giảm margin */
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04); /* Giảm shadow */
-      border: 1px solid #e0e0e0;
-      border-radius: 6px; /* Giảm border radius */
-      overflow: hidden;
-      font-size: 13px; /* Giảm cỡ chữ bảng */
+    .btn i {
+      margin-right: 4px;
     }
-    
-    th, td {
-      padding: 10px 12px; /* Giảm padding cho ô bảng */
-      text-align: left;
-      border-bottom: 1px solid #e0e0e0;
-      line-height: 1.3; /* Giảm khoảng cách dòng */
-    }
-    
-    th {
-      background-color: #f8f9fa;
-      font-weight: 600;
-      color: #5f6368;
-      font-size: 13px; /* Giảm cỡ chữ tiêu đề bảng */
-    }
-    
-    tr:last-child td {
-      border-bottom: none;
-    }
-    
-    tr:nth-child(even) {
-      background-color: #fafafa;
-    }
-    
-    tr:hover {
-      background-color: #f1f3f4;
-    }
-    
-    .action-icon {
-      color: #1a73e8;
-      text-decoration: none;
-      margin-right: 8px; /* Giảm khoảng cách bên phải */
-      cursor: pointer;
-      font-weight: 500;
-      padding: 4px 6px; /* Giảm padding cho liên kết hành động */
-      border-radius: 3px; /* Giảm border radius */
-      transition: all 0.2s;
-      font-size: 12px; /* Giảm cỡ chữ */
-      display: inline-block;
-    }
-    
-    .action-icon:hover {
-      background: #e8f0fe;
-    }
-    
-    .delete-icon {
-      color: #ea4335;
-    }
-    
-    .delete-icon:hover {
-      background: #fce8e6;
-    }
-    
-    .loading {
-      display: none;
+    table th {
+      background: #f8f9fa;
       text-align: center;
-      padding: 20px; /* Giảm padding */
-      color: #5f6368;
-      font-size: 14px; /* Giảm cỡ chữ */
     }
-    
+    table td {
+      vertical-align: middle;
+    }
+    .action-btn {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+    .action-btn.edit { color: #1a73e8; }
+    .action-btn.delete { color: #dc3545; }
     .notification {
       position: fixed;
-      top: 15px; /* Điều chỉnh vị trí */
-      right: 15px; /* Điều chỉnh vị trí */
-      padding: 12px 18px; /* Giảm padding */
-      border-radius: 6px; /* Giảm border radius */
-      color: white;
+      top: 20px;
+      right: 20px;
+      padding: 12px 18px;
+      border-radius: 8px;
+      color: #fff;
       display: none;
-      z-index: 1000;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* Giảm shadow */
-      font-weight: 500;
-      font-size: 13px; /* Giảm cỡ chữ */
-      line-height: 1.3; /* Giảm khoảng cách dòng */
+      z-index: 2000;
     }
-    
-    .success {
-      background: #34a853;
-    }
-    
-    .error {
-      background: #ea4335;
-    }
-    
-    @media (max-width: 1024px) {
-      .form-container {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px; /* Giảm khoảng cách trên màn hình nhỏ */
-      }
-      
-      body {
-        font-size: 13.5px; /* Giảm cỡ chữ trên tablet */
-      }
-    }
-    
-    @media (max-width: 768px) {
-      .form-container {
-        grid-template-columns: 1fr;
-        gap: 10px; /* Giảm khoảng cách trên mobile */
-      }
-      
-      .form-buttons {
-        flex-direction: column;
-      }
-      
-      .btn {
-        width: 100%;
-        margin-bottom: 6px; /* Giảm khoảng cách giữa các nút */
-      }
-      
-      body {
-        padding: 12px; /* Giảm padding */
-        font-size: 13px; /* Giảm cỡ chữ trên mobile */
-      }
-      
-      .container {
-        padding: 15px 12px; /* Giảm padding */
-      }
-      
-      th, td {
-        padding: 8px 10px; /* Giảm padding ô trên mobile */
-        font-size: 12.5px; /* Giảm cỡ chữ */
-      }
-    }
-
-    /* Tùy chỉnh bổ sung cho select và input */
-    select, input[type="text"], input[type="date"] {
-      height: 36px; /* Giảm chiều cao cho các trường nhập */
-    }
-    
-    /* Tùy chỉnh file input */
-    input[type="file"] {
-      padding: 6px; /* Giảm padding */
-      font-size: 13px; /* Giảm cỡ chữ */
-    }
+    .notification.success { background: #28a745; }
+    .notification.error { background: #dc3545; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>QUẢN LÝ CÔNG VĂN ĐI</h1>
-      <a href="dashboard.html" class="back-btn">← Quay lại</a>
-    </header>
-    
-    <div class="form-container">
-      <div class="form-group">
-        <label for="nam">Năm</label>
-        <select id="nam">
-          <option value="">Chọn năm</option>
-          <option value="2023">2023</option>
-          <option value="2024">2024</option>
-          <option value="2025">2025</option>
-          <option value="2026">2026</option>
-        </select>
-        <button class="btn btn-sm btn-primary" id="them-nam-btn">+</button>
-      </div>
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="text-primary"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi</h2>
+      <a href="dashboard.html" class="btn btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Quay lại
+      </a>
     </div>
-      <div class="form-group">
-        <label for="so-vb">Số công văn</label>
-        <input type="text" id="so-vb" placeholder="Nhập số công văn">
-      </div>
-      <div class="form-group">
-        <label for="ten-vb">Tên văn bản</label>
-        <div class="input-group">
-          <select id="ten-vb">
-            <option value="">Chọn tên văn bản</option>
-            <option value="Công văn hỏa tốc">Công văn hỏa tốc</option>
-            <option value="Công văn thường">Công văn thường</option>
-            <option value="Công văn mật">Công văn mật</option>
-          </select>
-          <button class="btn btn-sm btn-primary" id="them-ten-vb-btn">+</button>
+
+    <!-- Card Thông tin chính -->
+    <div class="card">
+      <div class="card-header">Thông tin công văn</div>
+      <div class="card-body row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Năm</label>
+          <div class="input-group">
+            <select id="nam" class="form-select">
+              <option value="">Chọn năm</option>
+              <option>2023</option>
+              <option>2024</option>
+              <option>2025</option>
+              <option>2026</option>
+            </select>
+            <button class="btn btn-outline-primary" id="them-nam-btn"><i class="fa fa-plus"></i></button>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Số công văn</label>
+          <input type="text" id="so-vb" class="form-control" placeholder="Nhập số công văn">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Tên văn bản</label>
+          <div class="input-group">
+            <select id="ten-vb" class="form-select">
+              <option value="">Chọn tên văn bản</option>
+              <option>Công văn hỏa tốc</option>
+              <option>Công văn thường</option>
+              <option>Công văn mật</option>
+            </select>
+            <button class="btn btn-outline-primary" id="them-ten-vb-btn"><i class="fa fa-plus"></i></button>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Ngày ký</label>
+          <input type="date" id="ngay-ky" class="form-control">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Người ký</label>
+          <div class="input-group">
+            <select id="nguoi-ky" class="form-select">
+              <option value="">Chọn người ký</option>
+              <option>Nguyễn Văn A</option>
+              <option>Trần Thị B</option>
+              <option>Lê Văn C</option>
+            </select>
+            <button class="btn btn-outline-primary" id="them-nguoi-ky-btn"><i class="fa fa-plus"></i></button>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Nơi ban hành</label>
+          <div class="input-group">
+            <select id="noi-ban-hanh" class="form-select">
+              <option value="">Chọn nơi ban hành</option>
+            </select>
+            <button class="btn btn-outline-primary" id="them-noi-ban-hanh-btn"><i class="fa fa-plus"></i></button>
+          </div>
         </div>
       </div>
-      <div class="form-group">
-        <label for="ngay-ky">Ngày ký</label>
-        <input type="date" id="ngay-ky">
-      </div>
-      <div class="form-group">
-        <label for="nguoi-ky">Người ký</label>
-        <div class="input-group">
-          <select id="nguoi-ky">
-            <option value="">Chọn người ký</option>
-            <option value="Nguyễn Văn A">Nguyễn Văn A</option>
-            <option value="Trần Thị B">Trần Thị B</option>
-            <option value="Lê Văn C">Lê Văn C</option>
-          </select>
-          <button class="btn btn-sm btn-primary" id="them-nguoi-ky-btn">+</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="noi-ban-hanh">Nơi ban hành</label>
-        <div class="input-group">
-          <select id="noi-ban-hanh">
-            <option value="">Chọn nơi ban hành</option>
-        <!--    <option value="Phòng Tổ chức">Phòng Tổ chức</option>
-            <option value="Phòng Kế hoạch">Phòng Kế hoạch</option>
-            <option value="Phòng Tài chính">Phòng Tài chính</option> -->
-          </select>
-          <button class="btn btn-sm btn-primary" id="them-noi-ban-hanh-btn">+</button>
-        </div>
-      </div>
-      <div class="form-group form-group-full">
-        <label for="noi-dung">Nội dung</label>
-        <textarea id="noi-dung" placeholder="Nhập nội dung công văn"></textarea>
-      </div>
-      <div class="form-group form-group-full">
-        <label for="file-dinh-kem">File đính kèm</label>
-        <input type="file" id="file-dinh-kem">
+    </div>
+
+    <!-- Card Nội dung -->
+    <div class="card">
+      <div class="card-header">Nội dung</div>
+      <div class="card-body">
+        <textarea id="noi-dung" class="form-control" rows="4" placeholder="Nhập nội dung công văn"></textarea>
       </div>
     </div>
-    
-    <div class="form-buttons">
-      <button class="btn btn-secondary" id="reset-cvdi-btn">Làm mới</button>
-      <button class="btn btn-primary" id="save-cvdi-btn">Lưu công văn</button>
-      <button class="btn btn-update" id="update-cvdi-btn">Cập nhật</button>
+
+    <!-- Card File -->
+    <div class="card">
+      <div class="card-header">File đính kèm</div>
+      <div class="card-body">
+        <input type="file" id="file-dinh-kem" class="form-control">
+      </div>
     </div>
-    
-    <div class="section-title">Danh sách công văn</div>
-    <div class="loading" id="loading">Đang tải dữ liệu...</div>
-    <table id="documentsTable">
-      <thead>
-        <tr>
-          <th width="5%">STT</th>
-          <th width="10%">Năm</th>
-          <th width="10%">Số VB</th>
-          <th width="20%">Tên VB</th>
-          <th width="15%">Ngày ký</th>
-          <th width="15%">Người ký</th>
-          <th width="15%">Nơi ban hành</th>
-          <th width="10%">Thao tác</th>
-        </tr>
-      </thead>
-      <tbody id="documentsBody">
-        <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
-      </tbody>
-    </table>
+
+    <!-- Nút hành động -->
+    <div class="d-flex justify-content-end gap-2 mb-4">
+      <button class="btn btn-secondary" id="reset-cvdi-btn"><i class="fa fa-rotate"></i> Làm mới</button>
+      <button class="btn btn-primary" id="save-cvdi-btn"><i class="fa fa-save"></i> Lưu công văn</button>
+      <button class="btn btn-warning text-white" id="update-cvdi-btn"><i class="fa fa-pen"></i> Cập nhật</button>
+    </div>
+
+    <!-- Danh sách công văn -->
+    <div class="card">
+      <div class="card-header">Danh sách công văn</div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped table-hover align-middle" id="documentsTable">
+            <thead>
+              <tr>
+                <th>STT</th>
+                <th>Năm</th>
+                <th>Số VB</th>
+                <th>Tên VB</th>
+                <th>Ngày ký</th>
+                <th>Người ký</th>
+                <th>Nơi ban hành</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="documentsBody">
+              <tr><td colspan="8" class="text-center">Chưa có công văn nào</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="successNotification" class="notification success"></div>
@@ -780,3 +531,4 @@ function loadCategories(selectId, category) {
 </body>
 
 </html>
+
