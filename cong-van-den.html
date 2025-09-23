@@ -347,6 +347,8 @@
           <option value="2025">2025</option>
           <option value="2026">2026</option>
         </select>
+        <button class="btn btn-sm btn-primary" id="them-nam-btn">+</button>
+        </div>
       </div>
       <div class="form-group">
         <label for="so-den">Số đến</label>
@@ -759,6 +761,7 @@
       document.getElementById('update-cvden-btn').addEventListener('click', saveDocument);
       
       // Xử lý sự kiện nút thêm mới
+      document.getElementById('them-nam-btn').addEventListener('click', () => themMoi('nam', 'years'));
       document.getElementById('them-nguoi-nhan-btn').addEventListener('click', () => themMoi('nguoi-nhan', 'receivers'));
       document.getElementById('them-ten-van-ban-btn').addEventListener('click', () => themMoi('ten-van-ban', 'documentTypes'));
       document.getElementById('them-nguoi-ky-btn').addEventListener('click', () => themMoi('nguoi-ky', 'signers'));
@@ -773,6 +776,7 @@
           currentUser = user;
           
           // Tải các danh mục từ Firebase
+          loadCategories('nam', 'years');
           loadCategories('nguoi-nhan', 'receivers');
           loadCategories('ten-van-ban', 'documentTypes');
           loadCategories('nguoi-ky', 'signers');
@@ -803,4 +807,5 @@
     window.themMoi = themMoi;
   </script>
 </body>
+
 </html>
