@@ -61,7 +61,7 @@
   <div class="container py-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div>
-        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi1</h4>
+        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi3</h4>
         <small class="text-muted">Quản lý và theo dõi công văn đi</small>
       </div>
       <a href="dashboard.html" class="btn btn-secondary btn-sm">
@@ -199,7 +199,7 @@
                 Chưa có công văn nào
               </td></tr>
             </tbody>
-           </table>
+          </table>
         </div>
       </div>
     </div>
@@ -251,7 +251,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+    import { getDatabase, ref, push, set, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
     import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 
     const firebaseConfig = {
@@ -368,10 +368,9 @@
       }
     }
 
-    // Hàm cập nhật - ĐÃ SỬA HOÀN CHỈNH
+    // Hàm cập nhật - QUAN TRỌNG: ĐÃ SỬA LỖI LƯU FILE
     async function updateDocument() {
       console.log("=== BẮT ĐẦU CẬP NHẬT ===");
-      console.log("editingId:", editingId);
       
       // Lấy dữ liệu từ form
       const year = document.getElementById('nam').value;
@@ -384,8 +383,9 @@
       const fileInput = document.getElementById('file-dinh-kem');
       const newFile = fileInput.files[0];
 
-      console.log("Dữ liệu form:", { year, documentNumber, documentName, signDate, signer, issuingPlace, content });
-      console.log("File mới:", newFile ? newFile.name : "Không có");
+      console.log("editingId:", editingId);
+      console.log("newFile:", newFile ? newFile.name : "Không có file mới");
+      console.log("currentFileData trước khi cập nhật:", currentFileData);
 
       // Kiểm tra dữ liệu bắt buộc
       if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) {
@@ -393,18 +393,17 @@
         return;
       }
 
-      // Kiểm tra đã chọn công văn để cập nhật chưa
       if (!editingId) {
         showNotification('Không có công văn nào đang được chọn để cập nhật', false);
         return;
       }
 
       try {
-        let fileData = currentFileData; // Giữ file cũ nếu không có file mới
+        let fileData = null;
         
-        // Nếu có file mới được chọn
+        // Nếu có file mới được chọn -> upload lên Storage
         if (newFile) {
-          console.log("Đang xử lý file mới...");
+          console.log("Đang xử lý upload file mới...");
           if (newFile.size > 10 * 1024 * 1024) {
             showNotification('File không được vượt quá 10MB', false);
             return;
@@ -415,9 +414,12 @@
             await deleteOldFile(currentFileData.path);
           }
           // Upload file mới
-          console.log("Upload file mới lên Firebase Storage...");
           fileData = await uploadFile(newFile, editingId);
-          console.log("Upload thành công:", fileData);
+          console.log("Upload file mới thành công:", fileData);
+        } else {
+          // Không có file mới, giữ nguyên file cũ
+          fileData = currentFileData;
+          console.log("Giữ nguyên file cũ:", fileData);
         }
         
         // Tạo dữ liệu cập nhật
@@ -430,12 +432,12 @@
           issuingPlace: issuingPlace,
           content: content,
           fileData: fileData,
-          hasFile: !!fileData,
+          hasFile: !!fileData,  // true nếu có file, false nếu không
           updatedAt: new Date().toISOString(),
           updatedBy: currentUser?.email || 'unknown'
         };
         
-        console.log("Dữ liệu cập nhật sẽ lưu:", updateData);
+        console.log("Dữ liệu cập nhật sẽ lưu:", JSON.stringify(updateData, null, 2));
         
         // Lưu lên Firebase Realtime Database
         const docRef = ref(database, `congVanDi/${editingId}`);
@@ -467,7 +469,7 @@
       }
     }
 
-    function editDocument(id, data) {
+    async function editDocument(id, data) {
       console.log("Chỉnh sửa công văn ID:", id);
       console.log("Dữ liệu công văn:", data);
       
@@ -483,6 +485,8 @@
       // Lưu thông tin file cũ và ID đang chỉnh sửa
       currentFileData = data.fileData || null;
       editingId = id;
+      
+      console.log("currentFileData sau khi set:", currentFileData);
       
       // Hiển thị thông tin file hiện tại
       const currentFileDiv = document.getElementById('current-file-info');
@@ -503,7 +507,7 @@
         currentFileDiv.innerHTML = `
           <strong><i class="fa-regular fa-file"></i> Chưa có file đính kèm</strong>
           <div class="mt-1">
-            <small class="text-muted">Chọn file bên dưới để thêm mới</small>
+            <small class="text-muted">📌 Chọn file bên dưới để thêm mới</small>
           </div>
         `;
       }
@@ -591,6 +595,9 @@
         const contentText = doc.content || '';
         const contentPreview = contentText.length > 80 ? contentText.substring(0, 80) + '...' : contentText;
         
+        // Xử lý an toàn khi hiển thị nội dung
+        const safeContent = contentText.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
+        
         const row = document.createElement('tr');
         row.innerHTML = `
           <td class="text-center">${stt}</td>
@@ -601,7 +608,7 @@
           <td>${doc.signer || ''}</td>
           <td>${doc.issuingPlace || ''}</td>
           <td>
-            <div class="content-preview" onclick="window.viewFullContentFromGlobal('${contentText.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ')}')" title="Click để xem toàn bộ nội dung">
+            <div class="content-preview" onclick='window.viewFullContentFromGlobal("${safeContent}")' title="Click để xem toàn bộ nội dung">
               ${contentPreview || '<em class="text-muted">Chưa có nội dung</em>'}
             </div>
           </td>
