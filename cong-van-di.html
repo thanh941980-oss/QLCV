@@ -21,7 +21,7 @@
     }
     
     .container {
-      max-width: 1400px;
+      max-width: 1600px;
     }
     
     .card {
@@ -192,6 +192,7 @@
       padding: 10px 8px;
       border-bottom: 2px solid #dee2e6;
       color: #495057;
+      vertical-align: middle;
     }
     
     .table tbody td {
@@ -207,6 +208,20 @@
     
     .table-responsive {
       border-radius: 8px;
+    }
+    
+    .content-preview {
+      max-width: 250px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      color: #0066cc;
+    }
+    
+    .content-preview:hover {
+      color: #0052a3;
+      text-decoration: underline;
     }
     
     .notification {
@@ -263,21 +278,17 @@
       font-weight: 500;
     }
     
-    .file-preview {
-      max-width: 100%;
-      margin-top: 10px;
-    }
-    
     .file-link {
       background: #f8f9fa;
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 5px;
       text-decoration: none;
       color: #0066cc;
-      font-size: 12px;
+      font-size: 11px;
+      cursor: pointer;
     }
     
     .file-link:hover {
@@ -285,16 +296,18 @@
       color: #0052a3;
     }
     
-    .action-bar {
-      position: sticky;
-      top: 0;
-      background: #fff;
-      padding: 10px 0;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      z-index: 100;
+    /* Tooltip */
+    .tooltip-content {
+      position: relative;
+      display: inline-block;
     }
     
+    /* Modal preview file */
+    .modal-xl {
+      max-width: 90%;
+    }
+    
+    /* Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -441,19 +454,20 @@
           <table class="table table-hover mb-0" id="documentsTable">
             <thead>
               <tr>
-                <th width="5%">STT</th>
-                <th width="8%">Năm</th>
-                <th width="10%">Số VB</th>
-                <th width="20%">Tên VB</th>
-                <th width="10%">Ngày ký</th>
-                <th width="10%">Người ký</th>
-                <th width="15%">Nơi ban hành</th>
-                <th width="12%">File</th>
-                <th width="10%">Thao tác</th>
+                <th width="3%">STT</th>
+                <th width="6%">Năm</th>
+                <th width="8%">Số VB</th>
+                <th width="10%">Tên VB</th>
+                <th width="8%">Ngày ký</th>
+                <th width="8%">Người ký</th>
+                <th width="10%">Nơi ban hành</th>
+                <th width="20%">Nội dung</th>
+                <th width="10%">File</th>
+                <th width="12%">Thao tác</th>
               </tr>
             </thead>
             <tbody id="documentsBody">
-              <tr><td colspan="9" class="text-center text-muted py-4">
+              <tr><td colspan="10" class="text-center text-muted py-4">
                 <i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>
                 Chưa có công văn nào
               </td></tr>
@@ -482,6 +496,24 @@
           <a href="#" id="downloadFileBtn" class="btn btn-primary btn-sm" download>
             <i class="fa-solid fa-download"></i> Tải xuống
           </a>
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal xem nội dung chi tiết -->
+  <div class="modal fade" id="contentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 class="modal-title"><i class="fa-solid fa-align-left"></i> Nội dung công văn</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="contentModalBody">
+          <!-- Nội dung sẽ hiển thị ở đây -->
+        </div>
+        <div class="modal-footer">
           <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
         </div>
       </div>
@@ -588,11 +620,9 @@
       try {
         let fileData = null;
         
-        if (file) {
-          if (file.size > 10 * 1024 * 1024) {
-            showNotification('File không được vượt quá 10MB', false);
-            return;
-          }
+        if (file && file.size > 10 * 1024 * 1024) {
+          showNotification('File không được vượt quá 10MB', false);
+          return;
         }
 
         if (editingId) {
@@ -603,8 +633,8 @@
           });
           const oldDoc = oldSnapshot.val();
           
-          if (file && oldDoc && oldDoc.filePath) {
-            await deleteOldFile(oldDoc.filePath);
+          if (file && oldDoc && oldDoc.fileData) {
+            await deleteOldFile(oldDoc.fileData.path);
           }
           
           if (file) {
@@ -612,31 +642,41 @@
           } else if (oldDoc && oldDoc.fileData) {
             fileData = oldDoc.fileData;
           }
-        } else {
-          const newDocRef = push(ref(database, 'congVanDi'));
-          editingId = newDocRef.key;
-          if (file) {
-            fileData = await uploadFile(file, editingId);
-          }
-        }
-
-        const documentData = {
-          year, documentNumber, documentName, signDate, signer, issuingPlace, content,
-          createdAt: new Date().toISOString(),
-          createdBy: currentUser ? currentUser.email : 'unknown',
-          fileData: fileData,
-          hasFile: !!fileData
-        };
-
-        if (editingId) {
+          
+          const documentData = {
+            year, documentNumber, documentName, signDate, signer, issuingPlace, content,
+            updatedAt: new Date().toISOString(),
+            updatedBy: currentUser ? currentUser.email : 'unknown',
+            fileData: fileData,
+            hasFile: !!fileData
+          };
+          
           await set(ref(database, `congVanDi/${editingId}`), documentData);
-          showNotification(editingId && !file ? 'Cập nhật công văn thành công!' : 'Lưu công văn thành công!');
+          showNotification('Cập nhật công văn thành công!');
           editingId = null;
           document.getElementById('update-cvdi-btn').style.display = 'none';
           document.getElementById('save-cvdi-btn').style.display = 'block';
+          refreshForm();
+        } else {
+          const newDocRef = push(ref(database, 'congVanDi'));
+          const newId = newDocRef.key;
+          
+          if (file) {
+            fileData = await uploadFile(file, newId);
+          }
+          
+          const documentData = {
+            year, documentNumber, documentName, signDate, signer, issuingPlace, content,
+            createdAt: new Date().toISOString(),
+            createdBy: currentUser ? currentUser.email : 'unknown',
+            fileData: fileData,
+            hasFile: !!fileData
+          };
+          
+          await set(newDocRef, documentData);
+          showNotification('Thêm công văn thành công!');
+          refreshForm();
         }
-        
-        refreshForm();
       } catch (error) {
         console.error('Lỗi khi lưu công văn:', error);
         showNotification('Có lỗi xảy ra khi lưu công văn: ' + error.message, false);
@@ -659,13 +699,13 @@
     }
 
     function editDocument(id, data) {
-      document.getElementById('nam').value = data.year;
-      document.getElementById('so-vb').value = data.documentNumber;
-      document.getElementById('ten-vb').value = data.documentName;
-      document.getElementById('ngay-ky').value = data.signDate;
-      document.getElementById('nguoi-ky').value = data.signer;
-      document.getElementById('noi-ban-hanh').value = data.issuingPlace;
-      document.getElementById('noi-dung').value = data.content;
+      document.getElementById('nam').value = data.year || '';
+      document.getElementById('so-vb').value = data.documentNumber || '';
+      document.getElementById('ten-vb').value = data.documentName || '';
+      document.getElementById('ngay-ky').value = data.signDate || '';
+      document.getElementById('nguoi-ky').value = data.signer || '';
+      document.getElementById('noi-ban-hanh').value = data.issuingPlace || '';
+      document.getElementById('noi-dung').value = data.content || '';
       
       editingId = id;
       document.getElementById('update-cvdi-btn').style.display = 'block';
@@ -699,7 +739,6 @@
           <iframe src="${fileData.url}" width="100%" height="600px" style="border: none;"></iframe>
         `;
       } else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(fileExtension)) {
-        // Sử dụng Google Docs Viewer cho file Office
         const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileData.url)}&embedded=true`;
         previewContent.innerHTML = `
           <iframe src="${viewerUrl}" width="100%" height="600px" style="border: none;"></iframe>
@@ -727,13 +766,24 @@
       modal.show();
     }
 
+    function viewFullContent(content) {
+      const modal = new bootstrap.Modal(document.getElementById('contentModal'));
+      const modalBody = document.getElementById('contentModalBody');
+      modalBody.innerHTML = `
+        <div style="white-space: pre-wrap; word-wrap: break-word; line-height: 1.6;">
+          ${content.replace(/\n/g, '<br>')}
+        </div>
+      `;
+      modal.show();
+    }
+
     function displayDocuments(snapshot) {
       const documentsBody = document.getElementById('documentsBody');
       const totalCountSpan = document.getElementById('totalCount');
       documentsBody.innerHTML = '';
       
       if (!snapshot.exists()) {
-        documentsBody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4"><i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>Chưa có công văn nào</td></tr>';
+        documentsBody.innerHTML = '<tr><td colspan="10" class="text-center text-muted py-4"><i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>Chưa có công văn nào</td></tr>';
         totalCountSpan.textContent = '0';
         return;
       }
@@ -749,10 +799,13 @@
         
         const hasFile = doc.hasFile && doc.fileData;
         const fileHtml = hasFile ? `
-          <button class="action-btn view" onclick="window.openFileFromGlobal('${id}')" title="Xem file">
-            <i class="fa-solid fa-paperclip"></i> ${doc.fileData.name}
+          <button class="file-link" onclick="window.openFileFromGlobal('${id}')" title="Xem file ${doc.fileData.name}">
+            <i class="fa-solid fa-paperclip"></i> ${doc.fileData.name.length > 20 ? doc.fileData.name.substring(0, 20) + '...' : doc.fileData.name}
           </button>
         ` : '<span class="text-muted"><i class="fa-regular fa-file"></i> Không có file</span>';
+        
+        const contentText = doc.content || '';
+        const contentPreview = contentText.length > 80 ? contentText.substring(0, 80) + '...' : contentText;
         
         row.innerHTML = `
           <td class="text-center">${stt}</td>
@@ -762,6 +815,11 @@
           <td class="text-center">${doc.signDate || ''}</td>
           <td>${doc.signer || ''}</td>
           <td>${doc.issuingPlace || ''}</td>
+          <td>
+            <div class="content-preview" onclick="window.viewFullContentFromGlobal('${contentText.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" title="Click để xem toàn bộ nội dung">
+              ${contentPreview || '<em class="text-muted">Chưa có nội dung</em>'}
+            </div>
+          </td>
           <td>${fileHtml}</td>
           <td>
             <div class="action-buttons">
@@ -846,6 +904,14 @@
         openFile(window.documentsData[id].fileData);
       } else {
         showNotification('Không có file đính kèm!', false);
+      }
+    };
+    
+    window.viewFullContentFromGlobal = function(content) {
+      if (content && content.trim()) {
+        viewFullContent(content);
+      } else {
+        showNotification('Không có nội dung để hiển thị!', false);
       }
     };
     
