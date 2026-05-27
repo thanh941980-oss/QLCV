@@ -263,56 +263,26 @@
       font-weight: 500;
     }
     
-    /* Modal styles */
-    .modal-content {
-      border-radius: 10px;
-      border: none;
-    }
-    
-    .modal-header {
-      background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
-      color: #fff;
-      border-radius: 10px 10px 0 0;
-      padding: 12px 20px;
-    }
-    
-    .modal-header .btn-close {
-      filter: brightness(0) invert(1);
-    }
-    
-    .modal-body {
-      padding: 20px;
-    }
-    
-    .detail-item {
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #e9ecef;
-    }
-    
-    .detail-label {
-      font-weight: 600;
-      color: #495057;
-      font-size: 12px;
-      text-transform: uppercase;
-      margin-bottom: 5px;
-    }
-    
-    .detail-value {
-      color: #212529;
-      font-size: 13px;
-    }
-    
-    .file-attachment {
-      background: #f8f9fa;
-      padding: 10px;
-      border-radius: 6px;
+    .file-preview {
+      max-width: 100%;
       margin-top: 10px;
     }
     
-    /* Compact layout */
-    .row.g-3 {
-      --bs-gutter-y: 0.8rem;
+    .file-link {
+      background: #f8f9fa;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #0066cc;
+      font-size: 12px;
+    }
+    
+    .file-link:hover {
+      background: #e9ecef;
+      color: #0052a3;
     }
     
     .action-bar {
@@ -325,7 +295,6 @@
       z-index: 100;
     }
     
-    /* Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -435,7 +404,8 @@
 
           <div class="col-md-3">
             <label class="form-label">File đính kèm</label>
-            <input type="file" id="file-dinh-kem" class="form-control form-control-sm">
+            <input type="file" id="file-dinh-kem" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif">
+            <small class="text-muted">Hỗ trợ: PDF, Word, Excel, PowerPoint, ảnh, txt</small>
           </div>
 
           <div class="col-12">
@@ -478,11 +448,12 @@
                 <th width="10%">Ngày ký</th>
                 <th width="10%">Người ký</th>
                 <th width="15%">Nơi ban hành</th>
-                <th width="12%">Thao tác</th>
+                <th width="12%">File</th>
+                <th width="10%">Thao tác</th>
               </tr>
             </thead>
             <tbody id="documentsBody">
-              <tr><td colspan="8" class="text-center text-muted py-4">
+              <tr><td colspan="9" class="text-center text-muted py-4">
                 <i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>
                 Chưa có công văn nào
               </td></tr>
@@ -493,18 +464,24 @@
     </div>
   </div>
 
-  <!-- Modal xem chi tiết -->
-  <div class="modal fade" id="detailModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+  <!-- Modal preview file -->
+  <div class="modal fade" id="filePreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h6 class="modal-title"><i class="fa-solid fa-file-alt"></i> Chi tiết công văn</h6>
+          <h6 class="modal-title"><i class="fa-solid fa-file"></i> <span id="previewFileName"></span></h6>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body" id="detailContent">
-          <!-- Nội dung chi tiết sẽ được load vào đây -->
+        <div class="modal-body p-0" id="filePreviewContent" style="min-height: 500px;">
+          <div class="text-center p-5">
+            <i class="fa-solid fa-spinner fa-spin fa-3x"></i>
+            <p class="mt-3">Đang tải file...</p>
+          </div>
         </div>
         <div class="modal-footer">
+          <a href="#" id="downloadFileBtn" class="btn btn-primary btn-sm" download>
+            <i class="fa-solid fa-download"></i> Tải xuống
+          </a>
           <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
         </div>
       </div>
@@ -518,6 +495,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 
     // Firebase config
     const firebaseConfig = {
@@ -533,6 +511,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const database = getDatabase(app);
+    const storage = getStorage(app);
 
     let currentUser = null;
     let editingId = null;
@@ -561,6 +540,35 @@
       document.getElementById('save-cvdi-btn').style.display = 'block';
     }
 
+    async function uploadFile(file, docId) {
+      if (!file) return null;
+      
+      const fileExtension = file.name.split('.').pop();
+      const fileName = `${docId}_${Date.now()}.${fileExtension}`;
+      const filePath = `congVanDi/${fileName}`;
+      const fileRef = storageRef(storage, filePath);
+      
+      await uploadBytes(fileRef, file);
+      const downloadURL = await getDownloadURL(fileRef);
+      
+      return {
+        name: file.name,
+        url: downloadURL,
+        path: filePath
+      };
+    }
+
+    async function deleteOldFile(filePath) {
+      if (filePath) {
+        try {
+          const oldFileRef = storageRef(storage, filePath);
+          await deleteObject(oldFileRef);
+        } catch (error) {
+          console.log('Không thể xóa file cũ:', error);
+        }
+      }
+    }
+
     async function saveDocument() {
       const year = document.getElementById('nam').value;
       const documentNumber = document.getElementById('so-vb').value;
@@ -570,7 +578,7 @@
       const issuingPlace = document.getElementById('noi-ban-hanh').value;
       const content = document.getElementById('noi-dung').value;
       const fileInput = document.getElementById('file-dinh-kem');
-      const fileName = fileInput.files[0] ? fileInput.files[0].name : '';
+      const file = fileInput.files[0];
 
       if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) {
         showNotification('Vui lòng điền đầy đủ thông tin', false);
@@ -578,33 +586,70 @@
       }
 
       try {
+        let fileData = null;
+        
+        if (file) {
+          if (file.size > 10 * 1024 * 1024) {
+            showNotification('File không được vượt quá 10MB', false);
+            return;
+          }
+        }
+
+        if (editingId) {
+          // Lấy thông tin cũ để xóa file nếu có file mới
+          const oldDocRef = ref(database, `congVanDi/${editingId}`);
+          const oldSnapshot = await new Promise((resolve) => {
+            onValue(oldDocRef, resolve, { onlyOnce: true });
+          });
+          const oldDoc = oldSnapshot.val();
+          
+          if (file && oldDoc && oldDoc.filePath) {
+            await deleteOldFile(oldDoc.filePath);
+          }
+          
+          if (file) {
+            fileData = await uploadFile(file, editingId);
+          } else if (oldDoc && oldDoc.fileData) {
+            fileData = oldDoc.fileData;
+          }
+        } else {
+          const newDocRef = push(ref(database, 'congVanDi'));
+          editingId = newDocRef.key;
+          if (file) {
+            fileData = await uploadFile(file, editingId);
+          }
+        }
+
         const documentData = {
-          year, documentNumber, documentName, signDate, signer, issuingPlace, content, fileName,
+          year, documentNumber, documentName, signDate, signer, issuingPlace, content,
           createdAt: new Date().toISOString(),
-          createdBy: currentUser ? currentUser.email : 'unknown'
+          createdBy: currentUser ? currentUser.email : 'unknown',
+          fileData: fileData,
+          hasFile: !!fileData
         };
 
         if (editingId) {
           await set(ref(database, `congVanDi/${editingId}`), documentData);
-          showNotification('Cập nhật công văn thành công!');
+          showNotification(editingId && !file ? 'Cập nhật công văn thành công!' : 'Lưu công văn thành công!');
           editingId = null;
           document.getElementById('update-cvdi-btn').style.display = 'none';
           document.getElementById('save-cvdi-btn').style.display = 'block';
-        } else {
-          const newDocRef = push(ref(database, 'congVanDi'));
-          await set(newDocRef, documentData);
-          showNotification('Thêm công văn thành công!');
         }
+        
         refreshForm();
       } catch (error) {
         console.error('Lỗi khi lưu công văn:', error);
-        showNotification('Có lỗi xảy ra khi lưu công văn', false);
+        showNotification('Có lỗi xảy ra khi lưu công văn: ' + error.message, false);
       }
     }
 
-    async function deleteDocument(id) {
+    async function deleteDocument(id, filePath) {
       if (!confirm('Bạn có chắc chắn muốn xóa công văn này?')) return;
+      
       try {
+        if (filePath) {
+          await deleteOldFile(filePath);
+        }
         await remove(ref(database, `congVanDi/${id}`));
         showNotification('Xóa công văn thành công!');
       } catch (error) {
@@ -628,46 +673,56 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function viewDocument(data) {
-      const modal = new bootstrap.Modal(document.getElementById('detailModal'));
-      const detailContent = document.getElementById('detailContent');
+    function openFile(fileData) {
+      if (!fileData || !fileData.url) {
+        showNotification('Không có file đính kèm!', false);
+        return;
+      }
       
-      detailContent.innerHTML = `
-        <div class="detail-item">
-          <div class="detail-label"><i class="fa-regular fa-calendar"></i> Năm</div>
-          <div class="detail-value">${data.year || '---'}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label"><i class="fa-regular fa-hashtag"></i> Số văn bản</div>
-          <div class="detail-value">${data.documentNumber || '---'}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label"><i class="fa-regular fa-file"></i> Tên văn bản</div>
-          <div class="detail-value">${data.documentName || '---'}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label"><i class="fa-regular fa-calendar-check"></i> Ngày ký</div>
-          <div class="detail-value">${data.signDate || '---'}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label"><i class="fa-regular fa-user"></i> Người ký</div>
-          <div class="detail-value">${data.signer || '---'}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label"><i class="fa-regular fa-building"></i> Nơi ban hành</div>
-          <div class="detail-value">${data.issuingPlace || '---'}</div>
-        </div>
-        <div class="detail-item">
-          <div class="detail-label"><i class="fa-regular fa-align-left"></i> Nội dung</div>
-          <div class="detail-value">${data.content || '---'}</div>
-        </div>
-        ${data.fileName ? `
-        <div class="file-attachment">
-          <i class="fa-solid fa-paperclip"></i> File đính kèm: 
-          <strong>${data.fileName}</strong>
-        </div>
-        ` : ''}
-      `;
+      const modal = new bootstrap.Modal(document.getElementById('filePreviewModal'));
+      const previewContent = document.getElementById('filePreviewContent');
+      const fileNameSpan = document.getElementById('previewFileName');
+      const downloadBtn = document.getElementById('downloadFileBtn');
+      
+      fileNameSpan.textContent = fileData.name;
+      downloadBtn.href = fileData.url;
+      
+      const fileExtension = fileData.name.split('.').pop().toLowerCase();
+      
+      // Hiển thị file tùy theo loại
+      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(fileExtension)) {
+        previewContent.innerHTML = `
+          <img src="${fileData.url}" class="img-fluid" style="max-height: 80vh; width: 100%; object-fit: contain;" alt="${fileData.name}">
+        `;
+      } else if (fileExtension === 'pdf') {
+        previewContent.innerHTML = `
+          <iframe src="${fileData.url}" width="100%" height="600px" style="border: none;"></iframe>
+        `;
+      } else if (['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(fileExtension)) {
+        // Sử dụng Google Docs Viewer cho file Office
+        const viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileData.url)}&embedded=true`;
+        previewContent.innerHTML = `
+          <iframe src="${viewerUrl}" width="100%" height="600px" style="border: none;"></iframe>
+          <div class="alert alert-info mt-2 mb-0">
+            <i class="fa-solid fa-info-circle"></i> 
+            Không xem được trực tiếp? <a href="${fileData.url}" target="_blank">Tải file về</a> để xem.
+          </div>
+        `;
+      } else if (fileExtension === 'txt') {
+        previewContent.innerHTML = `
+          <iframe src="${fileData.url}" width="100%" height="600px" style="border: none;"></iframe>
+        `;
+      } else {
+        previewContent.innerHTML = `
+          <div class="text-center p-5">
+            <i class="fa-solid fa-file fa-4x mb-3"></i>
+            <p>Không thể xem trước file này trực tiếp</p>
+            <a href="${fileData.url}" class="btn btn-primary" target="_blank">
+              <i class="fa-solid fa-download"></i> Tải file về
+            </a>
+          </div>
+        `;
+      }
       
       modal.show();
     }
@@ -678,7 +733,7 @@
       documentsBody.innerHTML = '';
       
       if (!snapshot.exists()) {
-        documentsBody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4"><i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>Chưa có công văn nào</td></tr>';
+        documentsBody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4"><i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>Chưa có công văn nào</td></tr>';
         totalCountSpan.textContent = '0';
         return;
       }
@@ -692,6 +747,13 @@
         total++;
         const row = document.createElement('tr');
         
+        const hasFile = doc.hasFile && doc.fileData;
+        const fileHtml = hasFile ? `
+          <button class="action-btn view" onclick="window.openFileFromGlobal('${id}')" title="Xem file">
+            <i class="fa-solid fa-paperclip"></i> ${doc.fileData.name}
+          </button>
+        ` : '<span class="text-muted"><i class="fa-regular fa-file"></i> Không có file</span>';
+        
         row.innerHTML = `
           <td class="text-center">${stt}</td>
           <td class="text-center"><span class="badge-info">${doc.year || ''}</span></td>
@@ -700,15 +762,13 @@
           <td class="text-center">${doc.signDate || ''}</td>
           <td>${doc.signer || ''}</td>
           <td>${doc.issuingPlace || ''}</td>
+          <td>${fileHtml}</td>
           <td>
             <div class="action-buttons">
-              <button class="action-btn view" onclick="window.viewDocumentModal('${id}')" title="Xem chi tiết">
-                <i class="fa-solid fa-eye"></i> Xem
-              </button>
               <button class="action-btn edit" onclick="window.editDocumentFromGlobal('${id}')" title="Sửa">
                 <i class="fa-solid fa-pen"></i> Sửa
               </button>
-              <button class="action-btn delete" onclick="window.deleteDocumentFromGlobal('${id}')" title="Xóa">
+              <button class="action-btn delete" onclick="window.deleteDocumentFromGlobal('${id}', '${doc.fileData ? doc.fileData.path : ''}')" title="Xóa">
                 <i class="fa-solid fa-trash"></i> Xóa
               </button>
             </div>
@@ -720,8 +780,6 @@
       }
       
       totalCountSpan.textContent = total;
-      
-      // Lưu dữ liệu để sử dụng cho các hàm global
       window.documentsData = documents;
     }
 
@@ -783,9 +841,11 @@
     }
 
     // Global functions
-    window.viewDocumentModal = function(id) {
-      if (window.documentsData && window.documentsData[id]) {
-        viewDocument(window.documentsData[id]);
+    window.openFileFromGlobal = function(id) {
+      if (window.documentsData && window.documentsData[id] && window.documentsData[id].fileData) {
+        openFile(window.documentsData[id].fileData);
+      } else {
+        showNotification('Không có file đính kèm!', false);
       }
     };
     
@@ -795,8 +855,8 @@
       }
     };
     
-    window.deleteDocumentFromGlobal = function(id) {
-      deleteDocument(id);
+    window.deleteDocumentFromGlobal = function(id, filePath) {
+      deleteDocument(id, filePath);
     };
 
     // Khởi tạo Bootstrap modal
