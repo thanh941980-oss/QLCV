@@ -57,6 +57,21 @@
     }
     .notification.success { background: #28a745; }
     .notification.error { background: #dc3545; }
+    .loading {
+      text-align: center;
+      padding: 20px;
+      display: none;
+    }
+    .action-icon {
+      cursor: pointer;
+      margin: 0 5px;
+      text-decoration: none;
+    }
+    .action-icon:hover {
+      text-decoration: underline;
+    }
+    .edit-icon { color: #1a73e8; }
+    .delete-icon { color: #dc3545; }
   </style>
 </head>
 <body>
@@ -70,77 +85,77 @@
 
     <!-- Card Thông tin chính -->
     <div class="card">
-  <div class="card-header">Thông tin công văn</div>
-  <div class="card-body">
-    <div class="row g-3">
-      <div class="col-md-6">
-        <label class="form-label">Năm</label>
-        <div class="input-group">
-          <select id="nam" class="form-select">
-            <option value="">Chọn năm</option>
-            <option>2023</option>
-            <option>2024</option>
-            <option>2025</option>
-            <option>2026</option>
-          </select>
-          <button class="btn btn-outline-primary" id="them-nam-btn"><i class="fa fa-plus"></i></button>
+      <div class="card-header">Thông tin công văn</div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Năm</label>
+            <div class="input-group">
+              <select id="nam" class="form-select">
+                <option value="">Chọn năm</option>
+                <option>2023</option>
+                <option>2024</option>
+                <option>2025</option>
+                <option>2026</option>
+              </select>
+              <button class="btn btn-outline-primary" id="them-nam-btn"><i class="fa fa-plus"></i></button>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Số công văn</label>
+            <input type="text" id="so-vb" class="form-control" placeholder="Nhập số công văn">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Tên văn bản</label>
+            <div class="input-group">
+              <select id="ten-vb" class="form-select">
+                <option value="">Chọn tên văn bản</option>
+              </select>
+              <button class="btn btn-outline-primary" id="them-ten-vb-btn"><i class="fa fa-plus"></i></button>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Ngày ký</label>
+            <input type="date" id="ngay-ky" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Người ký</label>
+            <div class="input-group">
+              <select id="nguoi-ky" class="form-select">
+                <option value="">Chọn người ký</option>
+              </select>
+              <button class="btn btn-outline-primary" id="them-nguoi-ky-btn"><i class="fa fa-plus"></i></button>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Nơi ban hành</label>
+            <div class="input-group">
+              <select id="noi-ban-hanh" class="form-select">
+                <option value="">Chọn nơi ban hành</option>
+              </select>
+              <button class="btn btn-outline-primary" id="them-noi-ban-hanh-btn"><i class="fa fa-plus"></i></button>
+            </div>
+          </div>
+
+          <!-- Nội dung full width -->
+          <div class="col-12">
+            <label class="form-label">Nội dung</label>
+            <textarea id="noi-dung" class="form-control" rows="4" placeholder="Nhập nội dung công văn"></textarea>
+          </div>
+
+          <!-- File đính kèm full width -->
+          <div class="col-12">
+            <label class="form-label">File đính kèm</label>
+            <input type="file" id="file-dinh-kem" class="form-control">
+          </div>
         </div>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Số công văn</label>
-        <input type="text" id="so-vb" class="form-control" placeholder="Nhập số công văn">
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Tên văn bản</label>
-        <div class="input-group">
-          <select id="ten-vb" class="form-select">
-            <option value="">Chọn tên văn bản</option>
-          </select>
-          <button class="btn btn-outline-primary" id="them-ten-vb-btn"><i class="fa fa-plus"></i></button>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Ngày ký</label>
-        <input type="date" id="ngay-ky" class="form-control">
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Người ký</label>
-        <div class="input-group">
-          <select id="nguoi-ky" class="form-select">
-            <option value="">Chọn người ký</option>
-          </select>
-          <button class="btn btn-outline-primary" id="them-nguoi-ky-btn"><i class="fa fa-plus"></i></button>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Nơi ban hành</label>
-        <div class="input-group">
-          <select id="noi-ban-hanh" class="form-select">
-            <option value="">Chọn nơi ban hành</option>
-          </select>
-          <button class="btn btn-outline-primary" id="them-noi-ban-hanh-btn"><i class="fa fa-plus"></i></button>
-        </div>
-      </div>
-
-      <!-- Nội dung full width -->
-      <div class="col-12">
-        <label class="form-label">Nội dung</label>
-        <textarea id="noi-dung" class="form-control" rows="4" placeholder="Nhập nội dung công văn"></textarea>
-      </div>
-
-      <!-- File đính kèm full width -->
-      <div class="col-12">
-        <label class="form-label">File đính kèm</label>
-        <input type="file" id="file-dinh-kem" class="form-control">
       </div>
     </div>
-  </div>
-</div>
 
     <!-- Nút hành động -->
     <div class="d-flex justify-content-end gap-2 mb-4">
@@ -153,6 +168,7 @@
     <div class="card">
       <div class="card-header">Danh sách công văn</div>
       <div class="card-body">
+        <div id="loading" class="loading">Đang tải dữ liệu...</div>
         <div class="table-responsive">
           <table class="table table-bordered table-striped table-hover align-middle" id="documentsTable">
             <thead>
@@ -259,13 +275,16 @@
           content,
           fileName,
           createdAt: new Date().toISOString(),
-          createdBy: currentUser.email
+          createdBy: currentUser ? currentUser.email : 'unknown'
         };
 
         if (editingId) {
           // Cập nhật công văn đã có
           await set(ref(database, `congVanDi/${editingId}`), documentData);
           showNotification('Cập nhật công văn thành công!');
+          editingId = null;
+          document.getElementById('update-cvdi-btn').style.display = 'none';
+          document.getElementById('save-cvdi-btn').style.display = 'block';
         } else {
           // Thêm công văn mới
           const newDocRef = push(ref(database, 'congVanDi'));
@@ -308,7 +327,7 @@
       document.getElementById('save-cvdi-btn').style.display = 'none';
       
       // Cuộn lên đầu form
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // Hiển thị danh sách công văn
@@ -317,7 +336,7 @@
       documentsBody.innerHTML = '';
       
       if (!snapshot.exists()) {
-        documentsBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Chưa có công văn nào</td></tr>';
+        documentsBody.innerHTML = '<tr><td colspan="8" class="text-center">Chưa có công văn nào</td></tr>';
         return;
       }
       
@@ -328,19 +347,35 @@
         const doc = documents[id];
         const row = document.createElement('tr');
         
+        // Tạo nút sửa và xóa
+        const editBtn = document.createElement('a');
+        editBtn.className = 'action-icon edit-icon';
+        editBtn.innerHTML = '<i class="fa-solid fa-pen"></i> Sửa';
+        editBtn.onclick = () => editDocument(id, doc);
+        
+        const deleteBtn = document.createElement('a');
+        deleteBtn.className = 'action-icon delete-icon';
+        deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i> Xóa';
+        deleteBtn.onclick = () => deleteDocument(id);
+        
+        const actionDiv = document.createElement('div');
+        actionDiv.appendChild(editBtn);
+        actionDiv.appendChild(document.createTextNode(' | '));
+        actionDiv.appendChild(deleteBtn);
+        
         row.innerHTML = `
           <td>${stt}</td>
-          <td>${doc.year}</td>
-          <td>${doc.documentNumber}</td>
-          <td>${doc.documentName}</td>
-          <td>${doc.signDate}</td>
-          <td>${doc.signer}</td>
-          <td>${doc.issuingPlace}</td>
-          <td>
-            <a class="action-icon" onclick="window.editDocument('${id}', ${JSON.stringify(doc).replace(/"/g, '&quot;')})">Sửa</a>
-            <a class="action-icon delete-icon" onclick="window.deleteDocument('${id}')">Xóa</a>
-          </td>
+          <td>${doc.year || ''}</td>
+          <td>${doc.documentNumber || ''}</td>
+          <td>${doc.documentName || ''}</td>
+          <td>${doc.signDate || ''}</td>
+          <td>${doc.signer || ''}</td>
+          <td>${doc.issuingPlace || ''}</td>
         `;
+        
+        const actionCell = document.createElement('td');
+        actionCell.appendChild(actionDiv);
+        row.appendChild(actionCell);
         
         documentsBody.appendChild(row);
         stt++;
@@ -348,122 +383,93 @@
     }
 
     // Thêm mới option và lưu vào Firebase
-async function themMoi(selectId, category) {
-  const tenMoi = prompt('Nhập giá trị mới:');
-  if (tenMoi && tenMoi.trim() !== '') {
-    try {
-      const tenMoiTrimmed = tenMoi.trim();
-      
-      // Kiểm tra trùng lặp
-      const select = document.getElementById(selectId);
-      for (let i = 0; i < select.options.length; i++) {
-        if (select.options[i].value === tenMoiTrimmed) {
-          showNotification('Giá trị này đã tồn tại!', false);
-          return;
+    async function themMoi(selectId, category) {
+      const tenMoi = prompt('Nhập giá trị mới:');
+      if (tenMoi && tenMoi.trim() !== '') {
+        try {
+          const tenMoiTrimmed = tenMoi.trim();
+          
+          // Kiểm tra trùng lặp
+          const select = document.getElementById(selectId);
+          for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === tenMoiTrimmed) {
+              showNotification('Giá trị này đã tồn tại!', false);
+              return;
+            }
+          }
+
+          // Tạo dữ liệu để lưu
+          const newData = {
+            name: tenMoiTrimmed,
+            createdAt: new Date().toISOString(),
+            createdBy: currentUser ? currentUser.email : 'unknown'
+          };
+          
+          // Lưu vào Firebase
+          const newItemRef = push(ref(database, `categories/${category}`));
+          await set(newItemRef, newData);
+          
+          // Thêm vào dropdown
+          const option = document.createElement('option');
+          option.value = tenMoiTrimmed;
+          option.textContent = tenMoiTrimmed;
+          select.appendChild(option);
+          select.value = tenMoiTrimmed;
+          
+          showNotification('Thêm mới thành công!');
+          
+        } catch (error) {
+          console.error('Lỗi khi thêm mới:', error);
+          showNotification('Có lỗi xảy ra khi thêm mới: ' + error.message, false);
         }
+      } else if (tenMoi !== null) {
+        showNotification('Vui lòng nhập giá trị hợp lệ!', false);
       }
-
-      console.log('Đang thêm mới:', tenMoiTrimmed, 'vào category:', category);
-      
-      // Tạo dữ liệu để lưu
-      const newData = {
-        name: tenMoiTrimmed,
-        createdAt: new Date().toISOString(),
-        createdBy: currentUser ? currentUser.email : 'unknown'
-      };
-
-      console.log('Dữ liệu sẽ lưu:', newData);
-      
-      // Lưu vào Firebase
-      const newItemRef = push(ref(database, `categories/${category}`));
-      console.log('Đường dẫn tham chiếu:', newItemRef.toString());
-      
-      await set(newItemRef, newData);
-      console.log('Lưu thành công!');
-      
-      // Thêm vào dropdown
-      const option = document.createElement('option');
-      option.value = tenMoiTrimmed;
-      option.textContent = tenMoiTrimmed;
-      select.appendChild(option);
-      select.value = tenMoiTrimmed;
-      
-      showNotification('Thêm mới thành công!');
-      
-    } catch (error) {
-      console.error('LỖI CHI TIẾT:');
-      console.error('Tên lỗi:', error.name);
-      console.error('Message:', error.message);
-      console.error('Code:', error.code);
-      console.error('Stack:', error.stack);
-      
-      let errorMessage = 'Có lỗi xảy ra khi thêm mới';
-      if (error.code) {
-        errorMessage += ` (Mã lỗi: ${error.code})`;
-      }
-      if (error.message) {
-        errorMessage += `: ${error.message}`;
-      }
-      showNotification(errorMessage, false);
     }
-  } else if (tenMoi !== null) {
-    showNotification('Vui lòng nhập giá trị hợp lệ!', false);
-  }
-}
-
-// Thêm hàm kiểm tra kết nối
-function checkDatabaseConnection() {
-  const connectedRef = ref(database, ".info/connected");
-  onValue(connectedRef, (snap) => {
-    if (snap.val() === true) {
-      console.log("Đã kết nối đến Firebase");
-    } 
-    //else {
-    //  console.log("Mất kết nối Firebase");
-    //  showNotification("Mất kết nối đến server", false);
-    //}
-  });
-}
-
-// Gọi hàm kiểm tra kết nối trong DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function() {
-  checkDatabaseConnection();
-  // ... code hiện có ...
-});
 
     // Tải danh sách các option từ Firebase
-function loadCategories(selectId, category) {
-  const categoriesRef = ref(database, `categories/${category}`);
-  onValue(categoriesRef, (snapshot) => {
-    const select = document.getElementById(selectId);
-    
-    // Giữ lại các option mặc định (những option đầu tiên)
-    const defaultOptions = [];
-    for (let i = 0; i < select.options.length; i++) {
-      defaultOptions.push(select.options[i]);
+    function loadCategories(selectId, category) {
+      const categoriesRef = ref(database, `categories/${category}`);
+      onValue(categoriesRef, (snapshot) => {
+        const select = document.getElementById(selectId);
+        
+        // Lưu lại option mặc định (option đầu tiên)
+        const defaultOption = select.options[0];
+        
+        // Xóa tất cả options (giữ lại option mặc định)
+        select.innerHTML = '';
+        if (defaultOption) {
+          select.appendChild(defaultOption);
+        }
+        
+        // Thêm các option từ Firebase
+        if (snapshot.exists()) {
+          const categories = snapshot.val();
+          for (const key in categories) {
+            const categoryItem = categories[key];
+            const option = document.createElement('option');
+            option.value = categoryItem.name;
+            option.textContent = categoryItem.name;
+            select.appendChild(option);
+          }
+        }
+      }, (error) => {
+        console.error(`Lỗi khi tải category ${category}:`, error);
+      });
     }
-    
-    // Xóa tất cả options
-    select.innerHTML = '';
-    
-    // Thêm lại các option mặc định
-    defaultOptions.forEach(option => {
-      select.appendChild(option);
-    });
-    
-    // Thêm các option từ Firebase
-    if (snapshot.exists()) {
-      const categories = snapshot.val();
-      for (const key in categories) {
-        const categoryItem = categories[key];
-        const option = document.createElement('option');
-        option.value = categoryItem.name;
-        option.textContent = categoryItem.name;
-        select.appendChild(option);
-      }
+
+    // Kiểm tra kết nối
+    function checkDatabaseConnection() {
+      const connectedRef = ref(database, ".info/connected");
+      onValue(connectedRef, (snap) => {
+        if (snap.val() === true) {
+          console.log("Đã kết nối đến Firebase");
+        } else {
+          console.log("Mất kết nối Firebase");
+        }
+      });
     }
-  });
-}
+
     // Khởi tạo trang
     document.addEventListener('DOMContentLoaded', function() {
       // Thiết lập ngày mặc định
@@ -487,6 +493,9 @@ function loadCategories(selectId, category) {
       document.getElementById('them-noi-ban-hanh-btn').addEventListener('click', () => themMoi('noi-ban-hanh', 'issuingPlaces'));
       document.getElementById('them-nam-btn').addEventListener('click', () => themMoi('nam', 'years'));
       
+      // Kiểm tra kết nối
+      checkDatabaseConnection();
+      
       // Kiểm tra trạng thái đăng nhập
       onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -499,15 +508,16 @@ function loadCategories(selectId, category) {
           loadCategories('nam', 'years');
           
           // Hiển thị loading
-          document.getElementById('loading').style.display = 'block';
+          const loadingEl = document.getElementById('loading');
+          if (loadingEl) loadingEl.style.display = 'block';
           
           // Lấy dữ liệu công văn đi từ Firebase
           const documentsRef = ref(database, 'congVanDi');
           onValue(documentsRef, (snapshot) => {
-            document.getElementById('loading').style.display = 'none';
+            if (loadingEl) loadingEl.style.display = 'none';
             displayDocuments(snapshot);
           }, (error) => {
-            document.getElementById('loading').style.display = 'none';
+            if (loadingEl) loadingEl.style.display = 'none';
             console.error('Lỗi khi tải dữ liệu:', error);
             showNotification('Có lỗi xảy ra khi tải dữ liệu', false);
           });
@@ -517,15 +527,9 @@ function loadCategories(selectId, category) {
       });
     });
 
-    // Cho phép sử dụng các hàm toàn cục
+    // Cho phép sử dụng các hàm toàn cục (cần thiết cho onclick)
     window.editDocument = editDocument;
     window.deleteDocument = deleteDocument;
-    window.themMoi = themMoi;
   </script>
 </body>
-
 </html>
-
-
-
-
