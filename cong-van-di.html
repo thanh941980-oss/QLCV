@@ -44,7 +44,7 @@
     .table-responsive { border-radius: 8px; }
     .content-preview { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; color: #0066cc; }
     .content-preview:hover { color: #0052a3; text-decoration: underline; }
-    .notification { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; color: #fff; display: none; z-index: 2000; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; }
+    .notification { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; color: #fff; display: none; z-index: 2000; font-size: 13px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease; z-index: 9999; }
     @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     .notification.success { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
     .notification.error { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); }
@@ -55,13 +55,14 @@
     .file-link:hover { background: #e9ecef; color: #0052a3; }
     .modal-xl { max-width: 90%; }
     .current-file-info { background: #e8f0fe; padding: 10px; border-radius: 6px; margin-top: 10px; border-left: 3px solid #0066cc; }
+    .debug-console { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 10px; margin-top: 10px; font-size: 11px; max-height: 150px; overflow-y: auto; display: none; }
   </style>
 </head>
 <body>
   <div class="container py-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div>
-        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi</h4>
+        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi1</h4>
         <small class="text-muted">Quản lý và theo dõi công văn đi</small>
       </div>
       <a href="dashboard.html" class="btn btn-secondary btn-sm">
@@ -362,16 +363,18 @@
       }
     }
 
-    // CẬP NHẬT - ĐÃ FIX
+    // HÀM CẬP NHẬT QUAN TRỌNG - ĐÃ ĐƯỢC KIỂM TRA KỸ
     async function updateDocument() {
-      console.log("=== BẮT ĐẦU CẬP NHẬT ===");
-      console.log("editingId:", editingId);
+      console.log("=== CẬP NHẬT CÔNG VĂN ===");
+      console.log("editingId hiện tại:", editingId);
       
+      // Kiểm tra editingId
       if (!editingId) {
-        showNotification('Không có công văn nào đang được chọn để cập nhật', false);
+        showNotification('Không có công văn nào đang được chọn để cập nhật! Hãy nhấn nút Sửa trên bảng', false);
         return;
       }
       
+      // Lấy dữ liệu từ form
       const year = document.getElementById('nam').value;
       const soVB = document.getElementById('so-vb').value;
       const tenVB = document.getElementById('ten-vb').value;
@@ -382,6 +385,7 @@
       const fileInput = document.getElementById('file-dinh-kem');
       const newFile = fileInput.files[0];
 
+      // Kiểm tra dữ liệu bắt buộc
       if (!year || !soVB || !tenVB || !ngayKy || !nguoiKy || !noiBanHanh || !noiDung) {
         showNotification('Vui lòng điền đầy đủ thông tin', false);
         return;
@@ -390,17 +394,21 @@
       try {
         let fileData = currentFileData;
         
+        // Xử lý file mới nếu có
         if (newFile) {
           if (newFile.size > 10 * 1024 * 1024) {
             showNotification('File không được vượt quá 10MB', false);
             return;
           }
+          // Xóa file cũ nếu tồn tại
           if (currentFileData && currentFileData.path) {
             await deleteOldFile(currentFileData.path);
           }
+          // Upload file mới
           fileData = await uploadFile(newFile, editingId);
         }
         
+        // Dữ liệu cập nhật
         const updateData = {
           year: year,
           documentNumber: soVB,
@@ -415,6 +423,9 @@
           updatedBy: currentUser?.email || 'unknown'
         };
         
+        console.log("Đang cập nhật dữ liệu:", updateData);
+        
+        // Thực hiện cập nhật
         await set(ref(database, `congVanDi/${editingId}`), updateData);
         
         showNotification('Cập nhật công văn thành công!');
@@ -429,11 +440,12 @@
     async function deleteDocument(id, filePath) {
       if (!confirm('Bạn có chắc chắn muốn xóa công văn này?')) return;
       try {
-        if (filePath) {
+        if (filePath && filePath !== 'undefined' && filePath !== 'null') {
           await deleteOldFile(filePath);
         }
         await remove(ref(database, `congVanDi/${id}`));
         showNotification('Xóa công văn thành công!');
+        if (editingId === id) refreshForm();
       } catch (error) {
         console.error('Lỗi khi xóa công văn:', error);
         showNotification('Có lỗi xảy ra khi xóa công văn', false);
@@ -441,8 +453,11 @@
     }
 
     function editDocument(id, data) {
-      console.log("Sửa công văn:", id, data);
+      console.log("=== SỬA CÔNG VĂN ===");
+      console.log("ID:", id);
+      console.log("Data:", data);
       
+      // Đổ dữ liệu vào form
       document.getElementById('nam').value = data.year || '';
       document.getElementById('so-vb').value = data.documentNumber || '';
       document.getElementById('ten-vb').value = data.documentName || '';
@@ -451,9 +466,11 @@
       document.getElementById('noi-ban-hanh').value = data.issuingPlace || '';
       document.getElementById('noi-dung').value = data.content || '';
       
+      // Lưu thông tin file và ID đang sửa
       currentFileData = data.fileData || null;
       editingId = id;
       
+      // Hiển thị thông tin file hiện tại
       const currentFileDiv = document.getElementById('current-file-info');
       if (currentFileData && currentFileData.url) {
         currentFileDiv.style.display = 'block';
@@ -465,16 +482,21 @@
             </button>
             <span class="text-muted small">${currentFileData.name}</span>
           </div>
-          <small class="text-muted">📌 Chọn file mới để thay thế</small>
+          <small class="text-muted text-danger">⚠️ Nếu chọn file mới, file cũ sẽ bị xóa</small>
         `;
       } else {
         currentFileDiv.style.display = 'block';
-        currentFileDiv.innerHTML = `<strong><i class="fa-regular fa-file"></i> Chưa có file</strong><br><small>📌 Chọn file bên dưới để thêm mới</small>`;
+        currentFileDiv.innerHTML = `<strong><i class="fa-regular fa-file"></i> Chưa có file đính kèm</strong><br><small>📌 Có thể chọn file mới bên dưới</small>`;
       }
       
+      // Chuyển nút Lưu thành nút Cập nhật
       document.getElementById('update-cvdi-btn').style.display = 'inline-block';
       document.getElementById('save-cvdi-btn').style.display = 'none';
+      
+      // Cuộn lên đầu form
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      showNotification('Đã tải dữ liệu vào form, nhấn Cập nhật để lưu thay đổi', true);
     }
 
     function openFile(fileData) {
@@ -503,14 +525,14 @@
           <div class="alert alert-info mt-2">Không xem được? <a href="${fileData.url}" target="_blank">Tải file về</a></div>
         `;
       } else {
-        previewContent.innerHTML = `<div class="text-center p-5"><i class="fa-solid fa-file fa-4x mb-3"></i><p>Không thể xem trước</p><a href="${fileData.url}" class="btn btn-primary" target="_blank">Tải file</a></div>`;
+        previewContent.innerHTML = `<div class="text-center p-5"><i class="fa-solid fa-file fa-4x mb-3"></i><p>Không thể xem trước loại file này</p><a href="${fileData.url}" class="btn btn-primary" target="_blank">Tải file</a></div>`;
       }
       modal.show();
     }
 
     function viewFullContent(content) {
       const modal = new bootstrap.Modal(document.getElementById('contentModal'));
-      document.getElementById('contentModalBody').innerHTML = `<div style="white-space: pre-wrap;">${content.replace(/\n/g, '<br>')}</div>`;
+      document.getElementById('contentModalBody').innerHTML = `<div style="white-space: pre-wrap; word-break: break-word;">${content.replace(/\n/g, '<br>')}</div>`;
       modal.show();
     }
 
@@ -520,7 +542,7 @@
       tbody.innerHTML = '';
       
       if (!snapshot.exists()) {
-        tbody.innerHTML = '<tr><td colspan="10" class="text-center">Chưa có công văn nào</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4 text-muted">Chưa có công văn nào</td></tr>';
         totalSpan.textContent = '0';
         return;
       }
@@ -539,6 +561,9 @@
         const filePath = doc.fileData ? doc.fileData.path : '';
         const fileNameDisplay = hasFile ? (doc.fileData.name.length > 20 ? doc.fileData.name.substring(0, 20) + '...' : doc.fileData.name) : '';
         
+        // Escape nội dung để tránh lỗi JavaScript
+        const escapedContent = contentText.replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ');
+        
         tbody.innerHTML += `
           <tr>
             <td class="text-center">${stt}</td>
@@ -548,7 +573,7 @@
             <td class="text-center">${doc.signDate || ''}</td>
             <td>${doc.signer || ''}</td>
             <td>${doc.issuingPlace || ''}</td>
-            <td><div class="content-preview" onclick="window.viewFullContentFromGlobal('${contentText.replace(/'/g, "\\'").replace(/\n/g, ' ')}')">${contentPreview || 'Chưa có nội dung'}</div></td>
+            <td><div class="content-preview" onclick="window.viewFullContentFromGlobal('${escapedContent}')">${contentPreview || 'Chưa có nội dung'}</div></td>
             <td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-paperclip"></i> ${fileNameDisplay}</button>` : '<span class="text-muted">Không có file</span>'}</td>
             <td>
               <div class="action-buttons">
@@ -564,7 +589,7 @@
       totalSpan.textContent = total;
     }
 
-    // Global functions
+    // === GÁN HÀM GLOBAL ĐỂ CÁC NÚT TRONG BẢNG CÓ THỂ GỌI ===
     window.openFileFromGlobal = function(id) {
       if (documentsDataGlobal[id] && documentsDataGlobal[id].fileData) {
         openFile(documentsDataGlobal[id].fileData);
@@ -582,7 +607,7 @@
     };
     
     window.viewFullContentFromGlobal = function(content) {
-      if (content && content.trim()) {
+      if (content && content.trim() && content !== 'undefined') {
         viewFullContent(content);
       } else {
         showNotification('Không có nội dung!', false);
@@ -592,6 +617,8 @@
     window.editDocumentFromGlobal = function(id) {
       if (documentsDataGlobal[id]) {
         editDocument(id, documentsDataGlobal[id]);
+      } else {
+        showNotification('Không tìm thấy dữ liệu công văn!', false);
       }
     };
     
@@ -599,32 +626,46 @@
       deleteDocument(id, filePath);
     };
 
-    window.updateDocumentGlobal = function() {
-      updateDocument();
-    };
-
+    // === THÊM MỚI CATEGORY ===
     async function themMoi(selectId, category) {
+      if (!currentUser) {
+        showNotification('Vui lòng đăng nhập!', false);
+        return;
+      }
+      
       const tenMoi = prompt('Nhập giá trị mới:');
       if (tenMoi && tenMoi.trim() !== '') {
         try {
           const tenMoiTrimmed = tenMoi.trim();
           const select = document.getElementById(selectId);
+          
+          // Kiểm tra trùng
           for (let i = 0; i < select.options.length; i++) {
             if (select.options[i].value === tenMoiTrimmed) {
               showNotification('Giá trị này đã tồn tại!', false);
               return;
             }
           }
-          const newData = { name: tenMoiTrimmed, createdAt: new Date().toISOString(), createdBy: currentUser ? currentUser.email : 'unknown' };
+          
+          const newData = { 
+            name: tenMoiTrimmed, 
+            createdAt: new Date().toISOString(), 
+            createdBy: currentUser.email || 'unknown' 
+          };
+          
           const newItemRef = push(ref(database, `categories/${category}`));
           await set(newItemRef, newData);
+          
+          // Thêm vào select
           const option = document.createElement('option');
           option.value = tenMoiTrimmed;
           option.textContent = tenMoiTrimmed;
           select.appendChild(option);
           select.value = tenMoiTrimmed;
+          
           showNotification('Thêm mới thành công!');
         } catch (error) {
+          console.error('Lỗi thêm mới:', error);
           showNotification('Có lỗi xảy ra khi thêm mới: ' + error.message, false);
         }
       }
@@ -636,51 +677,77 @@
         const select = document.getElementById(selectId);
         const defaultOption = select.options[0];
         select.innerHTML = '';
-        if (defaultOption) select.appendChild(defaultOption);
+        if (defaultOption) select.appendChild(defaultOption.cloneNode(true));
+        
         if (snapshot.exists()) {
           const categories = snapshot.val();
           for (const key in categories) {
-            const option = document.createElement('option');
-            option.value = categories[key].name;
-            option.textContent = categories[key].name;
-            select.appendChild(option);
+            if (categories[key] && categories[key].name) {
+              const option = document.createElement('option');
+              option.value = categories[key].name;
+              option.textContent = categories[key].name;
+              select.appendChild(option);
+            }
           }
         }
+      }, (error) => {
+        console.error('Lỗi load categories:', error);
       });
     }
 
-    // KHỞI TẠO
+    // === KHỞI TẠI SỰ KIỆN ===
     document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('ngay-ky').valueAsDate = new Date();
-      document.getElementById('update-cvdi-btn').style.display = 'none';
+      console.log("DOM đã sẵn sàng");
       
+      // Set ngày mặc định
+      document.getElementById('ngay-ky').valueAsDate = new Date();
+      
+      // Nút Làm mới
       document.getElementById('reset-cvdi-btn').onclick = refreshForm;
+      
+      // Nút Lưu
       document.getElementById('save-cvdi-btn').onclick = addDocument;
-      document.getElementById('update-cvdi-btn').onclick = function() {
-        console.log("Click vào nút Cập nhật!");
+      
+      // === NÚT CẬP NHẬT - QUAN TRỌNG NHẤT ===
+      const updateBtn = document.getElementById('update-cvdi-btn');
+      updateBtn.onclick = function(e) {
+        e.preventDefault();
+        console.log("🔥 ĐÃ NHẤN NÚT CẬP NHẬT 🔥");
         updateDocument();
       };
       
+      // Nút thêm mới categories
       document.getElementById('them-ten-vb-btn').onclick = () => themMoi('ten-vb', 'documentTypes');
       document.getElementById('them-nguoi-ky-btn').onclick = () => themMoi('nguoi-ky', 'signers');
       document.getElementById('them-noi-ban-hanh-btn').onclick = () => themMoi('noi-ban-hanh', 'issuingPlaces');
       document.getElementById('them-nam-btn').onclick = () => themMoi('nam', 'years');
       
+      // Auth state
       onAuthStateChanged(auth, (user) => {
+        console.log("Auth state changed:", user ? user.email : 'null');
+        
         if (user) {
           currentUser = user;
+          
+          // Load categories
           loadCategories('ten-vb', 'documentTypes');
           loadCategories('nguoi-ky', 'signers');
           loadCategories('noi-ban-hanh', 'issuingPlaces');
           loadCategories('nam', 'years');
           
+          // Load documents
           document.getElementById('loading').style.display = 'block';
           const documentsRef = ref(database, 'congVanDi');
           onValue(documentsRef, (snapshot) => {
             document.getElementById('loading').style.display = 'none';
             displayDocuments(snapshot);
+          }, (error) => {
+            console.error('Lỗi load documents:', error);
+            document.getElementById('loading').style.display = 'none';
+            showNotification('Lỗi tải dữ liệu: ' + error.message, false);
           });
         } else {
+          console.log("Chưa đăng nhập, chuyển về index.html");
           window.location.href = 'index.html';
         }
       });
