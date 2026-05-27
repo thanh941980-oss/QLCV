@@ -27,8 +27,6 @@
     .btn-warning:hover { background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%); transform: translateY(-1px); }
     .btn-secondary { background: #6c757d; border: none; }
     .btn-secondary:hover { background: #5a6268; transform: translateY(-1px); }
-    .btn-outline-primary { border-color: #dee2e6; color: #0066cc; }
-    .btn-outline-primary:hover { background: #0066cc; border-color: #0066cc; }
     .action-buttons { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
     .action-btn { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; border: none; }
     .action-btn i { font-size: 11px; }
@@ -55,18 +53,14 @@
     .file-link { background: #f8f9fa; padding: 4px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; color: #0066cc; font-size: 11px; cursor: pointer; border: none; }
     .file-link:hover { background: #e9ecef; color: #0052a3; }
     .modal-xl { max-width: 90%; }
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #555; }
-    .current-file-info { background: #f8f9fa; padding: 8px; border-radius: 6px; margin-top: 8px; }
+    .current-file-info { background: #e8f0fe; padding: 10px; border-radius: 6px; margin-top: 10px; border-left: 3px solid #0066cc; }
   </style>
 </head>
 <body>
   <div class="container py-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div>
-        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi 1</h4>
+        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi</h4>
         <small class="text-muted">Quản lý và theo dõi công văn đi</small>
       </div>
       <a href="dashboard.html" class="btn btn-secondary btn-sm">
@@ -204,7 +198,7 @@
                 Chưa có công văn nào
               </td></tr>
             </tbody>
-           </table>
+          </table>
         </div>
       </div>
     </div>
@@ -373,8 +367,11 @@
       }
     }
 
-    // Hàm cập nhật
+    // Hàm cập nhật - QUAN TRỌNG: ĐÃ SỬA LỖI
     async function updateDocument() {
+      console.log('=== BẮT ĐẦU CẬP NHẬT ===');
+      console.log('editingId:', editingId);
+      
       const year = document.getElementById('nam').value;
       const documentNumber = document.getElementById('so-vb').value;
       const documentName = document.getElementById('ten-vb').value;
@@ -384,6 +381,9 @@
       const content = document.getElementById('noi-dung').value;
       const fileInput = document.getElementById('file-dinh-kem');
       const newFile = fileInput.files[0];
+
+      console.log('newFile:', newFile ? newFile.name : 'Không có file mới');
+      console.log('currentFileData:', currentFileData);
 
       if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) {
         showNotification('Vui lòng điền đầy đủ thông tin', false);
@@ -396,34 +396,47 @@
       }
 
       try {
-        let fileData = currentFileData;
+        let fileData = currentFileData; // Giữ file cũ
         
+        // Nếu có file mới được chọn
         if (newFile) {
+          console.log('Đang xử lý file mới...');
           if (newFile.size > 10 * 1024 * 1024) {
             showNotification('File không được vượt quá 10MB', false);
             return;
           }
           // Xóa file cũ nếu có
           if (currentFileData && currentFileData.path) {
+            console.log('Xóa file cũ:', currentFileData.path);
             await deleteOldFile(currentFileData.path);
           }
           // Upload file mới
+          console.log('Upload file mới...');
           fileData = await uploadFile(newFile, editingId);
+          console.log('Upload thành công:', fileData);
         }
         
         const updateData = {
-          year, documentNumber, documentName, signDate, signer, issuingPlace, content,
+          year, 
+          documentNumber, 
+          documentName, 
+          signDate, 
+          signer, 
+          issuingPlace, 
+          content,
           fileData: fileData,
           hasFile: !!fileData,
           updatedAt: new Date().toISOString(),
           updatedBy: currentUser?.email || 'unknown'
         };
         
+        console.log('Dữ liệu cập nhật:', updateData);
+        
         await set(ref(database, `congVanDi/${editingId}`), updateData);
         showNotification('Cập nhật công văn thành công!');
         refreshForm();
       } catch (error) {
-        console.error(error);
+        console.error('LỖI CẬP NHẬT:', error);
         showNotification('Lỗi: ' + error.message, false);
       }
     }
@@ -443,6 +456,8 @@
     }
 
     function editDocument(id, data) {
+      console.log('Chỉnh sửa công văn:', id, data);
+      
       document.getElementById('nam').value = data.year || '';
       document.getElementById('so-vb').value = data.documentNumber || '';
       document.getElementById('ten-vb').value = data.documentName || '';
@@ -460,17 +475,22 @@
         currentFileDiv.style.display = 'block';
         currentFileDiv.innerHTML = `
           <strong><i class="fa-solid fa-paperclip"></i> File hiện tại:</strong>
-          <div class="d-flex gap-2 mt-1 flex-wrap">
+          <div class="d-flex gap-2 mt-2 flex-wrap">
             <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.openCurrentFile()">
               <i class="fa-solid fa-eye"></i> Mở file
             </button>
             <span class="text-muted small">${currentFileData.name}</span>
           </div>
-          <small class="text-muted">Chọn file mới để thay thế hoặc bỏ trống để giữ nguyên</small>
+          <small class="text-muted d-block mt-2">📌 Chọn file mới để thay thế hoặc bỏ trống để giữ nguyên file cũ</small>
         `;
       } else {
-        currentFileDiv.style.display = 'none';
-        currentFileDiv.innerHTML = '';
+        currentFileDiv.style.display = 'block';
+        currentFileDiv.innerHTML = `
+          <strong><i class="fa-regular fa-file"></i> Chưa có file đính kèm</strong>
+          <div class="mt-1">
+            <small class="text-muted">Chọn file bên dưới để thêm mới</small>
+          </div>
+        `;
       }
       
       document.getElementById('update-cvdi-btn').style.display = 'inline-block';
