@@ -5,11 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Công Văn Đi - Hệ Thống Quản Lý Văn bản</title>
 
-  <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- FontAwesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <!-- Bootstrap 5 JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <style>
@@ -31,8 +28,6 @@
     .btn-warning:hover { background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%); transform: translateY(-1px); }
     .btn-secondary { background: #6c757d; border: none; }
     .btn-secondary:hover { background: #5a6268; transform: translateY(-1px); }
-    .btn-danger { background: #dc3545; border: none; }
-    .btn-danger:hover { background: #c82333; transform: translateY(-1px); }
     .action-buttons { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
     .action-btn { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; border: none; }
     .action-btn i { font-size: 11px; }
@@ -66,7 +61,7 @@
   <div class="container py-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div>
-        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi2</h4>
+        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi1</h4>
         <small class="text-muted">Quản lý và theo dõi công văn đi</small>
       </div>
       <a href="dashboard.html" class="btn btn-secondary btn-sm">
@@ -204,7 +199,7 @@
                 Chưa có công văn nào
               </td></tr>
             </tbody>
-          </table>
+           </table>
         </div>
       </div>
     </div>
@@ -373,8 +368,12 @@
       }
     }
 
-    // Hàm cập nhật
+    // Hàm cập nhật - ĐÃ SỬA HOÀN CHỈNH
     async function updateDocument() {
+      console.log("=== BẮT ĐẦU CẬP NHẬT ===");
+      console.log("editingId:", editingId);
+      
+      // Lấy dữ liệu từ form
       const year = document.getElementById('nam').value;
       const documentNumber = document.getElementById('so-vb').value;
       const documentName = document.getElementById('ten-vb').value;
@@ -385,43 +384,71 @@
       const fileInput = document.getElementById('file-dinh-kem');
       const newFile = fileInput.files[0];
 
+      console.log("Dữ liệu form:", { year, documentNumber, documentName, signDate, signer, issuingPlace, content });
+      console.log("File mới:", newFile ? newFile.name : "Không có");
+
+      // Kiểm tra dữ liệu bắt buộc
       if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) {
         showNotification('Vui lòng điền đầy đủ thông tin', false);
         return;
       }
 
+      // Kiểm tra đã chọn công văn để cập nhật chưa
       if (!editingId) {
         showNotification('Không có công văn nào đang được chọn để cập nhật', false);
         return;
       }
 
       try {
-        let fileData = currentFileData;
+        let fileData = currentFileData; // Giữ file cũ nếu không có file mới
         
+        // Nếu có file mới được chọn
         if (newFile) {
+          console.log("Đang xử lý file mới...");
           if (newFile.size > 10 * 1024 * 1024) {
             showNotification('File không được vượt quá 10MB', false);
             return;
           }
+          // Xóa file cũ nếu có
           if (currentFileData && currentFileData.path) {
+            console.log("Xóa file cũ:", currentFileData.path);
             await deleteOldFile(currentFileData.path);
           }
+          // Upload file mới
+          console.log("Upload file mới lên Firebase Storage...");
           fileData = await uploadFile(newFile, editingId);
+          console.log("Upload thành công:", fileData);
         }
         
+        // Tạo dữ liệu cập nhật
         const updateData = {
-          year, documentNumber, documentName, signDate, signer, issuingPlace, content,
+          year: year,
+          documentNumber: documentNumber,
+          documentName: documentName,
+          signDate: signDate,
+          signer: signer,
+          issuingPlace: issuingPlace,
+          content: content,
           fileData: fileData,
           hasFile: !!fileData,
           updatedAt: new Date().toISOString(),
           updatedBy: currentUser?.email || 'unknown'
         };
         
-        await set(ref(database, `congVanDi/${editingId}`), updateData);
+        console.log("Dữ liệu cập nhật sẽ lưu:", updateData);
+        
+        // Lưu lên Firebase Realtime Database
+        const docRef = ref(database, `congVanDi/${editingId}`);
+        await set(docRef, updateData);
+        
+        console.log("Cập nhật thành công!");
         showNotification('Cập nhật công văn thành công!');
+        
+        // Làm mới form
         refreshForm();
+        
       } catch (error) {
-        console.error(error);
+        console.error("LỖI CẬP NHẬT:", error);
         showNotification('Lỗi: ' + error.message, false);
       }
     }
@@ -441,6 +468,10 @@
     }
 
     function editDocument(id, data) {
+      console.log("Chỉnh sửa công văn ID:", id);
+      console.log("Dữ liệu công văn:", data);
+      
+      // Đổ dữ liệu lên form
       document.getElementById('nam').value = data.year || '';
       document.getElementById('so-vb').value = data.documentNumber || '';
       document.getElementById('ten-vb').value = data.documentName || '';
@@ -449,9 +480,11 @@
       document.getElementById('noi-ban-hanh').value = data.issuingPlace || '';
       document.getElementById('noi-dung').value = data.content || '';
       
+      // Lưu thông tin file cũ và ID đang chỉnh sửa
       currentFileData = data.fileData || null;
       editingId = id;
       
+      // Hiển thị thông tin file hiện tại
       const currentFileDiv = document.getElementById('current-file-info');
       if (currentFileData && currentFileData.url) {
         currentFileDiv.style.display = 'block';
@@ -475,9 +508,14 @@
         `;
       }
       
+      // Hiển thị nút Cập nhật, ẩn nút Lưu
       document.getElementById('update-cvdi-btn').style.display = 'inline-block';
       document.getElementById('save-cvdi-btn').style.display = 'none';
+      
+      // Cuộn lên đầu form
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      showNotification('Đã tải dữ liệu lên form, bạn có thể chỉnh sửa và bấm "Cập nhật"', true);
     }
 
     function openFile(fileData) {
@@ -668,11 +706,16 @@
 
     // Khởi tạo
     document.addEventListener('DOMContentLoaded', function() {
+      console.log("DOM đã tải xong");
+      
       document.getElementById('ngay-ky').valueAsDate = new Date();
       document.getElementById('update-cvdi-btn').style.display = 'none';
+      
+      // Gán sự kiện cho các nút
       document.getElementById('reset-cvdi-btn').addEventListener('click', refreshForm);
       document.getElementById('save-cvdi-btn').addEventListener('click', addDocument);
       document.getElementById('update-cvdi-btn').addEventListener('click', updateDocument);
+      
       document.getElementById('them-ten-vb-btn').addEventListener('click', () => themMoi('ten-vb', 'documentTypes'));
       document.getElementById('them-nguoi-ky-btn').addEventListener('click', () => themMoi('nguoi-ky', 'signers'));
       document.getElementById('them-noi-ban-hanh-btn').addEventListener('click', () => themMoi('noi-ban-hanh', 'issuingPlaces'));
@@ -680,6 +723,7 @@
       
       onAuthStateChanged(auth, (user) => {
         if (user) {
+          console.log("Đã đăng nhập:", user.email);
           currentUser = user;
           loadCategories('ten-vb', 'documentTypes');
           loadCategories('nguoi-ky', 'signers');
@@ -697,6 +741,7 @@
             showNotification('Có lỗi xảy ra khi tải dữ liệu', false);
           });
         } else {
+          console.log("Chưa đăng nhập, chuyển về trang login");
           window.location.href = 'index.html';
         }
       });
