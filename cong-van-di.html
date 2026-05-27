@@ -61,7 +61,7 @@
   <div class="container py-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div>
-        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi1</h4>
+        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi</h4>
         <small class="text-muted">Quản lý và theo dõi công văn đi</small>
       </div>
       <a href="dashboard.html" class="btn btn-secondary btn-sm">
@@ -80,10 +80,6 @@
             <div class="input-group">
               <select id="nam" class="form-select form-select-sm">
                 <option value="">Chọn năm</option>
-                <option>2025</option>
-                <option>2026</option>
-                <option>2027</option>
-                <option>2028</option>
               </select>
               <button class="btn btn-outline-primary btn-sm-custom" id="them-nam-btn" title="Thêm năm mới">
                 <i class="fa fa-plus"></i>
@@ -272,6 +268,7 @@
     let currentUser = null;
     let editingId = null;
     let currentFileData = null;
+    let documentsDataGlobal = {};
 
     function showNotification(message, isSuccess = true) {
       const notification = document.getElementById(isSuccess ? 'successNotification' : 'errorNotification');
@@ -321,7 +318,6 @@
       }
     }
 
-    // THÊM MỚI
     async function addDocument() {
       const year = document.getElementById('nam').value;
       const documentNumber = document.getElementById('so-vb').value;
@@ -366,12 +362,16 @@
       }
     }
 
-    // CẬP NHẬT - ĐÃ ĐƠN GIẢN HÓA VÀ ĐẢM BẢO HOẠT ĐỘNG
-    window.updateDocument = async function() {
-      console.log("=== NÚT CẬP NHẬT ĐƯỢC BẤM ===");
+    // CẬP NHẬT - ĐÃ FIX
+    async function updateDocument() {
+      console.log("=== BẮT ĐẦU CẬP NHẬT ===");
       console.log("editingId:", editingId);
       
-      // Lấy dữ liệu từ form
+      if (!editingId) {
+        showNotification('Không có công văn nào đang được chọn để cập nhật', false);
+        return;
+      }
+      
       const year = document.getElementById('nam').value;
       const soVB = document.getElementById('so-vb').value;
       const tenVB = document.getElementById('ten-vb').value;
@@ -382,36 +382,26 @@
       const fileInput = document.getElementById('file-dinh-kem');
       const newFile = fileInput.files[0];
 
-      // Kiểm tra dữ liệu
       if (!year || !soVB || !tenVB || !ngayKy || !nguoiKy || !noiBanHanh || !noiDung) {
         showNotification('Vui lòng điền đầy đủ thông tin', false);
-        return;
-      }
-
-      if (!editingId) {
-        showNotification('Không có công văn nào đang được chọn để cập nhật', false);
         return;
       }
 
       try {
         let fileData = currentFileData;
         
-        // Nếu có file mới
         if (newFile) {
           if (newFile.size > 10 * 1024 * 1024) {
             showNotification('File không được vượt quá 10MB', false);
             return;
           }
-          // Xóa file cũ
           if (currentFileData && currentFileData.path) {
             await deleteOldFile(currentFileData.path);
           }
-          // Upload file mới
           fileData = await uploadFile(newFile, editingId);
         }
         
-        // Lưu dữ liệu
-        await set(ref(database, `congVanDi/${editingId}`), {
+        const updateData = {
           year: year,
           documentNumber: soVB,
           documentName: tenVB,
@@ -423,16 +413,18 @@
           hasFile: !!fileData,
           updatedAt: new Date().toISOString(),
           updatedBy: currentUser?.email || 'unknown'
-        });
+        };
+        
+        await set(ref(database, `congVanDi/${editingId}`), updateData);
         
         showNotification('Cập nhật công văn thành công!');
         refreshForm();
         
       } catch (error) {
-        console.error("LỖI:", error);
+        console.error("LỖI CẬP NHẬT:", error);
         showNotification('Lỗi: ' + error.message, false);
       }
-    };
+    }
 
     async function deleteDocument(id, filePath) {
       if (!confirm('Bạn có chắc chắn muốn xóa công văn này?')) return;
@@ -448,8 +440,8 @@
       }
     }
 
-    window.editDocument = function(id, data) {
-      console.log("Sửa công văn:", id);
+    function editDocument(id, data) {
+      console.log("Sửa công văn:", id, data);
       
       document.getElementById('nam').value = data.year || '';
       document.getElementById('so-vb').value = data.documentNumber || '';
@@ -483,9 +475,9 @@
       document.getElementById('update-cvdi-btn').style.display = 'inline-block';
       document.getElementById('save-cvdi-btn').style.display = 'none';
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    }
 
-    window.openFile = function(fileData) {
+    function openFile(fileData) {
       if (!fileData || !fileData.url) {
         showNotification('Không có file đính kèm!', false);
         return;
@@ -514,7 +506,7 @@
         previewContent.innerHTML = `<div class="text-center p-5"><i class="fa-solid fa-file fa-4x mb-3"></i><p>Không thể xem trước</p><a href="${fileData.url}" class="btn btn-primary" target="_blank">Tải file</a></div>`;
       }
       modal.show();
-    };
+    }
 
     function viewFullContent(content) {
       const modal = new bootstrap.Modal(document.getElementById('contentModal'));
@@ -534,6 +526,7 @@
       }
       
       const docs = snapshot.val();
+      documentsDataGlobal = docs;
       let stt = 1;
       let total = 0;
       
@@ -543,6 +536,8 @@
         const hasFile = doc.hasFile && doc.fileData;
         const contentText = doc.content || '';
         const contentPreview = contentText.length > 80 ? contentText.substring(0, 80) + '...' : contentText;
+        const filePath = doc.fileData ? doc.fileData.path : '';
+        const fileNameDisplay = hasFile ? (doc.fileData.name.length > 20 ? doc.fileData.name.substring(0, 20) + '...' : doc.fileData.name) : '';
         
         tbody.innerHTML += `
           <tr>
@@ -553,13 +548,13 @@
             <td class="text-center">${doc.signDate || ''}</td>
             <td>${doc.signer || ''}</td>
             <td>${doc.issuingPlace || ''}</td>
-            <td><div class="content-preview" onclick='window.viewFullContentFromGlobal("${contentText.replace(/'/g, "\\'")}")'>${contentPreview || 'Chưa có nội dung'}</div></td>
-            <td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-paperclip"></i> ${doc.fileData.name.substring(0, 20)}...</button>` : '<span class="text-muted">Không có file</span>'}</td>
+            <td><div class="content-preview" onclick="window.viewFullContentFromGlobal('${contentText.replace(/'/g, "\\'").replace(/\n/g, ' ')}')">${contentPreview || 'Chưa có nội dung'}</div></td>
+            <td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-paperclip"></i> ${fileNameDisplay}</button>` : '<span class="text-muted">Không có file</span>'}</td>
             <td>
               <div class="action-buttons">
                 ${hasFile ? `<button class="action-btn view" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-eye"></i> Mở</button>` : ''}
                 <button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i> Sửa</button>
-                <button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}", "${doc.fileData ? doc.fileData.path : ''}")'><i class="fa-solid fa-trash"></i> Xóa</button>
+                <button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}", "${filePath}")'><i class="fa-solid fa-trash"></i> Xóa</button>
               </div>
             </td>
           </tr>
@@ -567,12 +562,12 @@
         stt++;
       }
       totalSpan.textContent = total;
-      window.documentsData = docs;
     }
 
+    // Global functions
     window.openFileFromGlobal = function(id) {
-      if (window.documentsData && window.documentsData[id] && window.documentsData[id].fileData) {
-        window.openFile(window.documentsData[id].fileData);
+      if (documentsDataGlobal[id] && documentsDataGlobal[id].fileData) {
+        openFile(documentsDataGlobal[id].fileData);
       } else {
         showNotification('Không có file đính kèm!', false);
       }
@@ -580,7 +575,7 @@
     
     window.openCurrentFile = function() {
       if (currentFileData) {
-        window.openFile(currentFileData);
+        openFile(currentFileData);
       } else {
         showNotification('Không có file đính kèm!', false);
       }
@@ -595,13 +590,17 @@
     };
     
     window.editDocumentFromGlobal = function(id) {
-      if (window.documentsData && window.documentsData[id]) {
-        window.editDocument(id, window.documentsData[id]);
+      if (documentsDataGlobal[id]) {
+        editDocument(id, documentsDataGlobal[id]);
       }
     };
     
     window.deleteDocumentFromGlobal = function(id, filePath) {
       deleteDocument(id, filePath);
+    };
+
+    window.updateDocumentGlobal = function() {
+      updateDocument();
     };
 
     async function themMoi(selectId, category) {
@@ -659,7 +658,7 @@
       document.getElementById('save-cvdi-btn').onclick = addDocument;
       document.getElementById('update-cvdi-btn').onclick = function() {
         console.log("Click vào nút Cập nhật!");
-        window.updateDocument();
+        updateDocument();
       };
       
       document.getElementById('them-ten-vb-btn').onclick = () => themMoi('ten-vb', 'documentTypes');
