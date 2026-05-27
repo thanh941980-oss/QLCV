@@ -11,182 +11,501 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
   <style>
-    body {
-      background-color: #f4f6f9;
+    * {
       font-size: 13px;
     }
+    
+    body {
+      background-color: #f0f2f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .container {
+      max-width: 1400px;
+    }
+    
     .card {
       margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border: none;
     }
+    
     .card-header {
-      background: #1a73e8;
+      background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
       color: #fff;
       font-weight: 600;
-    }
-    .btn i {
-      margin-right: 4px;
-    }
-    table th {
-      background: #f8f9fa;
-      text-align: center;
-      font-size: 13px;
-    }
-    table td {
-      vertical-align: middle;
-      font-size: 13px;
-    }
-    .action-btn {
+      font-size: 15px;
+      padding: 12px 20px;
+      border-radius: 10px 10px 0 0 !important;
       border: none;
-      background: transparent;
-      cursor: pointer;
-      padding: 4px 8px;
     }
-    .action-btn.edit { color: #1a73e8; }
-    .action-btn.delete { color: #dc3545; }
+    
+    .card-header i {
+      margin-right: 8px;
+    }
+    
+    .form-label {
+      font-weight: 600;
+      color: #495057;
+      margin-bottom: 5px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    
+    .form-control, .form-select {
+      border-radius: 6px;
+      border: 1px solid #dee2e6;
+      padding: 6px 12px;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: #0066cc;
+      box-shadow: 0 0 0 0.2rem rgba(0,102,204,0.15);
+    }
+    
+    .btn {
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .btn-sm-custom {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+    
+    .btn i {
+      margin-right: 5px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+      border: none;
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0052a3 0%, #004080 100%);
+      transform: translateY(-1px);
+    }
+    
+    .btn-warning {
+      background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+      border: none;
+      color: #fff;
+    }
+    
+    .btn-warning:hover {
+      background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%);
+      transform: translateY(-1px);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      border: none;
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+      transform: translateY(-1px);
+    }
+    
+    .btn-outline-primary {
+      border-color: #dee2e6;
+      color: #0066cc;
+    }
+    
+    .btn-outline-primary:hover {
+      background: #0066cc;
+      border-color: #0066cc;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+    }
+    
+    .action-btn {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      border: none;
+    }
+    
+    .action-btn i {
+      font-size: 11px;
+    }
+    
+    .action-btn.view {
+      background: #e3f2fd;
+      color: #0066cc;
+    }
+    
+    .action-btn.view:hover {
+      background: #0066cc;
+      color: #fff;
+    }
+    
+    .action-btn.edit {
+      background: #fff3e0;
+      color: #ff9800;
+    }
+    
+    .action-btn.edit:hover {
+      background: #ff9800;
+      color: #fff;
+    }
+    
+    .action-btn.delete {
+      background: #ffebee;
+      color: #dc3545;
+    }
+    
+    .action-btn.delete:hover {
+      background: #dc3545;
+      color: #fff;
+    }
+    
+    .table {
+      margin-bottom: 0;
+    }
+    
+    .table thead th {
+      background: #f8f9fa;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 8px;
+      border-bottom: 2px solid #dee2e6;
+      color: #495057;
+    }
+    
+    .table tbody td {
+      padding: 10px 8px;
+      vertical-align: middle;
+      font-size: 12px;
+    }
+    
+    .table tbody tr:hover {
+      background: #f8f9fa;
+      transition: background 0.2s;
+    }
+    
+    .table-responsive {
+      border-radius: 8px;
+    }
+    
     .notification {
       position: fixed;
       top: 20px;
       right: 20px;
-      padding: 12px 18px;
+      padding: 12px 20px;
       border-radius: 8px;
       color: #fff;
       display: none;
       z-index: 2000;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease;
     }
-    .notification.success { background: #28a745; }
-    .notification.error { background: #dc3545; }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .notification.success {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+    
+    .notification.error {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    }
+    
     .loading {
       text-align: center;
+      padding: 40px;
+      color: #6c757d;
+    }
+    
+    .loading i {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+    
+    .badge-info {
+      background: #e3f2fd;
+      color: #0066cc;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    
+    /* Modal styles */
+    .modal-content {
+      border-radius: 10px;
+      border: none;
+    }
+    
+    .modal-header {
+      background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+      color: #fff;
+      border-radius: 10px 10px 0 0;
+      padding: 12px 20px;
+    }
+    
+    .modal-header .btn-close {
+      filter: brightness(0) invert(1);
+    }
+    
+    .modal-body {
       padding: 20px;
-      display: none;
     }
-    .action-icon {
-      cursor: pointer;
-      margin: 0 5px;
-      text-decoration: none;
+    
+    .detail-item {
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e9ecef;
     }
-    .action-icon:hover {
-      text-decoration: underline;
+    
+    .detail-label {
+      font-weight: 600;
+      color: #495057;
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
     }
-    .edit-icon { color: #1a73e8; }
-    .delete-icon { color: #dc3545; }
+    
+    .detail-value {
+      color: #212529;
+      font-size: 13px;
+    }
+    
+    .file-attachment {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    
+    /* Compact layout */
+    .row.g-3 {
+      --bs-gutter-y: 0.8rem;
+    }
+    
+    .action-bar {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      padding: 10px 0;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      z-index: 100;
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
   </style>
 </head>
 <body>
-  <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="text-primary"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi</h2>
-      <a href="dashboard.html" class="btn btn-secondary">
+  <div class="container py-3">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi</h4>
+        <small class="text-muted">Quản lý và theo dõi công văn đi</small>
+      </div>
+      <a href="dashboard.html" class="btn btn-secondary btn-sm">
         <i class="fa-solid fa-arrow-left"></i> Quay lại
       </a>
     </div>
 
-    <!-- Card Thông tin chính -->
+    <!-- Form thông tin công văn -->
     <div class="card">
-      <div class="card-header">Thông tin công văn</div>
+      <div class="card-header">
+        <i class="fa-solid fa-file-signature"></i> Thông tin công văn
+      </div>
       <div class="card-body">
         <div class="row g-3">
-          <div class="col-md-6">
+          <div class="col-md-3">
             <label class="form-label">Năm</label>
             <div class="input-group">
-              <select id="nam" class="form-select">
+              <select id="nam" class="form-select form-select-sm">
                 <option value="">Chọn năm</option>
                 <option>2023</option>
                 <option>2024</option>
                 <option>2025</option>
                 <option>2026</option>
               </select>
-              <button class="btn btn-outline-primary" id="them-nam-btn"><i class="fa fa-plus"></i></button>
+              <button class="btn btn-outline-primary btn-sm-custom" id="them-nam-btn" title="Thêm năm mới">
+                <i class="fa fa-plus"></i>
+              </button>
             </div>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-3">
             <label class="form-label">Số công văn</label>
-            <input type="text" id="so-vb" class="form-control" placeholder="Nhập số công văn">
+            <input type="text" id="so-vb" class="form-control form-control-sm" placeholder="VD: 123/QĐ-UBND">
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-3">
+            <label class="form-label">Ngày ký</label>
+            <input type="date" id="ngay-ky" class="form-control form-control-sm">
+          </div>
+
+          <div class="col-md-3">
             <label class="form-label">Tên văn bản</label>
             <div class="input-group">
-              <select id="ten-vb" class="form-select">
+              <select id="ten-vb" class="form-select form-select-sm">
                 <option value="">Chọn tên văn bản</option>
               </select>
-              <button class="btn btn-outline-primary" id="them-ten-vb-btn"><i class="fa fa-plus"></i></button>
+              <button class="btn btn-outline-primary btn-sm-custom" id="them-ten-vb-btn" title="Thêm tên văn bản mới">
+                <i class="fa fa-plus"></i>
+              </button>
             </div>
           </div>
 
-          <div class="col-md-6">
-            <label class="form-label">Ngày ký</label>
-            <input type="date" id="ngay-ky" class="form-control">
-          </div>
-
-          <div class="col-md-6">
+          <div class="col-md-3">
             <label class="form-label">Người ký</label>
             <div class="input-group">
-              <select id="nguoi-ky" class="form-select">
+              <select id="nguoi-ky" class="form-select form-select-sm">
                 <option value="">Chọn người ký</option>
               </select>
-              <button class="btn btn-outline-primary" id="them-nguoi-ky-btn"><i class="fa fa-plus"></i></button>
+              <button class="btn btn-outline-primary btn-sm-custom" id="them-nguoi-ky-btn" title="Thêm người ký mới">
+                <i class="fa fa-plus"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Nơi ban hành</label>
+            <div class="input-group">
+              <select id="noi-ban-hanh" class="form-select form-select-sm">
+                <option value="">Chọn nơi ban hành</option>
+              </select>
+              <button class="btn btn-outline-primary btn-sm-custom" id="them-noi-ban-hanh-btn" title="Thêm nơi ban hành mới">
+                <i class="fa fa-plus"></i>
+              </button>
             </div>
           </div>
 
           <div class="col-md-6">
-            <label class="form-label">Nơi ban hành</label>
-            <div class="input-group">
-              <select id="noi-ban-hanh" class="form-select">
-                <option value="">Chọn nơi ban hành</option>
-              </select>
-              <button class="btn btn-outline-primary" id="them-noi-ban-hanh-btn"><i class="fa fa-plus"></i></button>
-            </div>
-          </div>
-
-          <!-- Nội dung full width -->
-          <div class="col-12">
             <label class="form-label">Nội dung</label>
-            <textarea id="noi-dung" class="form-control" rows="4" placeholder="Nhập nội dung công văn"></textarea>
+            <textarea id="noi-dung" class="form-control form-control-sm" rows="2" placeholder="Nhập nội dung công văn"></textarea>
           </div>
 
-          <!-- File đính kèm full width -->
-          <div class="col-12">
+          <div class="col-md-3">
             <label class="form-label">File đính kèm</label>
-            <input type="file" id="file-dinh-kem" class="form-control">
+            <input type="file" id="file-dinh-kem" class="form-control form-control-sm">
+          </div>
+
+          <div class="col-12">
+            <hr class="my-2">
+            <div class="d-flex justify-content-end gap-2">
+              <button class="btn btn-secondary btn-sm" id="reset-cvdi-btn">
+                <i class="fa fa-rotate"></i> Làm mới
+              </button>
+              <button class="btn btn-primary btn-sm" id="save-cvdi-btn">
+                <i class="fa fa-save"></i> Lưu
+              </button>
+              <button class="btn btn-warning btn-sm" id="update-cvdi-btn" style="display: none;">
+                <i class="fa fa-pen"></i> Cập nhật
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Nút hành động -->
-    <div class="d-flex justify-content-end gap-2 mb-4">
-      <button class="btn btn-secondary" id="reset-cvdi-btn"><i class="fa fa-rotate"></i> Làm mới</button>
-      <button class="btn btn-primary" id="save-cvdi-btn"><i class="fa fa-save"></i> Lưu công văn</button>
-      <button class="btn btn-warning text-white" id="update-cvdi-btn"><i class="fa fa-pen"></i> Cập nhật</button>
-    </div>
-
     <!-- Danh sách công văn -->
     <div class="card">
-      <div class="card-header">Danh sách công văn</div>
-      <div class="card-body">
-        <div id="loading" class="loading">Đang tải dữ liệu...</div>
+      <div class="card-header">
+        <i class="fa-solid fa-list"></i> Danh sách công văn
+        <span id="totalCount" class="badge bg-light text-dark ms-2">0</span>
+      </div>
+      <div class="card-body p-0">
+        <div id="loading" class="loading" style="display: none;">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <div>Đang tải dữ liệu...</div>
+        </div>
         <div class="table-responsive">
-          <table class="table table-bordered table-striped table-hover align-middle" id="documentsTable">
+          <table class="table table-hover mb-0" id="documentsTable">
             <thead>
               <tr>
-                <th>STT</th>
-                <th>Năm</th>
-                <th>Số VB</th>
-                <th>Tên VB</th>
-                <th>Ngày ký</th>
-                <th>Người ký</th>
-                <th>Nơi ban hành</th>
-                <th>Thao tác</th>
+                <th width="5%">STT</th>
+                <th width="8%">Năm</th>
+                <th width="10%">Số VB</th>
+                <th width="20%">Tên VB</th>
+                <th width="10%">Ngày ký</th>
+                <th width="10%">Người ký</th>
+                <th width="15%">Nơi ban hành</th>
+                <th width="12%">Thao tác</th>
               </tr>
             </thead>
             <tbody id="documentsBody">
-              <tr><td colspan="8" class="text-center">Chưa có công văn nào</td></tr>
+              <tr><td colspan="8" class="text-center text-muted py-4">
+                <i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>
+                Chưa có công văn nào
+              </td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal xem chi tiết -->
+  <div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 class="modal-title"><i class="fa-solid fa-file-alt"></i> Chi tiết công văn</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="detailContent">
+          <!-- Nội dung chi tiết sẽ được load vào đây -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
         </div>
       </div>
     </div>
@@ -211,16 +530,13 @@
       appId: "1:1080528314069:web:831f1b3c497ba082f80c5c"
     };
 
-    // Khởi tạo Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const database = getDatabase(app);
 
-    // Biến toàn cục
     let currentUser = null;
     let editingId = null;
 
-    // Hiển thị thông báo
     function showNotification(message, isSuccess = true) {
       const notification = document.getElementById(isSuccess ? 'successNotification' : 'errorNotification');
       notification.textContent = message;
@@ -231,7 +547,6 @@
       }, 3000);
     }
 
-    // Làm mới form
     function refreshForm() {
       document.getElementById('nam').value = '';
       document.getElementById('so-vb').value = '';
@@ -246,7 +561,6 @@
       document.getElementById('save-cvdi-btn').style.display = 'block';
     }
 
-    // Lưu công văn
     async function saveDocument() {
       const year = document.getElementById('nam').value;
       const documentNumber = document.getElementById('so-vb').value;
@@ -258,7 +572,6 @@
       const fileInput = document.getElementById('file-dinh-kem');
       const fileName = fileInput.files[0] ? fileInput.files[0].name : '';
 
-      // Kiểm tra dữ liệu đầu vào
       if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) {
         showNotification('Vui lòng điền đầy đủ thông tin', false);
         return;
@@ -266,32 +579,22 @@
 
       try {
         const documentData = {
-          year,
-          documentNumber,
-          documentName,
-          signDate,
-          signer,
-          issuingPlace,
-          content,
-          fileName,
+          year, documentNumber, documentName, signDate, signer, issuingPlace, content, fileName,
           createdAt: new Date().toISOString(),
           createdBy: currentUser ? currentUser.email : 'unknown'
         };
 
         if (editingId) {
-          // Cập nhật công văn đã có
           await set(ref(database, `congVanDi/${editingId}`), documentData);
           showNotification('Cập nhật công văn thành công!');
           editingId = null;
           document.getElementById('update-cvdi-btn').style.display = 'none';
           document.getElementById('save-cvdi-btn').style.display = 'block';
         } else {
-          // Thêm công văn mới
           const newDocRef = push(ref(database, 'congVanDi'));
           await set(newDocRef, documentData);
           showNotification('Thêm công văn thành công!');
         }
-
         refreshForm();
       } catch (error) {
         console.error('Lỗi khi lưu công văn:', error);
@@ -299,10 +602,8 @@
       }
     }
 
-    // Xóa công văn
     async function deleteDocument(id) {
       if (!confirm('Bạn có chắc chắn muốn xóa công văn này?')) return;
-      
       try {
         await remove(ref(database, `congVanDi/${id}`));
         showNotification('Xóa công văn thành công!');
@@ -312,7 +613,6 @@
       }
     }
 
-    // Chỉnh sửa công văn
     function editDocument(id, data) {
       document.getElementById('nam').value = data.year;
       document.getElementById('so-vb').value = data.documentNumber;
@@ -325,72 +625,113 @@
       editingId = id;
       document.getElementById('update-cvdi-btn').style.display = 'block';
       document.getElementById('save-cvdi-btn').style.display = 'none';
-      
-      // Cuộn lên đầu form
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Hiển thị danh sách công văn
+    function viewDocument(data) {
+      const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+      const detailContent = document.getElementById('detailContent');
+      
+      detailContent.innerHTML = `
+        <div class="detail-item">
+          <div class="detail-label"><i class="fa-regular fa-calendar"></i> Năm</div>
+          <div class="detail-value">${data.year || '---'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fa-regular fa-hashtag"></i> Số văn bản</div>
+          <div class="detail-value">${data.documentNumber || '---'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fa-regular fa-file"></i> Tên văn bản</div>
+          <div class="detail-value">${data.documentName || '---'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fa-regular fa-calendar-check"></i> Ngày ký</div>
+          <div class="detail-value">${data.signDate || '---'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fa-regular fa-user"></i> Người ký</div>
+          <div class="detail-value">${data.signer || '---'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fa-regular fa-building"></i> Nơi ban hành</div>
+          <div class="detail-value">${data.issuingPlace || '---'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fa-regular fa-align-left"></i> Nội dung</div>
+          <div class="detail-value">${data.content || '---'}</div>
+        </div>
+        ${data.fileName ? `
+        <div class="file-attachment">
+          <i class="fa-solid fa-paperclip"></i> File đính kèm: 
+          <strong>${data.fileName}</strong>
+        </div>
+        ` : ''}
+      `;
+      
+      modal.show();
+    }
+
     function displayDocuments(snapshot) {
       const documentsBody = document.getElementById('documentsBody');
+      const totalCountSpan = document.getElementById('totalCount');
       documentsBody.innerHTML = '';
       
       if (!snapshot.exists()) {
-        documentsBody.innerHTML = '<tr><td colspan="8" class="text-center">Chưa có công văn nào</td></tr>';
+        documentsBody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4"><i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>Chưa có công văn nào</td></tr>';
+        totalCountSpan.textContent = '0';
         return;
       }
       
       const documents = snapshot.val();
       let stt = 1;
+      let total = 0;
       
       for (const id in documents) {
         const doc = documents[id];
+        total++;
         const row = document.createElement('tr');
         
-        // Tạo nút sửa và xóa
-        const editBtn = document.createElement('a');
-        editBtn.className = 'action-icon edit-icon';
-        editBtn.innerHTML = '<i class="fa-solid fa-pen"></i> Sửa';
-        editBtn.onclick = () => editDocument(id, doc);
-        
-        const deleteBtn = document.createElement('a');
-        deleteBtn.className = 'action-icon delete-icon';
-        deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i> Xóa';
-        deleteBtn.onclick = () => deleteDocument(id);
-        
-        const actionDiv = document.createElement('div');
-        actionDiv.appendChild(editBtn);
-        actionDiv.appendChild(document.createTextNode(' | '));
-        actionDiv.appendChild(deleteBtn);
-        
         row.innerHTML = `
-          <td>${stt}</td>
-          <td>${doc.year || ''}</td>
-          <td>${doc.documentNumber || ''}</td>
+          <td class="text-center">${stt}</td>
+          <td class="text-center"><span class="badge-info">${doc.year || ''}</span></td>
+          <td><strong>${doc.documentNumber || ''}</strong></td>
           <td>${doc.documentName || ''}</td>
-          <td>${doc.signDate || ''}</td>
+          <td class="text-center">${doc.signDate || ''}</td>
           <td>${doc.signer || ''}</td>
           <td>${doc.issuingPlace || ''}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="action-btn view" onclick="window.viewDocumentModal('${id}')" title="Xem chi tiết">
+                <i class="fa-solid fa-eye"></i> Xem
+              </button>
+              <button class="action-btn edit" onclick="window.editDocumentFromGlobal('${id}')" title="Sửa">
+                <i class="fa-solid fa-pen"></i> Sửa
+              </button>
+              <button class="action-btn delete" onclick="window.deleteDocumentFromGlobal('${id}')" title="Xóa">
+                <i class="fa-solid fa-trash"></i> Xóa
+              </button>
+            </div>
+          </td>
         `;
-        
-        const actionCell = document.createElement('td');
-        actionCell.appendChild(actionDiv);
-        row.appendChild(actionCell);
         
         documentsBody.appendChild(row);
         stt++;
       }
+      
+      totalCountSpan.textContent = total;
+      
+      // Lưu dữ liệu để sử dụng cho các hàm global
+      window.documentsData = documents;
     }
 
-    // Thêm mới option và lưu vào Firebase
     async function themMoi(selectId, category) {
       const tenMoi = prompt('Nhập giá trị mới:');
       if (tenMoi && tenMoi.trim() !== '') {
         try {
           const tenMoiTrimmed = tenMoi.trim();
-          
-          // Kiểm tra trùng lặp
           const select = document.getElementById(selectId);
+          
           for (let i = 0; i < select.options.length; i++) {
             if (select.options[i].value === tenMoiTrimmed) {
               showNotification('Giá trị này đã tồn tại!', false);
@@ -398,18 +739,15 @@
             }
           }
 
-          // Tạo dữ liệu để lưu
           const newData = {
             name: tenMoiTrimmed,
             createdAt: new Date().toISOString(),
             createdBy: currentUser ? currentUser.email : 'unknown'
           };
           
-          // Lưu vào Firebase
           const newItemRef = push(ref(database, `categories/${category}`));
           await set(newItemRef, newData);
           
-          // Thêm vào dropdown
           const option = document.createElement('option');
           option.value = tenMoiTrimmed;
           option.textContent = tenMoiTrimmed;
@@ -417,32 +755,20 @@
           select.value = tenMoiTrimmed;
           
           showNotification('Thêm mới thành công!');
-          
         } catch (error) {
-          console.error('Lỗi khi thêm mới:', error);
           showNotification('Có lỗi xảy ra khi thêm mới: ' + error.message, false);
         }
-      } else if (tenMoi !== null) {
-        showNotification('Vui lòng nhập giá trị hợp lệ!', false);
       }
     }
 
-    // Tải danh sách các option từ Firebase
     function loadCategories(selectId, category) {
       const categoriesRef = ref(database, `categories/${category}`);
       onValue(categoriesRef, (snapshot) => {
         const select = document.getElementById(selectId);
-        
-        // Lưu lại option mặc định (option đầu tiên)
         const defaultOption = select.options[0];
-        
-        // Xóa tất cả options (giữ lại option mặc định)
         select.innerHTML = '';
-        if (defaultOption) {
-          select.appendChild(defaultOption);
-        }
+        if (defaultOption) select.appendChild(defaultOption);
         
-        // Thêm các option từ Firebase
         if (snapshot.exists()) {
           const categories = snapshot.val();
           for (const key in categories) {
@@ -453,72 +779,59 @@
             select.appendChild(option);
           }
         }
-      }, (error) => {
-        console.error(`Lỗi khi tải category ${category}:`, error);
       });
     }
 
-    // Kiểm tra kết nối
-    function checkDatabaseConnection() {
-      const connectedRef = ref(database, ".info/connected");
-      onValue(connectedRef, (snap) => {
-        if (snap.val() === true) {
-          console.log("Đã kết nối đến Firebase");
-        } else {
-          console.log("Mất kết nối Firebase");
-        }
-      });
-    }
+    // Global functions
+    window.viewDocumentModal = function(id) {
+      if (window.documentsData && window.documentsData[id]) {
+        viewDocument(window.documentsData[id]);
+      }
+    };
+    
+    window.editDocumentFromGlobal = function(id) {
+      if (window.documentsData && window.documentsData[id]) {
+        editDocument(id, window.documentsData[id]);
+      }
+    };
+    
+    window.deleteDocumentFromGlobal = function(id) {
+      deleteDocument(id);
+    };
 
-    // Khởi tạo trang
+    // Khởi tạo Bootstrap modal
+    const bootstrapScript = document.createElement('script');
+    bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js';
+    document.body.appendChild(bootstrapScript);
+
     document.addEventListener('DOMContentLoaded', function() {
-      // Thiết lập ngày mặc định
       document.getElementById('ngay-ky').valueAsDate = new Date();
-      
-      // Ẩn nút cập nhật ban đầu
       document.getElementById('update-cvdi-btn').style.display = 'none';
-      
-      // Xử lý sự kiện nút làm mới
       document.getElementById('reset-cvdi-btn').addEventListener('click', refreshForm);
-      
-      // Xử lý sự kiện nút lưu
       document.getElementById('save-cvdi-btn').addEventListener('click', saveDocument);
-      
-      // Xử lý sự kiện nút cập nhật
       document.getElementById('update-cvdi-btn').addEventListener('click', saveDocument);
-      
-      // Xử lý sự kiện nút thêm mới
       document.getElementById('them-ten-vb-btn').addEventListener('click', () => themMoi('ten-vb', 'documentTypes'));
       document.getElementById('them-nguoi-ky-btn').addEventListener('click', () => themMoi('nguoi-ky', 'signers'));
       document.getElementById('them-noi-ban-hanh-btn').addEventListener('click', () => themMoi('noi-ban-hanh', 'issuingPlaces'));
       document.getElementById('them-nam-btn').addEventListener('click', () => themMoi('nam', 'years'));
       
-      // Kiểm tra kết nối
-      checkDatabaseConnection();
-      
-      // Kiểm tra trạng thái đăng nhập
       onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUser = user;
-          
-          // Tải các danh mục từ Firebase
           loadCategories('ten-vb', 'documentTypes');
           loadCategories('nguoi-ky', 'signers');
           loadCategories('noi-ban-hanh', 'issuingPlaces');
           loadCategories('nam', 'years');
           
-          // Hiển thị loading
           const loadingEl = document.getElementById('loading');
-          if (loadingEl) loadingEl.style.display = 'block';
+          loadingEl.style.display = 'block';
           
-          // Lấy dữ liệu công văn đi từ Firebase
           const documentsRef = ref(database, 'congVanDi');
           onValue(documentsRef, (snapshot) => {
-            if (loadingEl) loadingEl.style.display = 'none';
+            loadingEl.style.display = 'none';
             displayDocuments(snapshot);
           }, (error) => {
-            if (loadingEl) loadingEl.style.display = 'none';
-            console.error('Lỗi khi tải dữ liệu:', error);
+            loadingEl.style.display = 'none';
             showNotification('Có lỗi xảy ra khi tải dữ liệu', false);
           });
         } else {
@@ -526,10 +839,6 @@
         }
       });
     });
-
-    // Cho phép sử dụng các hàm toàn cục (cần thiết cho onclick)
-    window.editDocument = editDocument;
-    window.deleteDocument = deleteDocument;
   </script>
 </body>
 </html>
