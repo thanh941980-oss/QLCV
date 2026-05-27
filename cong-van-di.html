@@ -331,7 +331,7 @@
   <div class="container py-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div>
-        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi</h4>
+        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Văn bản đi</h4>
         <small class="text-muted">Quản lý và theo dõi công văn đi</small>
       </div>
       <a href="dashboard.html" class="btn btn-secondary btn-sm">
@@ -413,20 +413,10 @@
           </div>
 
           <div class="col-md-3">
-  <label class="form-label">File đính kèm</label>
-
-  <input type="file"
-         id="file-dinh-kem"
-         class="form-control form-control-sm"
-         accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif">
-
-  <small class="text-muted">
-    Hỗ trợ: PDF, Word, Excel, PowerPoint, ảnh, txt
-  </small>
-
-  <!-- FILE HIỆN TẠI -->
-  <div id="file-cu" class="mt-2"></div>
-</div>
+            <label class="form-label">File đính kèm</label>
+            <input type="file" id="file-dinh-kem" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif">
+            <small class="text-muted">Hỗ trợ: PDF, Word, Excel, PowerPoint, ảnh, txt</small>
+          </div>
 
           <div class="col-12">
             <hr class="my-2">
@@ -561,28 +551,19 @@
       }, 3000);
     }
 
-    let removeCurrentFile = false;
-
-function refreshForm() {
-
-  document.getElementById('nam').value = '';
-  document.getElementById('so-vb').value = '';
-  document.getElementById('ten-vb').value = '';
-  document.getElementById('ngay-ky').valueAsDate = new Date();
-  document.getElementById('nguoi-ky').value = '';
-  document.getElementById('noi-ban-hanh').value = '';
-  document.getElementById('noi-dung').value = '';
-  document.getElementById('file-dinh-kem').value = '';
-
-  document.getElementById('file-cu').innerHTML = '';
-
-  editingId = null;
-
-  removeCurrentFile = false;
-
-  document.getElementById('update-cvdi-btn').style.display = 'none';
-  document.getElementById('save-cvdi-btn').style.display = 'inline-block';
-}
+    function refreshForm() {
+      document.getElementById('nam').value = '';
+      document.getElementById('so-vb').value = '';
+      document.getElementById('ten-vb').value = '';
+      document.getElementById('ngay-ky').valueAsDate = new Date();
+      document.getElementById('nguoi-ky').value = '';
+      document.getElementById('noi-ban-hanh').value = '';
+      document.getElementById('noi-dung').value = '';
+      document.getElementById('file-dinh-kem').value = '';
+      editingId = null;
+      document.getElementById('update-cvdi-btn').style.display = 'none';
+      document.getElementById('save-cvdi-btn').style.display = 'block';
+    }
 
     async function uploadFile(file, docId) {
       if (!file) return null;
@@ -614,64 +595,84 @@ function refreshForm() {
     }
 
     async function saveDocument() {
+      const year = document.getElementById('nam').value;
+      const documentNumber = document.getElementById('so-vb').value;
+      const documentName = document.getElementById('ten-vb').value;
+      const signDate = document.getElementById('ngay-ky').value;
+      const signer = document.getElementById('nguoi-ky').value;
+      const issuingPlace = document.getElementById('noi-ban-hanh').value;
+      const content = document.getElementById('noi-dung').value;
+      const fileInput = document.getElementById('file-dinh-kem');
+      const file = fileInput.files[0];
 
-      return;
+      if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) {
+        showNotification('Vui lòng điền đầy đủ thông tin', false);
+        return;
+      }
+
+      try {
+        let fileData = null;
+        
+        if (file && file.size > 10 * 1024 * 1024) {
+          showNotification('File không được vượt quá 10MB', false);
+          return;
+        }
+
+        if (editingId) {
+          // Lấy thông tin cũ dùng hàm get nhận diện một lần chuẩn Firebase v10
+          const oldDocRef = ref(database, `congVanDi/${editingId}`);
+          const oldSnapshot = await get(oldDocRef);
+          const oldDoc = oldSnapshot.val();
+          
+          if (file && oldDoc && oldDoc.fileData) {
+            await deleteOldFile(oldDoc.fileData.path);
+          }
+          
+          if (file) {
+            fileData = await uploadFile(file, editingId);
+          } else if (oldDoc && oldDoc.fileData) {
+            fileData = oldDoc.fileData;
+          }
+          
+          const documentData = {
+            year, documentNumber, documentName, signDate, signer, issuingPlace, content,
+            updatedAt: new Date().toISOString(),
+            updatedBy: currentUser ? currentUser.email : 'unknown',
+            fileData: fileData,
+            hasFile: !!fileData
+          };
+          
+          await set(ref(database, `congVanDi/${editingId}`), documentData);
+          showNotification('Cập nhật công văn thành công!');
+          editingId = null;
+          document.getElementById('update-cvdi-btn').style.display = 'none';
+          document.getElementById('save-cvdi-btn').style.display = 'block';
+          refreshForm();
+        } else {
+          const newDocRef = push(ref(database, 'congVanDi'));
+          const newId = newDocRef.key;
+          
+          if (file) {
+            fileData = await uploadFile(file, newId);
+          }
+          
+          const documentData = {
+            year, documentNumber, documentName, signDate, signer, issuingPlace, content,
+            createdAt: new Date().toISOString(),
+            createdBy: currentUser ? currentUser.email : 'unknown',
+            fileData: fileData,
+            hasFile: !!fileData
+          };
+          
+          await set(newDocRef, documentData);
+          showNotification('Thêm công văn thành công!');
+          refreshForm();
+        }
+      } catch (error) {
+        console.error('Lỗi khi lưu công văn:', error);
+        showNotification('Có lỗi xảy ra khi lưu công văn: ' + error.message, false);
+      }
     }
-
-    // ========================
-    // THÊM MỚI
-    // ========================
-
-    const newRef = push(
-      ref(database, 'congVanDi')
-    );
-
-    const newId = newRef.key;
-
-    // UPLOAD FILE
-    if (file) {
-
-      fileData = await uploadFile(
-        file,
-        newId
-      );
-    }
-
-    const newData = {
-
-      year,
-      documentNumber,
-      documentName,
-      signDate,
-      signer,
-      issuingPlace,
-      content,
-
-      fileData: fileData,
-      hasFile: !!fileData,
-
-      createdAt: new Date().toISOString(),
-      createdBy: currentUser?.email || 'unknown'
-    };
-
-    await set(newRef, newData);
-
-    showNotification(
-      'Thêm công văn thành công!'
-    );
-
-    refreshForm();
-
-  } catch (error) {
-
-    console.error(error);
-
-    showNotification(
-      'Lỗi: ' + error.message,
-      false
-    );
-  }
-}
 
     async function deleteDocument(id, filePath) {
       if (!confirm('Bạn có chắc chắn muốn xóa công văn này?')) return;
@@ -689,59 +690,40 @@ function refreshForm() {
     }
 
     function editDocument(id, data) {
+      document.getElementById('nam').value = data.year || '';
+      document.getElementById('so-vb').value = data.documentNumber || '';
+      document.getElementById('ten-vb').value = data.documentName || '';
+      document.getElementById('ngay-ky').value = data.signDate || '';
+      document.getElementById('nguoi-ky').value = data.signer || '';
+      document.getElementById('noi-ban-hanh').value = data.issuingPlace || '';
+      document.getElementById('noi-dung').value = data.content || '';
 
-  document.getElementById('nam').value = data.year || '';
-  document.getElementById('so-vb').value = data.documentNumber || '';
-  document.getElementById('ten-vb').value = data.documentName || '';
-  document.getElementById('ngay-ky').value = data.signDate || '';
-  document.getElementById('nguoi-ky').value = data.signer || '';
-  document.getElementById('noi-ban-hanh').value = data.issuingPlace || '';
-  document.getElementById('noi-dung').value = data.content || '';
+      if (data.fileData && data.fileData.url) {
+        document.getElementById('file-cu').innerHTML = `
+          <div class="d-flex gap-2 flex-wrap">
+            <a href="${data.fileData.url}" target="_blank" class="btn btn-sm btn-outline-primary">
+              <i class="fa fa-folder-open"></i> Mở file hiện tại
+            </a>
 
-  // HIỂN THỊ FILE CŨ
-  if (data.fileData && data.fileData.url) {
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="xoaFileHienTai()">
+              <i class="fa fa-trash"></i> Xóa file
+            </button>
+          </div>
+        `;
+      } else {
+        document.getElementById('file-cu').innerHTML = '<span class="text-muted">Không có file</span>';
+      }
 
-    document.getElementById('file-cu').innerHTML = `
-      <div class="d-flex gap-2 flex-wrap">
+      editingId = id;
 
-        <a href="${data.fileData.url}"
-           target="_blank"
-           class="btn btn-sm btn-outline-primary">
+      document.getElementById('update-cvdi-btn').style.display = 'inline-block';
+      document.getElementById('save-cvdi-btn').style.display = 'none';
 
-          <i class="fa fa-folder-open"></i>
-          Mở file hiện tại
-        </a>
-
-        <button type="button"
-                class="btn btn-sm btn-outline-danger"
-                onclick="xoaFileHienTai()">
-
-          <i class="fa fa-trash"></i>
-          Xóa file
-        </button>
-
-      </div>
-    `;
-
-  } else {
-
-    document.getElementById('file-cu').innerHTML = `
-      <span class="text-muted">
-        Không có file
-      </span>
-    `;
-  }
-
-  editingId = id;
-
-  document.getElementById('update-cvdi-btn').style.display = 'inline-block';
-  document.getElementById('save-cvdi-btn').style.display = 'none';
-
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
-}
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
 
     function openFile(fileData) {
       if (!fileData || !fileData.url) {
@@ -959,18 +941,18 @@ function refreshForm() {
     window.deleteDocumentFromGlobal = function(id, filePath) {
       deleteDocument(id, filePath);
     };
+
     window.xoaFileHienTai = function () {
+      if (!confirm('Bạn có chắc muốn xóa file hiện tại?')) return;
 
-  if (!confirm('Bạn có chắc muốn xóa file hiện tại?')) return;
+      document.getElementById('file-cu').innerHTML = `
+        <span class="text-danger">
+          File sẽ bị xóa sau khi bấm cập nhật
+        </span>
+      `;
 
-  document.getElementById('file-cu').innerHTML = `
-    <span class="text-danger">
-      File sẽ bị xóa sau khi bấm cập nhật
-    </span>
-  `;
-
-  removeCurrentFile = true;
-};
+      removeCurrentFile = true;
+    };
 
     // Khởi tạo Bootstrap modal
     const bootstrapScript = document.createElement('script');
@@ -982,22 +964,14 @@ function refreshForm() {
       document.getElementById('update-cvdi-btn').style.display = 'none';
       document.getElementById('reset-cvdi-btn').addEventListener('click', refreshForm);
       document.getElementById('save-cvdi-btn').addEventListener('click', saveDocument);
-      document.getElementById('update-cvdi-btn')
-  .addEventListener('click', async () => {
+      document.getElementById('update-cvdi-btn').addEventListener('click', async () => {
+          if (!editingId) {
+            showNotification('Không tìm thấy dữ liệu cần cập nhật!', false);
+            return;
+          }
 
-    if (!editingId) {
-
-      showNotification(
-        'Không tìm thấy dữ liệu cần cập nhật!',
-        false
-      );
-
-      return;
-    }
-
-    await saveDocument();
-  });
-      
+          await saveDocument();
+        });
       document.getElementById('them-ten-vb-btn').addEventListener('click', () => themMoi('ten-vb', 'documentTypes'));
       document.getElementById('them-nguoi-ky-btn').addEventListener('click', () => themMoi('nguoi-ky', 'signers'));
       document.getElementById('them-noi-ban-hanh-btn').addEventListener('click', () => themMoi('noi-ban-hanh', 'issuingPlaces'));
