@@ -61,7 +61,7 @@
   <div class="container py-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div>
-        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi</h4>
+        <h4 class="text-primary mb-0"><i class="fa-solid fa-paper-plane"></i> Quản lý Công văn đi1</h4>
         <small class="text-muted">Quản lý và theo dõi công văn đi</small>
       </div>
       <a href="dashboard.html" class="btn btn-secondary btn-sm">
@@ -154,7 +154,7 @@
               <button class="btn btn-primary btn-sm" id="save-cvdi-btn">
                 <i class="fa fa-save"></i> Lưu
               </button>
-              <button class="btn btn-warning btn-sm" id="update-cvdi-btn" style="display: none;">
+              <button class="btn btn-warning btn-sm" id="update-cvdi-btn" style="display: none;" onclick="window.updateDocumentGlobal();">
                 <i class="fa fa-pen"></i> Cập nhật
               </button>
             </div>
@@ -361,11 +361,11 @@
     }
 
     async function updateDocument() {
-      console.log("=== BẮT ĐẦU CẬP NHẬT ===");
-      console.log("editingId:", editingId);
+      console.log("=== THỰC THI HÀM CẬP NHẬT ===");
+      console.log("ID đang sửa:", editingId);
       
       if (!editingId) {
-        showNotification('Không có công văn nào đang được chọn để cập nhật', false);
+        showNotification('Không tìm thấy ID công văn cần cập nhật!', false);
         return;
       }
       
@@ -380,7 +380,7 @@
       const newFile = fileInput.files[0];
 
       if (!year || !soVB || !tenVB || !ngayKy || !nguoiKy || !noiBanHanh || !noiDung) {
-        showNotification('Vui lòng điền đầy đủ thông tin', false);
+        showNotification('Vui lòng điền đầy đủ thông tin bắt buộc', false);
         return;
       }
 
@@ -412,15 +412,13 @@
           updatedBy: currentUser?.email || 'unknown'
         };
         
-        // Sửa đổi từ set() sang update() để hoạt động chuẩn xác với Rules
         await update(ref(database, `congVanDi/${editingId}`), updateData);
-        
-        showNotification('Cập nhật công văn thành công!');
+        showNotification('Cập nhật dữ liệu thành công!');
         refreshForm();
         
       } catch (error) {
-        console.error("LỖI CẬP NHẬT:", error);
-        showNotification('Lỗi: ' + error.message, false);
+        console.error("LỖI KHI UPDATE:", error);
+        showNotification('Cập nhật thất bại: ' + error.message, false);
       }
     }
 
@@ -439,7 +437,7 @@
     }
 
     function editDocument(id, data) {
-      console.log("Sửa công văn:", id, data);
+      console.log("Nạp dữ liệu lên form sửa:", id, data);
       
       document.getElementById('nam').value = data.year || '';
       document.getElementById('so-vb').value = data.documentNumber || '';
@@ -562,7 +560,7 @@
       totalSpan.textContent = total;
     }
 
-    // Global functions
+    // ĐƯA CÁC HÀM RA TOÀN CỤC ĐỂ HTML LUÔN GỌI ĐƯỢC
     window.openFileFromGlobal = function(id) {
       if (documentsDataGlobal[id] && documentsDataGlobal[id].fileData) {
         openFile(documentsDataGlobal[id].fileData);
@@ -572,10 +570,10 @@
     };
     
     window.openCurrentFile = function() {
-      if (currentFileData) {
+      if (currentFileData && currentFileData.url) {
         openFile(currentFileData);
       } else {
-        showNotification('Không có file đính kèm!', false);
+        showNotification('Không có file đính kèm hiện tại!', false);
       }
     };
     
@@ -597,6 +595,7 @@
       deleteDocument(id, filePath);
     };
 
+    // Đảm bảo hàm cập nhật chạy mượt mà xuyên suốt toàn cục hệ thống
     window.updateDocumentGlobal = function() {
       updateDocument();
     };
@@ -647,19 +646,12 @@
       });
     }
 
-    // KHỞI TẠO SỰ KIỆN CHUẨN ĐÃ ĐƯỢC FIX
     document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('ngay-ky').valueAsDate = new Date();
       document.getElementById('update-cvdi-btn').style.display = 'none';
       
       document.getElementById('reset-cvdi-btn').onclick = refreshForm;
       document.getElementById('save-cvdi-btn').onclick = addDocument;
-      
-      // Khắc phục hoàn toàn lỗi nuốt sự kiện của thẻ module
-      document.getElementById('update-cvdi-btn').addEventListener('click', function(e) {
-        e.preventDefault();
-        updateDocument();
-      });
       
       document.getElementById('them-ten-vb-btn').onclick = () => themMoi('ten-vb', 'documentTypes');
       document.getElementById('them-nguuoi-ky-btn').onclick = () => themMoi('nguoi-ky', 'signers');
