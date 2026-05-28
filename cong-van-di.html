@@ -390,18 +390,30 @@ function renderThongKe(docs) {
 
   for (const id in docs) {
 
-    const tenVB = docs[id].documentName || 'Không rõ';
+    const doc = docs[id];
 
-    stats[tenVB] = (stats[tenVB] || 0) + 1;
+    const tenVB = doc.documentName || 'Không rõ';
+
+    const soVB = doc.documentNumber || '';
+
+    // Lấy số đầu tiên trong số công văn
+    const match = soVB.match(/\d+/);
+
+    const so = match ? parseInt(match[0]) : 0;
+
+    // Lưu số lớn nhất
+    if (!stats[tenVB] || so > stats[tenVB]) {
+      stats[tenVB] = so;
+    }
   }
 
   Object.entries(stats)
     .sort((a,b) => b[1] - a[1])
-    .forEach(([name,count]) => {
+    .forEach(([name,maxSo]) => {
 
       container.innerHTML += `
         <span class="inline-stat-item">
-          ${name}: ${count}
+          ${name}: ${maxSo}
         </span>
       `;
     });
