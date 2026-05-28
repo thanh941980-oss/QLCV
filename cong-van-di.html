@@ -64,6 +64,21 @@
     .search-row th { background: #fff !important; padding: 4px !important; }
     .search-row input { min-width: 100%; font-size: 11px; padding: 4px 6px; }
     #githubConfigCard { display: none; }
+    .inline-stats{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.inline-stat-item{
+  background:rgba(255,255,255,0.18);
+  padding:2px 8px;
+  border-radius:4px;
+  font-size:12px;
+  color:#fff;
+  font-weight:500;
+}
   </style>
 </head>
 <body>
@@ -171,7 +186,18 @@
     </div>
 
     <div class="card list-card">
-      <div class="card-header py-2"><i class="fa-solid fa-list"></i> Danh sách công văn <span id="totalCount" class="badge bg-light text-dark ms-2">0</span></div>
+<!--      <div class="card-header py-2"><i class="fa-solid fa-list"></i> Danh sách công văn <span id="totalCount" class="badge bg-light text-dark ms-2">0</span></div> -->
+<div class="card-header py-2 d-flex align-items-center gap-3 flex-wrap">
+  
+  <div>
+    <i class="fa-solid fa-list"></i>
+    Danh sách công văn
+    <span id="totalCount" class="badge bg-light text-dark ms-2">0</span>
+  </div>
+
+  <div id="thongKeContainer" class="inline-stats"></div>
+
+</div>      
       <div class="card-body p-0">
         <div id="loading" class="loading" style="display: none;"><i class="fa-solid fa-spinner fa-spin"></i><div>Đang tải dữ liệu...</div></div>
         <div class="table-responsive">
@@ -346,13 +372,40 @@
     function displayDocuments(snapshot) {
       const tbody = document.getElementById('documentsBody'); const totalSpan = document.getElementById('totalCount'); tbody.innerHTML = '';
       if (!snapshot.exists()) { tbody.innerHTML = '<tr><td colspan="10" class="text-center">Chưa có công văn nào</td></tr>'; totalSpan.textContent = '0'; return; }
-      const docs = snapshot.val(); documentsDataGlobal = docs; let stt = 1, total = 0;
+      const docs = snapshot.val(); documentsDataGlobal = docs; renderThongKe(docs); let stt = 1, total = 0;
       for (const id in docs) { const doc = docs[id]; total++; const hasFile = doc.hasFile && doc.fileData; const contentText = doc.content || ''; const contentPreview = contentText.length > 80 ? contentText.substring(0, 80) + '...' : contentText; const fileNameDisplay = hasFile ? (doc.fileData.name.length > 15 ? doc.fileData.name.substring(0, 15) + '...' : doc.fileData.name) : '';
         tbody.innerHTML += `<tr><td class="text-center">${stt}</td><td class="text-center"><span class="badge-info">${escapeHtml(doc.year || '')}</span></td><td><strong>${escapeHtml(doc.documentNumber || '')}</strong></td><td>${escapeHtml(doc.documentName || '')}</td><td class="text-center">${doc.signDate || ''}</td><td>${escapeHtml(doc.signer || '')}</td><td>${escapeHtml(doc.issuingPlace || '')}</td><td><div class="content-preview" onclick='window.viewFullContentFromGlobal(${JSON.stringify(contentText)})'>${escapeHtml(contentPreview) || 'Chưa có nội dung'}</div></td><td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileNameDisplay)}</button>` : '<span class="text-muted">Không có file</span>'}</td><td><div class="action-buttons">${hasFile ? `<button class="action-btn view" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-eye"></i> Mở</button>` : ''}<button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i> Sửa</button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i> Xóa</button></div></td></tr>`;
         stt++;
       } totalSpan.textContent = total;
     }
+function renderThongKe(docs) {
 
+  const container = document.getElementById('thongKeContainer');
+
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const stats = {};
+
+  for (const id in docs) {
+
+    const tenVB = docs[id].documentName || 'Không rõ';
+
+    stats[tenVB] = (stats[tenVB] || 0) + 1;
+  }
+
+  Object.entries(stats)
+    .sort((a,b) => b[1] - a[1])
+    .forEach(([name,count]) => {
+
+      container.innerHTML += `
+        <span class="inline-stat-item">
+          ${name}: ${count}
+        </span>
+      `;
+    });
+}
     document.addEventListener('input', function(e) {
       if (!e.target.classList.contains('column-search')) return;
       const rows = document.querySelectorAll('#documentsBody tr'); const searchInputs = document.querySelectorAll('.column-search');
