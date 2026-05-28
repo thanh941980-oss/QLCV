@@ -70,6 +70,16 @@
 .card:has(.fa-github) {
   display: none;
 }
+    .search-row th {
+  background: #fff !important;
+  padding: 4px !important;
+}
+
+.search-row input {
+  min-width: 100%;
+  font-size: 11px;
+  padding: 4px 6px;
+}
   </style>
 </head>
 <body>
@@ -252,6 +262,68 @@
                 <th width="12%">Thao tác</th>
               </tr>
             </thead>
+// các ô tìm kiếm
+<thead>
+  <tr>
+    <th width="3%">STT</th>
+    <th width="6%">Năm</th>
+    <th width="8%">Số VB</th>
+    <th width="10%">Tên VB</th>
+    <th width="8%">Ngày ký</th>
+    <th width="8%">Người ký</th>
+    <th width="10%">Nơi ban hành</th>
+    <th width="20%">Nội dung</th>
+    <th width="10%">File</th>
+    <th width="12%">Thao tác</th>
+  </tr>
+
+  <!-- HÀNG TÌM KIẾM -->
+  <tr class="search-row">
+    <th></th>
+
+    <th>
+      <input type="text" class="form-control form-control-sm column-search"
+             data-column="1" placeholder="Tìm năm">
+    </th>
+
+    <th>
+      <input type="text" class="form-control form-control-sm column-search"
+             data-column="2" placeholder="Tìm số VB">
+    </th>
+
+    <th>
+      <input type="text" class="form-control form-control-sm column-search"
+             data-column="3" placeholder="Tìm tên VB">
+    </th>
+
+    <th>
+      <input type="text" class="form-control form-control-sm column-search"
+             data-column="4" placeholder="Tìm ngày ký">
+    </th>
+
+    <th>
+      <input type="text" class="form-control form-control-sm column-search"
+             data-column="5" placeholder="Tìm người ký">
+    </th>
+
+    <th>
+      <input type="text" class="form-control form-control-sm column-search"
+             data-column="6" placeholder="Tìm nơi BH">
+    </th>
+
+    <th>
+      <input type="text" class="form-control form-control-sm column-search"
+             data-column="7" placeholder="Tìm nội dung">
+    </th>
+
+    <th>
+      <input type="text" class="form-control form-control-sm column-search"
+             data-column="8" placeholder="Tìm file">
+    </th>
+
+    <th></th>
+  </tr>
+</thead>            
             <tbody id="documentsBody">
               <tr><td colspan="10" class="text-center text-muted py-4">
                 <i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>
@@ -759,6 +831,38 @@
       }
       totalSpan.textContent = total;
     }
+// Tìm kiếm theo cột
+document.addEventListener('input', function(e) {
+  if (!e.target.classList.contains('column-search')) return;
+
+  const table = document.querySelector('#documentsBody');
+  const rows = table.querySelectorAll('tr');
+
+  const searchInputs = document.querySelectorAll('.column-search');
+
+  rows.forEach(row => {
+    let visible = true;
+
+    searchInputs.forEach(input => {
+      const colIndex = parseInt(input.dataset.column);
+      const keyword = input.value.trim().toLowerCase();
+
+      if (keyword !== '') {
+        const cell = row.children[colIndex];
+
+        if (cell) {
+          const text = cell.innerText.toLowerCase();
+
+          if (!text.includes(keyword)) {
+            visible = false;
+          }
+        }
+      }
+    });
+
+    row.style.display = visible ? '' : 'none';
+  });
+});    
 
     // Global functions
     window.openFileFromGlobal = function(id) {
