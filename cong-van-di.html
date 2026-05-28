@@ -303,7 +303,14 @@
   <div id="successNotification" class="notification success"></div>
   <div id="errorNotification" class="notification error"></div>
   <div id="infoNotification" class="notification info"></div>
-
+<!-- Nút cài đặt Gear - THÊM VÀO ĐÂY -->
+  <button onclick="document.querySelector('.card.mb-3').style.display='block'" 
+          style="position:fixed; bottom:20px; right:20px; z-index:9999; 
+                 background:#0066cc; color:white; border:none; border-radius:50%;
+                 width:50px; height:50px; font-size:20px; cursor:pointer;
+                 box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+    <i class="fa-solid fa-gear"></i>
+  </button>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
