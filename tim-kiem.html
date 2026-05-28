@@ -66,7 +66,7 @@
       display: flex;
       gap: 15px;
       margin-bottom: 20px;
-      align-items: center;
+      align-items: flex-end;
       flex-wrap: wrap;
     }
     
@@ -109,6 +109,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 6px;
     }
     
     .btn-primary {
@@ -147,14 +148,16 @@
       border-bottom: 1px solid #eaeaea;
     }
     
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 15px 0;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+    }
+    
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 15px 0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      overflow: hidden;
       font-size: 13px;
     }
     
@@ -169,7 +172,8 @@
       font-weight: 600;
       color: #5f6368;
       font-size: 13px;
-      position: relative;
+      position: sticky;
+      top: 0;
     }
     
     th input {
@@ -179,6 +183,7 @@
       border: 1px solid #ddd;
       border-radius: 3px;
       font-size: 12px;
+      font-weight: normal;
     }
     
     tr:last-child td {
@@ -196,9 +201,21 @@
     .loading {
       display: none;
       text-align: center;
-      padding: 20px;
+      padding: 40px;
       color: #5f6368;
       font-size: 14px;
+    }
+    
+    .loading i {
+      font-size: 24px;
+      margin-bottom: 10px;
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     
     .notification {
@@ -223,6 +240,25 @@
       background: #ea4335;
     }
     
+    .info {
+      background: #1a73e8;
+    }
+    
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: #9aa0a6;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #e8f0fe;
+      color: #1a73e8;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    
     @media (max-width: 1024px) {
       .filter-section {
         flex-direction: column;
@@ -244,13 +280,13 @@
 <body>
   <div class="container">
     <header>
-      <h1>TRA CỨU CÔNG VĂN</h1>
-      <a href="dashboard.html" class="back-btn">← Quay lại</a>
+      <h1><i class="fas fa-search"></i> TRA CỨU CÔNG VĂN</h1>
+      <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Quay lại</a>
     </header>
     
     <div class="filter-section">
       <div class="filter-group">
-        <label for="loai-cong-van">Loại công văn</label>
+        <label for="loai-cong-van"><i class="fas fa-file-alt"></i> Loại công văn</label>
         <select id="loai-cong-van">
           <option value="di">Công văn đi</option>
           <option value="den">Công văn đến</option>
@@ -258,75 +294,80 @@
       </div>
       
       <div class="filter-group">
-        <label for="nam">Năm</label>
+        <label for="nam"><i class="fas fa-calendar"></i> Năm</label>
         <select id="nam">
           <option value="">Tất cả năm</option>
-          <option value="2023">2023</option>
-          <option value="2024">2024</option>
-          <option value="2025">2025</option>
         </select>
       </div>
       
       <div class="filter-group">
-        <label for="tim-kiem">Tìm kiếm chung</label>
+        <label for="tim-kiem"><i class="fas fa-search"></i> Tìm kiếm chung</label>
         <input type="text" id="tim-kiem" placeholder="Nhập từ khóa...">
       </div>
     </div>
     
     <div class="action-buttons">
-      <button class="btn btn-primary" id="hien-tat-ca-btn">Hiện tất cả</button>
-      <button class="btn btn-success" id="xuat-excel-btn">Xuất Excel</button>
+      <button class="btn btn-primary" id="hien-tat-ca-btn"><i class="fas fa-eye"></i> Hiện tất cả</button>
+      <button class="btn btn-success" id="xuat-excel-btn"><i class="fas fa-file-excel"></i> Xuất Excel</button>
     </div>
     
-    <div class="section-title">Kết quả tra cứu</div>
-    <div class="loading" id="loading">Đang tải dữ liệu...</div>
+    <div class="section-title"><i class="fas fa-list"></i> Kết quả tra cứu</div>
+    <div class="loading" id="loading"><i class="fas fa-spinner"></i><br>Đang tải dữ liệu...</div>
     
     <!-- Bảng kết quả cho công văn đi -->
-    <table id="table-cong-van-di" style="display: none;">
-      <thead>
-        <tr>
-          <th width="5%">STT</th>
-          <th width="8%">Năm <input type="text" class="column-filter" data-column="1"></th>
-          <th width="10%">Số VB <input type="text" class="column-filter" data-column="2"></th>
-          <th width="15%">Tên VB <input type="text" class="column-filter" data-column="3"></th>
-          <th width="10%">Ngày ký <input type="text" class="column-filter" data-column="4"></th>
-          <th width="12%">Người ký <input type="text" class="column-filter" data-column="5"></th>
-          <th width="15%">Nơi ban hành <input type="text" class="column-filter" data-column="6"></th>
-          <th width="25%">Nội dung <input type="text" class="column-filter" data-column="7"></th>
-        </tr>
-      </thead>
-      <tbody id="body-cong-van-di">
-        <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
-      </tbody>
-    </table>
+    <div id="wrapper-cong-van-di" class="table-wrapper" style="display: none;">
+      <table id="table-cong-van-di">
+        <thead>
+          <tr>
+            <th width="4%">STT</th>
+            <th width="8%">Năm <input type="text" class="column-filter" data-column="1" placeholder="Lọc..."></th>
+            <th width="10%">Số VB <input type="text" class="column-filter" data-column="2" placeholder="Lọc..."></th>
+            <th width="15%">Tên VB <input type="text" class="column-filter" data-column="3" placeholder="Lọc..."></th>
+            <th width="10%">Ngày ký <input type="text" class="column-filter" data-column="4" placeholder="Lọc..."></th>
+            <th width="12%">Người ký <input type="text" class="column-filter" data-column="5" placeholder="Lọc..."></th>
+            <th width="15%">Nơi ban hành <input type="text" class="column-filter" data-column="6" placeholder="Lọc..."></th>
+            <th width="26%">Nội dung <input type="text" class="column-filter" data-column="7" placeholder="Lọc..."></th>
+          </tr>
+        </thead>
+        <tbody id="body-cong-van-di">
+          <tr><td colspan="8" class="no-data">Chưa có dữ liệu</td></tr>
+        </tbody>
+      </table>
+    </div>
     
     <!-- Bảng kết quả cho công văn đến -->
-    <table id="table-cong-van-den" style="display: none;">
-      <thead>
-        <tr>
-          <th width="5%">STT</th>
-          <th width="8%">Năm <input type="text" class="column-filter" data-column="1"></th>
-          <th width="8%">Số đến <input type="text" class="column-filter" data-column="2"></th>
-          <th width="10%">Người nhận <input type="text" class="column-filter" data-column="3"></th>
-          <th width="10%">Ngày nhận <input type="text" class="column-filter" data-column="4"></th>
-          <th width="10%">Số CV <input type="text" class="column-filter" data-column="5"></th>
-          <th width="15%">Tên VB <input type="text" class="column-filter" data-column="6"></th>
-          <th width="10%">Ngày ký <input type="text" class="column-filter" data-column="7"></th>
-          <th width="12%">Người ký <input type="text" class="column-filter" data-column="8"></th>
-          <th width="12%">Nơi BH <input type="text" class="column-filter" data-column="9"></th>
-        </tr>
-      </thead>
-      <tbody id="body-cong-van-den">
-        <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
-      </tbody>
-    </table>
+    <div id="wrapper-cong-van-den" class="table-wrapper" style="display: none;">
+      <table id="table-cong-van-den">
+        <thead>
+          <tr>
+            <th width="4%">STT</th>
+            <th width="7%">Năm <input type="text" class="column-filter" data-column="1" placeholder="Lọc..."></th>
+            <th width="8%">Số đến <input type="text" class="column-filter" data-column="2" placeholder="Lọc..."></th>
+            <th width="10%">Người nhận <input type="text" class="column-filter" data-column="3" placeholder="Lọc..."></th>
+            <th width="9%">Ngày nhận <input type="text" class="column-filter" data-column="4" placeholder="Lọc..."></th>
+            <th width="8%">Số CV <input type="text" class="column-filter" data-column="5" placeholder="Lọc..."></th>
+            <th width="15%">Tên VB <input type="text" class="column-filter" data-column="6" placeholder="Lọc..."></th>
+            <th width="9%">Ngày ký <input type="text" class="column-filter" data-column="7" placeholder="Lọc..."></th>
+            <th width="12%">Người ký <input type="text" class="column-filter" data-column="8" placeholder="Lọc..."></th>
+            <th width="12%">Nơi BH <input type="text" class="column-filter" data-column="9" placeholder="Lọc..."></th>
+            <th width="6%">Số tờ <input type="text" class="column-filter" data-column="10" placeholder="Lọc..."></th>
+          </tr>
+        </thead>
+        <tbody id="body-cong-van-den">
+          <tr><td colspan="11" class="no-data">Chưa có dữ liệu</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <div id="successNotification" class="notification success"></div>
   <div id="errorNotification" class="notification error"></div>
+  <div id="infoNotification" class="notification info"></div>
 
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <!-- Thư viện SheetJS (xlsx) để xuất Excel -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
   
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -351,16 +392,22 @@
 
     // Biến toàn cục
     let currentUser = null;
+    let currentUid = null;
     let allCongVanDi = [];
     let allCongVanDen = [];
-    let filteredData = [];
+    let allYears = new Set();
+
+    // Helper: lấy path theo user
+    function getUserPath(path) {
+      return `users/${currentUid}/${path}`;
+    }
 
     // Hiển thị thông báo
-    function showNotification(message, isSuccess = true) {
-      const notification = document.getElementById(isSuccess ? 'successNotification' : 'errorNotification');
+    function showNotification(message, isSuccess = true, isInfo = false) {
+      const notifId = isInfo ? 'infoNotification' : (isSuccess ? 'successNotification' : 'errorNotification');
+      const notification = document.getElementById(notifId);
       notification.textContent = message;
       notification.style.display = 'block';
-      
       setTimeout(() => {
         notification.style.display = 'none';
       }, 3000);
@@ -369,50 +416,66 @@
     // Lọc dữ liệu theo từ khóa
     function filterData(data, searchTerm) {
       if (!searchTerm) return data;
-      
+      const term = searchTerm.toLowerCase();
       return data.filter(item => {
         return Object.values(item).some(value => 
-          value && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+          value && value.toString().toLowerCase().includes(term)
         );
       });
     }
 
-    // Lọc dữ liệu theo cột - PHIÊN BẢN ĐÃ SỬA
+    // Lọc dữ liệu theo cột
     function filterByColumn(data, columnIndex, filterValue, loaiCongVan) {
       if (!filterValue) return data;
+      const term = filterValue.toLowerCase();
       
       return data.filter(item => {
         let value;
         
         if (loaiCongVan === 'di') {
-          // Ánh xạ cột cho công văn đi
           const columnMap = {
-            1: item.year,           // Năm
-            2: item.documentNumber, // Số VB
-            3: item.documentName,   // Tên VB
-            4: item.signDate,       // Ngày ký
-            5: item.signer,         // Người ký
-            6: item.issuingPlace,   // Nơi ban hành
-            7: item.content         // Nội dung
+            1: item.year,
+            2: item.documentNumber,
+            3: item.documentName,
+            4: item.signDate,
+            5: item.signer,
+            6: item.issuingPlace,
+            7: item.content
           };
           value = columnMap[columnIndex];
         } else {
-          // Ánh xạ cột cho công văn đến
           const columnMap = {
-            1: item.year,          // Năm
-            2: item.soDen,         // Số đến
-            3: item.nguoiNhan,     // Người nhận
-            4: item.ngayNhan,      // Ngày nhận
-            5: item.soCongVan,     // Số CV
-            6: item.tenVanBan,     // Tên VB
-            7: item.ngayKy,        // Ngày ký
-            8: item.nguoiKy,       // Người ký
-            9: item.noiBanHanh     // Nơi BH
+            1: item.year,
+            2: item.soDen,
+            3: item.nguoiNhan,
+            4: item.ngayNhan,
+            5: item.soCongVan,
+            6: item.tenVanBan,
+            7: item.ngayKy,
+            8: item.nguoiKy,
+            9: item.noiBanHanh,
+            10: item.soTo
           };
           value = columnMap[columnIndex];
         }
         
-        return value && value.toString().toLowerCase().includes(filterValue.toLowerCase());
+        return value && value.toString().toLowerCase().includes(term);
+      });
+    }
+
+    // Cập nhật danh sách năm
+    function updateYearOptions() {
+      const yearSelect = document.getElementById('nam');
+      const currentValue = yearSelect.value;
+      
+      const years = Array.from(allYears).sort((a, b) => b - a);
+      yearSelect.innerHTML = '<option value="">Tất cả năm</option>';
+      years.forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (currentValue === year) option.selected = true;
+        yearSelect.appendChild(option);
       });
     }
 
@@ -422,21 +485,21 @@
       tableBody.innerHTML = '';
       
       if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Không có dữ liệu</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="8" class="no-data"><i class="fas fa-folder-open"></i> Không có dữ liệu</td></tr>';
         return;
       }
       
       data.forEach((item, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${index + 1}</td>
+          <td class="badge" style="text-align:center">${index + 1}</td>
           <td>${item.year || ''}</td>
-          <td>${item.documentNumber || ''}</td>
+          <td><strong>${item.documentNumber || ''}</strong></td>
           <td>${item.documentName || ''}</td>
           <td>${item.signDate || ''}</td>
           <td>${item.signer || ''}</td>
           <td>${item.issuingPlace || ''}</td>
-          <td>${item.content || ''}</td>
+          <td style="max-width:300px; white-space:normal">${item.content || ''}</td>
         `;
         tableBody.appendChild(row);
       });
@@ -448,16 +511,16 @@
       tableBody.innerHTML = '';
       
       if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Không có dữ liệu</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="11" class="no-data"><i class="fas fa-folder-open"></i> Không có dữ liệu</td></tr>';
         return;
       }
       
       data.forEach((item, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${index + 1}</td>
+          <td class="badge" style="text-align:center">${index + 1}</td>
           <td>${item.year || ''}</td>
-          <td>${item.soDen || ''}</td>
+          <td><strong>${item.soDen || ''}</strong></td>
           <td>${item.nguoiNhan || ''}</td>
           <td>${item.ngayNhan || ''}</td>
           <td>${item.soCongVan || ''}</td>
@@ -465,9 +528,45 @@
           <td>${item.ngayKy || ''}</td>
           <td>${item.nguoiKy || ''}</td>
           <td>${item.noiBanHanh || ''}</td>
+          <td>${item.soTo || ''}</td>
         `;
         tableBody.appendChild(row);
       });
+    }
+
+    // Xử lý tìm kiếm và lọc
+    function handleSearchAndFilter() {
+      const loaiCongVan = document.getElementById('loai-cong-van').value;
+      const nam = document.getElementById('nam').value;
+      const searchTerm = document.getElementById('tim-kiem').value;
+      
+      let data = loaiCongVan === 'di' ? [...allCongVanDi] : [...allCongVanDen];
+      
+      // Lọc theo năm
+      if (nam) {
+        data = data.filter(item => item.year === nam);
+      }
+      
+      // Lọc theo từ khóa tìm kiếm
+      if (searchTerm) {
+        data = filterData(data, searchTerm);
+      }
+      
+      // Lọc theo các cột
+      document.querySelectorAll('.column-filter').forEach(input => {
+        const columnIndex = parseInt(input.getAttribute('data-column'));
+        const filterValue = input.value;
+        if (filterValue) {
+          data = filterByColumn(data, columnIndex, filterValue, loaiCongVan);
+        }
+      });
+      
+      // Hiển thị kết quả
+      if (loaiCongVan === 'di') {
+        displayCongVanDi(data);
+      } else {
+        displayCongVanDen(data);
+      }
     }
 
     // Xuất dữ liệu ra Excel
@@ -477,10 +576,23 @@
       let fileName = '';
       
       if (loaiCongVan === 'di') {
-        dataToExport = filteredData.length > 0 ? filteredData : allCongVanDi;
-        fileName = 'Cong_van_di.xlsx';
+        // Lấy dữ liệu đang hiển thị (đã lọc)
+        const nam = document.getElementById('nam').value;
+        const searchTerm = document.getElementById('tim-kiem').value;
+        let tempData = [...allCongVanDi];
         
-        // Định dạng dữ liệu cho công văn đi
+        if (nam) tempData = tempData.filter(item => item.year === nam);
+        if (searchTerm) tempData = filterData(tempData, searchTerm);
+        
+        document.querySelectorAll('#wrapper-cong-van-di .column-filter').forEach(input => {
+          const colIndex = parseInt(input.dataset.column);
+          const filterVal = input.value;
+          if (filterVal) tempData = filterByColumn(tempData, colIndex, filterVal, 'di');
+        });
+        
+        dataToExport = tempData;
+        fileName = `Cong_van_di_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`;
+        
         const ws_data = [
           ['STT', 'Năm', 'Số VB', 'Tên VB', 'Ngày ký', 'Người ký', 'Nơi ban hành', 'Nội dung']
         ];
@@ -499,17 +611,30 @@
         });
         
         const ws = XLSX.utils.aoa_to_sheet(ws_data);
+        ws['!cols'] = [{wch:5},{wch:8},{wch:15},{wch:25},{wch:12},{wch:15},{wch:20},{wch:40}];
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Công văn đi");
         XLSX.writeFile(wb, fileName);
         
       } else {
-        dataToExport = filteredData.length > 0 ? filteredData : allCongVanDen;
-        fileName = 'Cong_van_den.xlsx';
+        const nam = document.getElementById('nam').value;
+        const searchTerm = document.getElementById('tim-kiem').value;
+        let tempData = [...allCongVanDen];
         
-        // Định dạng dữ liệu cho công văn đến
+        if (nam) tempData = tempData.filter(item => item.year === nam);
+        if (searchTerm) tempData = filterData(tempData, searchTerm);
+        
+        document.querySelectorAll('#wrapper-cong-van-den .column-filter').forEach(input => {
+          const colIndex = parseInt(input.dataset.column);
+          const filterVal = input.value;
+          if (filterVal) tempData = filterByColumn(tempData, colIndex, filterVal, 'den');
+        });
+        
+        dataToExport = tempData;
+        fileName = `Cong_van_den_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`;
+        
         const ws_data = [
-          ['STT', 'Năm', 'Số đến', 'Người nhận', 'Ngày nhận', 'Số CV', 'Tên VB', 'Ngày ký', 'Người ký', 'Nơi ban hành']
+          ['STT', 'Năm', 'Số đến', 'Người nhận', 'Ngày nhận', 'Số CV', 'Tên VB', 'Ngày ký', 'Người ký', 'Nơi ban hành', 'Số tờ']
         ];
         
         dataToExport.forEach((item, index) => {
@@ -523,100 +648,82 @@
             item.tenVanBan || '',
             item.ngayKy || '',
             item.nguoiKy || '',
-            item.noiBanHanh || ''
+            item.noiBanHanh || '',
+            item.soTo || ''
           ]);
         });
         
         const ws = XLSX.utils.aoa_to_sheet(ws_data);
+        ws['!cols'] = [{wch:5},{wch:8},{wch:12},{wch:15},{wch:12},{wch:12},{wch:25},{wch:12},{wch:15},{wch:20},{wch:8}];
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Công văn đến");
         XLSX.writeFile(wb, fileName);
       }
       
-      showNotification('Xuất file Excel thành công!');
+      showNotification(`Xuất file Excel thành công! (${dataToExport.length} dòng)`, true);
     }
 
-    // Xử lý tìm kiếm và lọc - PHIÊN BẢN ĐÃ SỬA
-    function handleSearchAndFilter() {
-      const loaiCongVan = document.getElementById('loai-cong-van').value;
-      const nam = document.getElementById('nam').value;
-      const searchTerm = document.getElementById('tim-kiem').value;
+    // Tải dữ liệu từ Firebase
+    function loadData() {
+      if (!currentUid) return;
       
-      let data = loaiCongVan === 'di' ? [...allCongVanDi] : [...allCongVanDen];
+      document.getElementById('loading').style.display = 'block';
+      allYears.clear();
       
-      // Lọc theo năm
-      if (nam) {
-        data = data.filter(item => item.year === nam);
-      }
-      
-      // Lọc theo từ khóa tìm kiếm
-      if (searchTerm) {
-        data = filterData(data, searchTerm);
-      }
-      
-      // Lọc theo các cột - ĐÃ SỬA
-      document.querySelectorAll('.column-filter').forEach(input => {
-        const columnIndex = parseInt(input.getAttribute('data-column'));
-        const filterValue = input.value;
-        
-        if (filterValue) {
-          data = filterByColumn(data, columnIndex, filterValue, loaiCongVan);
+      // Lấy dữ liệu công văn đi
+      const congVanDiRef = ref(database, getUserPath('congVanDi'));
+      onValue(congVanDiRef, (snapshot) => {
+        if (snapshot.exists()) {
+          allCongVanDi = Object.values(snapshot.val());
+          allCongVanDi.forEach(item => {
+            if (item.year) allYears.add(item.year);
+          });
+        } else {
+          allCongVanDi = [];
         }
+        
+        // Lấy dữ liệu công văn đến
+        const congVanDenRef = ref(database, getUserPath('congVanDen'));
+        onValue(congVanDenRef, (snapshot) => {
+          if (snapshot.exists()) {
+            allCongVanDen = Object.values(snapshot.val());
+            allCongVanDen.forEach(item => {
+              if (item.year) allYears.add(item.year);
+            });
+          } else {
+            allCongVanDen = [];
+          }
+          
+          document.getElementById('loading').style.display = 'none';
+          updateYearOptions();
+          
+          // Hiển thị dữ liệu mặc định (công văn đi)
+          document.getElementById('wrapper-cong-van-di').style.display = 'block';
+          document.getElementById('wrapper-cong-van-den').style.display = 'none';
+          displayCongVanDi(allCongVanDi);
+          
+          showNotification(`Đã tải dữ liệu: ${allCongVanDi.length} công văn đi, ${allCongVanDen.length} công văn đến`, true, true);
+        }, (error) => {
+          document.getElementById('loading').style.display = 'none';
+          console.error('Lỗi khi tải công văn đến:', error);
+          showNotification('Có lỗi xảy ra khi tải dữ liệu công văn đến', false);
+        });
+      }, (error) => {
+        document.getElementById('loading').style.display = 'none';
+        console.error('Lỗi khi tải công văn đi:', error);
+        showNotification('Có lỗi xảy ra khi tải dữ liệu công văn đi', false);
       });
-      
-      filteredData = data;
-      
-      // Hiển thị kết quả
-      if (loaiCongVan === 'di') {
-        displayCongVanDi(data);
-      } else {
-        displayCongVanDen(data);
-      }
     }
 
     // Khởi tạo trang
     document.addEventListener('DOMContentLoaded', function() {
-      // Kiểm tra trạng thái đăng nhập
       onAuthStateChanged(auth, (user) => {
         if (user) {
           currentUser = user;
+          currentUid = user.uid;
+          console.log('Đã đăng nhập:', user.email, 'UID:', currentUid);
           
-          // Hiển thị loading
-          document.getElementById('loading').style.display = 'block';
-          
-          // Lấy dữ liệu công văn đi
-          const congVanDiRef = ref(database, 'congVanDi');
-          onValue(congVanDiRef, (snapshot) => {
-            if (snapshot.exists()) {
-              allCongVanDi = Object.values(snapshot.val());
-            } else {
-              allCongVanDi = [];
-            }
-            
-            // Lấy dữ liệu công văn đến
-            const congVanDenRef = ref(database, 'congVanDen');
-            onValue(congVanDenRef, (snapshot) => {
-              document.getElementById('loading').style.display = 'none';
-              
-              if (snapshot.exists()) {
-                allCongVanDen = Object.values(snapshot.val());
-              } else {
-                allCongVanDen = [];
-              }
-              
-              // Hiển thị dữ liệu mặc định (công văn đi)
-              document.getElementById('table-cong-van-di').style.display = 'table';
-              displayCongVanDi(allCongVanDi);
-            }, (error) => {
-              document.getElementById('loading').style.display = 'none';
-              console.error('Lỗi khi tải dữ liệu công văn đến:', error);
-              showNotification('Có lỗi xảy ra khi tải dữ liệu', false);
-            });
-          }, (error) => {
-            document.getElementById('loading').style.display = 'none';
-            console.error('Lỗi khi tải dữ liệu công văn đi:', error);
-            showNotification('Có lỗi xảy ra khi tải dữ liệu', false);
-          });
+          loadData();
         } else {
           window.location.href = 'index.html';
         }
@@ -626,16 +733,12 @@
       document.getElementById('loai-cong-van').addEventListener('change', function() {
         const loaiCongVan = this.value;
         
-        // Ẩn cả hai bảng trước
-        document.getElementById('table-cong-van-di').style.display = 'none';
-        document.getElementById('table-cong-van-den').style.display = 'none';
+        document.getElementById('wrapper-cong-van-di').style.display = loaiCongVan === 'di' ? 'block' : 'none';
+        document.getElementById('wrapper-cong-van-den').style.display = loaiCongVan === 'den' ? 'block' : 'none';
         
-        // Hiển thị bảng tương ứng
         if (loaiCongVan === 'di') {
-          document.getElementById('table-cong-van-di').style.display = 'table';
           handleSearchAndFilter();
         } else {
-          document.getElementById('table-cong-van-den').style.display = 'table';
           handleSearchAndFilter();
         }
       });
@@ -644,9 +747,11 @@
       document.getElementById('tim-kiem').addEventListener('input', handleSearchAndFilter);
       document.getElementById('nam').addEventListener('change', handleSearchAndFilter);
       
-      // Xử lý lọc theo cột
-      document.querySelectorAll('.column-filter').forEach(input => {
-        input.addEventListener('input', handleSearchAndFilter);
+      // Xử lý lọc theo cột - sử dụng event delegation
+      document.addEventListener('input', function(e) {
+        if (e.target.classList && e.target.classList.contains('column-filter')) {
+          handleSearchAndFilter();
+        }
       });
       
       // Xử lý nút hiện tất cả
@@ -659,6 +764,7 @@
         });
         
         handleSearchAndFilter();
+        showNotification('Đã hiển thị tất cả dữ liệu', true, true);
       });
       
       // Xử lý nút xuất Excel
