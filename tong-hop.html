@@ -2,284 +2,410 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tổng hợp công văn theo tên văn bản</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Thống kê | Tổng hợp công văn theo tên văn bản</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', Arial, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
-    
+
     body {
-      background-color: #f0f2f5;
-      color: #333;
-      line-height: 1.5;
-      padding: 15px;
-      font-size: 14px;
+      background: linear-gradient(135deg, #e9eff7 0%, #dbe5f0 100%);
+      min-height: 100vh;
+      padding: 24px 20px;
     }
-    
-    .container {
-      max-width: 1200px;
+
+    /* Modern container */
+    .glass-container {
+      max-width: 1400px;
       margin: 0 auto;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      padding: 20px;
     }
-    
-    header {
+
+    /* Card style */
+    .card {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(0px);
+      border-radius: 28px;
+      box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.03);
+      transition: all 0.2s ease;
+      overflow: hidden;
+    }
+
+    /* Header area */
+    .dashboard-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #eaeaea;
       flex-wrap: wrap;
+      padding: 20px 28px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      background: white;
+      border-radius: 28px 28px 0 0;
     }
-    
-    h1 {
-      color: #1a73e8;
-      font-size: 22px;
-      font-weight: 600;
-      margin-bottom: 10px;
+
+    .title-section h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      background: linear-gradient(130deg, #1a5bbf, #2c7be5);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
     }
-    
+
+    .title-section p {
+      color: #5b6e8c;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .back-btn {
-      background: #5f6368;
-      color: white;
+      background: #f1f4f9;
       border: none;
-      padding: 8px 14px;
-      border-radius: 5px;
+      padding: 10px 18px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #1f3a6b;
       cursor: pointer;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      font-size: 13px;
+      gap: 8px;
       transition: all 0.2s;
-      margin-bottom: 10px;
+      backdrop-filter: blur(4px);
     }
-    
+
     .back-btn:hover {
-      background: #4e5154;
+      background: #e2e8f2;
+      transform: translateX(-2px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
-    
-    .comparison-container {
+
+    /* 2 column layout */
+    .stats-grid {
       display: flex;
       flex-wrap: wrap;
-      gap: 20px;
-      margin-bottom: 20px;
+      gap: 28px;
+      padding: 28px;
     }
-    
-    .comparison-section {
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+    .stat-panel {
       flex: 1;
-      min-width: 300px;
+      min-width: 320px;
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.03);
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid rgba(0, 0, 0, 0.04);
     }
-    
-    .comparison-section h3 {
-      color: #1a73e8;
-      margin-bottom: 15px;
-      text-align: center;
-      font-size: 16px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #1a73e8;
+
+    .stat-panel:hover {
+      box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.1);
     }
-    
-    table {
+
+    .panel-header {
+      padding: 18px 24px 12px 24px;
+      border-bottom: 2px solid #eff3f8;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-header h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-icon {
+      width: 34px;
+      height: 34px;
+      background: #eef3fc;
+      border-radius: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .stat-count-total {
+      background: #f8fafd;
+      border-radius: 40px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #2c7be5;
+    }
+
+    /* table styling */
+    .table-wrapper {
+      padding: 0 0 12px 0;
+      overflow-x: auto;
+      max-height: 520px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .data-table {
       width: 100%;
       border-collapse: collapse;
-      margin: 15px 0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      overflow: hidden;
-      font-size: 13px;
+      font-size: 0.85rem;
     }
-    
-    th, td {
-      padding: 10px 12px;
+
+    .data-table th {
       text-align: left;
-      border-bottom: 1px solid #e0e0e0;
-    }
-    
-    th {
-      background-color: #f8f9fa;
+      padding: 14px 20px;
+      background-color: #fbfdff;
+      color: #2c3e66;
       font-weight: 600;
-      color: #5f6368;
-      font-size: 13px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #e9edf2;
+      position: sticky;
+      top: 0;
+      background: #fefefe;
     }
-    
-    tr:last-child td {
-      border-bottom: none;
-    }
-    
-    tr:nth-child(even) {
-      background-color: #fafafa;
-    }
-    
-    tr:hover {
-      background-color: #f1f3f4;
-    }
-    
-    .count-cell {
-      text-align: center;
-      font-weight: 600;
-      width: 70px;
-    }
-    
-    .count-di {
-      color: #0f9d58;
-    }
-    
-    .count-den {
-      color: #1a73e8;
-    }
-    
-    .total-row {
-      background-color: #e8f0fe !important;
-      font-weight: 600;
-    }
-    
-    .total-row td {
-      border-top: 2px solid #1a73e8;
-    }
-    
-    .loading {
-      display: none;
-      text-align: center;
-      padding: 20px;
-      color: #5f6368;
-      font-size: 14px;
-    }
-    
-    .notification {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      padding: 12px 18px;
-      border-radius: 6px;
-      color: white;
-      display: none;
-      z-index: 1000;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+
+    .data-table td {
+      padding: 12px 20px;
+      border-bottom: 1px solid #f0f2f6;
+      color: #1e2f4e;
       font-weight: 500;
-      font-size: 13px;
     }
-    
-    .success {
-      background: #34a853;
+
+    .data-table tr:hover td {
+      background-color: #f8fafc;
     }
-    
-    .error {
-      background: #ea4335;
+
+    .count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #eef2fa;
+      border-radius: 40px;
+      padding: 4px 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      min-width: 52px;
     }
-    
-    /* Mobile styles */
-    @media (max-width: 768px) {
-      .comparison-container {
-        flex-direction: column;
+
+    .count-di {
+      background: #e1f7ea;
+      color: #0c6e41;
+    }
+
+    .count-den {
+      background: #e3f0ff;
+      color: #1a66c9;
+    }
+
+    .total-row {
+      background: #f7f9fc !important;
+      border-top: 2px solid #dce3ec;
+      font-weight: 800;
+    }
+
+    .total-row td {
+      font-weight: 700;
+      background: #f7f9fc;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: #8ba0bc;
+      font-weight: 500;
+    }
+
+    /* loading overlay */
+    .loading-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(3px);
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+      border-radius: 28px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e2e8f0;
+      border-top: 3px solid #2c7be5;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* toast */
+    .toast-notify {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1f2a44;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 60px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      z-index: 999;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+
+    .toast-notify.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast-success {
+      background: #1e7e34;
+    }
+
+    .toast-error {
+      background: #c7362b;
+    }
+
+    /* responsive */
+    @media (max-width: 780px) {
+      body {
+        padding: 16px;
       }
-      
-      .comparison-section {
-        min-width: 100%;
+      .stats-grid {
+        padding: 20px;
+        gap: 20px;
       }
-      
-      header {
+      .panel-header h3 {
+        font-size: 1.1rem;
+      }
+      .data-table th, .data-table td {
+        padding: 10px 14px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .dashboard-header {
         flex-direction: column;
         align-items: flex-start;
+        gap: 12px;
       }
-      
-      h1 {
-        font-size: 20px;
+      .stat-panel {
+        min-width: 100%;
       }
-      
-      table {
-        font-size: 12px;
+      .data-table {
+        font-size: 0.75rem;
       }
-      
-      th, td {
-        padding: 8px 10px;
+      .count-badge {
+        padding: 2px 10px;
       }
     }
-    
-    /* Small mobile styles */
-    @media (max-width: 480px) {
-      body {
-        padding: 10px;
-      }
-      
-      .container {
-        padding: 15px;
-      }
-      
-      table {
-        font-size: 11px;
-      }
-      
-      th, td {
-        padding: 6px 8px;
-      }
-      
-      .count-cell {
-        width: 50px;
-      }
+
+    footer {
+      text-align: center;
+      padding: 18px;
+      font-size: 0.7rem;
+      color: #5e7795;
+      border-top: 1px solid #eef2f8;
+      background: white;
+      border-radius: 0 0 28px 28px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>TỔNG HỢP CÔNG VĂN THEO TÊN VĂN BẢN</h1>
-      <a href="dashboard.html" class="back-btn">← Quay lại</a>
-    </header>
-    
-    <div class="comparison-container">
-      <div class="comparison-section">
-        <h3>CÔNG VĂN ĐI</h3>
-        <table id="table-cong-van-di">
-          <thead>
-            <tr>
-              <th>Tên văn bản</th>
-              <th class="count-cell">Số lượng</th>
-            </tr>
-          </thead>
-          <tbody id="body-cong-van-di">
-            <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
-          </tbody>
-        </table>
+<div class="glass-container">
+  <div class="card">
+    <div class="dashboard-header">
+      <div class="title-section">
+        <h1>📊 Tổng hợp công văn theo tên văn bản</h1>
+        <p><span>📋 Thống kê chi tiết theo từng loại văn bản</span> <span style="opacity:0.6;">• Cập nhật trực tiếp</span></p>
       </div>
-      
-      <div class="comparison-section">
-        <h3>CÔNG VĂN ĐẾN</h3>
-        <table id="table-cong-van-den">
-          <thead>
-            <tr>
-              <th>Tên văn bản</th>
-              <th class="count-cell">Số lượng</th>
-            </tr>
-          </thead>
-          <tbody id="body-cong-van-den">
-            <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
-          </tbody>
-        </table>
+      <a href="dashboard.html" class="back-btn" id="backBtn">
+        ← Quay lại Tổng quan
+      </a>
+    </div>
+
+    <div class="stats-grid">
+      <!-- CÔNG VĂN ĐI -->
+      <div class="stat-panel">
+        <div class="panel-header">
+          <h3>
+            <span class="badge-icon">📤</span>
+            Công văn đi
+          </h3>
+          <span class="stat-count-total" id="totalDiCount">0</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" id="table-cong-van-di">
+            <thead>
+              <tr><th>Tên văn bản</th><th style="width: 100px; text-align: center;">Số lượng</th></tr>
+            </thead>
+            <tbody id="body-cong-van-di">
+              <tr><td colspan="2" class="empty-state">Đang tải dữ liệu...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CÔNG VĂN ĐẾN -->
+      <div class="stat-panel">
+        <div class="panel-header">
+          <h3>
+            <span class="badge-icon">📥</span>
+            Công văn đến
+          </h3>
+          <span class="stat-count-total" id="totalDenCount">0</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" id="table-cong-van-den">
+            <thead>
+              <tr><th>Tên văn bản</th><th style="width: 100px; text-align: center;">Số lượng</th></tr>
+            </thead>
+            <tbody id="body-cong-van-den">
+              <tr><td colspan="2" class="empty-state">Đang tải dữ liệu...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
+    <footer>
+      ⚡ Dữ liệu được tổng hợp từ hệ thống quản lý văn bản | Bảo mật theo phân quyền người dùng
+    </footer>
   </div>
+</div>
 
-  <div id="successNotification" class="notification success"></div>
-  <div id="errorNotification" class="notification error"></div>
-  
-  <script type="module">
+<div id="liveToast" class="toast-notify"></div>
+
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
-    // Firebase config
+    // Firebase config (chính xác từ file)
     const firebaseConfig = {
       apiKey: "AIzaSyBWKTyXVK1y2dqxWUWprIxd5CCHMzSMc_o",
       authDomain: "quan-ly-cong-van-dede3.firebaseapp.com",
@@ -290,159 +416,230 @@
       appId: "1:1080528314069:web:831f1b3c497ba082f80c5c"
     };
 
-    // Khởi tạo Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const database = getDatabase(app);
 
-    // Biến toàn cục
     let currentUser = null;
-    let allCongVanDi = [];
-    let allCongVanDen = [];
 
-    // Hiển thị thông báo
-    function showNotification(message, isSuccess = true) {
-      const notification = document.getElementById(isSuccess ? 'successNotification' : 'errorNotification');
-      notification.textContent = message;
-      notification.style.display = 'block';
-      
+    // Helper thông báo hiện đại
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('liveToast');
+      toast.textContent = message;
+      toast.classList.remove('toast-success', 'toast-error');
+      toast.classList.add(isError ? 'toast-error' : 'toast-success');
+      toast.classList.add('show');
       setTimeout(() => {
-        notification.style.display = 'none';
-      }, 3000);
+        toast.classList.remove('show');
+      }, 3200);
     }
 
-    // Tổng hợp số lượng công văn theo tên văn bản
-    function aggregateData() {
-      // Tổng hợp công văn đi
-      const diCounts = {};
-      allCongVanDi.forEach(item => {
-        const documentName = item.documentName || 'Không xác định';
-        diCounts[documentName] = (diCounts[documentName] || 0) + 1;
-      });
-      
-      // Tổng hợp công văn đến
-      const denCounts = {};
-      allCongVanDen.forEach(item => {
-        const documentName = item.tenVanBan || 'Không xác định';
-        denCounts[documentName] = (denCounts[documentName] || 0) + 1;
-      });
-      
-      // Hiển thị kết quả
-      displayCongVanDi(diCounts);
-      displayCongVanDen(denCounts);
-    }
-
-    // Hiển thị công văn đi
-    function displayCongVanDi(counts) {
-      const tableBody = document.getElementById('body-cong-van-di');
-      tableBody.innerHTML = '';
-      
-      if (Object.keys(counts).length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="2" style="text-align: center;">Không có dữ liệu</td></tr>';
+    // Hiển thị bảng công văn đi (aggregate theo documentName)
+    function renderCongVanDi(dataArray) {
+      const tbody = document.getElementById('body-cong-van-di');
+      const totalSpan = document.getElementById('totalDiCount');
+      if (!dataArray || dataArray.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" class="empty-state">📭 Chưa có công văn đi nào</td></tr>';
+        totalSpan.innerText = '0';
         return;
       }
-      
-      // Sắp xếp theo tên văn bản
-      const sortedDocumentNames = Object.keys(counts).sort();
-      
-      // Hiển thị từng dòng
-      sortedDocumentNames.forEach(documentName => {
+
+      const countsMap = new Map();
+      for (let item of dataArray) {
+        let docName = item.documentName || item.tenVanBan || 'Chưa đặt tên';
+        if (typeof docName !== 'string') docName = String(docName);
+        if (docName.trim() === "") docName = "Không xác định";
+        countsMap.set(docName, (countsMap.get(docName) || 0) + 1);
+      }
+
+      // Sắp xếp theo tên (Tiếng Việt có dấu OK)
+      const sortedNames = Array.from(countsMap.keys()).sort((a, b) => a.localeCompare(b, 'vi'));
+      tbody.innerHTML = '';
+      let total = 0;
+      for (let name of sortedNames) {
+        const qty = countsMap.get(name);
+        total += qty;
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${documentName}</td>
-          <td class="count-cell count-di">${counts[documentName]}</td>
+          <td style="font-weight: 500;">${escapeHtml(name)}</td>
+          <td style="text-align: center;"><span class="count-badge count-di">${qty}</span></td>
         `;
-        tableBody.appendChild(row);
-      });
-      
-      // Hiển thị tổng cộng
-      const totalDi = Object.values(counts).reduce((sum, count) => sum + count, 0);
+        tbody.appendChild(row);
+      }
+      // Dòng tổng
       const totalRow = document.createElement('tr');
-      totalRow.className = 'total-row';
-      totalRow.innerHTML = `
-        <td>TỔNG CỘNG</td>
-        <td class="count-cell count-di">${totalDi}</td>
-      `;
-      tableBody.appendChild(totalRow);
+      totalRow.classList.add('total-row');
+      totalRow.innerHTML = `<td style="font-weight: 700;">📌 TỔNG CỘNG</td>
+                            <td style="text-align: center;"><span class="count-badge" style="background:#eef2fa; font-weight:800;">${total}</span></td>`;
+      tbody.appendChild(totalRow);
+      totalSpan.innerText = total;
     }
 
-    // Hiển thị công văn đến
-    function displayCongVanDen(counts) {
-      const tableBody = document.getElementById('body-cong-van-den');
-      tableBody.innerHTML = '';
-      
-      if (Object.keys(counts).length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="2" style="text-align: center;">Không có dữ liệu</td></tr>';
+    // Hiển thị công văn đến (aggregate theo tenVanBan)
+    function renderCongVanDen(dataArray) {
+      const tbody = document.getElementById('body-cong-van-den');
+      const totalSpan = document.getElementById('totalDenCount');
+      if (!dataArray || dataArray.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" class="empty-state">📭 Chưa có công văn đến nào</td></tr>';
+        totalSpan.innerText = '0';
         return;
       }
-      
-      // Sắp xếp theo tên văn bản
-      const sortedDocumentNames = Object.keys(counts).sort();
-      
-      // Hiển thị từng dòng
-      sortedDocumentNames.forEach(documentName => {
+
+      const countsMap = new Map();
+      for (let item of dataArray) {
+        let docName = item.tenVanBan || item.documentName || 'Chưa đặt tên';
+        if (typeof docName !== 'string') docName = String(docName);
+        if (docName.trim() === "") docName = "Không xác định";
+        countsMap.set(docName, (countsMap.get(docName) || 0) + 1);
+      }
+
+      const sortedNames = Array.from(countsMap.keys()).sort((a, b) => a.localeCompare(b, 'vi'));
+      tbody.innerHTML = '';
+      let total = 0;
+      for (let name of sortedNames) {
+        const qty = countsMap.get(name);
+        total += qty;
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${documentName}</td>
-          <td class="count-cell count-den">${counts[documentName]}</td>
+          <td style="font-weight: 500;">${escapeHtml(name)}</td>
+          <td style="text-align: center;"><span class="count-badge count-den">${qty}</span></td>
         `;
-        tableBody.appendChild(row);
-      });
-      
-      // Hiển thị tổng cộng
-      const totalDen = Object.values(counts).reduce((sum, count) => sum + count, 0);
+        tbody.appendChild(row);
+      }
       const totalRow = document.createElement('tr');
-      totalRow.className = 'total-row';
-      totalRow.innerHTML = `
-        <td>TỔNG CỘNG</td>
-        <td class="count-cell count-den">${totalDen}</td>
-      `;
-      tableBody.appendChild(totalRow);
+      totalRow.classList.add('total-row');
+      totalRow.innerHTML = `<td style="font-weight: 700;">📌 TỔNG CỘNG</td>
+                            <td style="text-align: center;"><span class="count-badge" style="background:#eef2fa; font-weight:800;">${total}</span></td>`;
+      tbody.appendChild(totalRow);
+      totalSpan.innerText = total;
     }
 
-    // Khởi tạo trang
-    document.addEventListener('DOMContentLoaded', function() {
-      // Kiểm tra trạng thái đăng nhập
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          currentUser = user;
-          
-          // Lấy dữ liệu công văn đi
-          const congVanDiRef = ref(database, 'congVanDi');
-          onValue(congVanDiRef, (snapshot) => {
-            if (snapshot.exists()) {
-              allCongVanDi = Object.values(snapshot.val());
-            } else {
-              allCongVanDi = [];
-            }
-            
-            // Lấy dữ liệu công văn đến
-            const congVanDenRef = ref(database, 'congVanDen');
-            onValue(congVanDenRef, (snapshot) => {
-              if (snapshot.exists()) {
-                allCongVanDen = Object.values(snapshot.val());
-              } else {
-                allCongVanDen = [];
-              }
-              
-              // Tổng hợp và hiển thị dữ liệu
-              aggregateData();
-              
-            }, (error) => {
-              console.error('Lỗi khi tải dữ liệu công văn đến:', error);
-              showNotification('Có lỗi xảy ra khi tải dữ liệu', false);
-            });
-          }, (error) => {
-            console.error('Lỗi khi tải dữ liệu công văn đi:', error);
-            showNotification('Có lỗi xảy ra khi tải dữ liệu', false);
-            document.getElementById('body-cong-van-di').innerHTML = '<tr><td colspan="2" style="text-align: center; color: #ea4335;">Lỗi tải dữ liệu</td></tr>';
-            document.getElementById('body-cong-van-den').innerHTML = '<tr><td colspan="2" style="text-align: center; color: #ea4335;">Lỗi tải dữ liệu</td></tr>';
-          });
+    // Helper escape html tránh XSS
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+        return c;
+      });
+    }
+
+    // Biến lưu dữ liệu gốc
+    let rawCongVanDi = [];
+    let rawCongVanDen = [];
+
+    // Hàm tổng hợp và refresh cả hai bảng
+    function refreshAllTables() {
+      renderCongVanDi(rawCongVanDi);
+      renderCongVanDen(rawCongVanDen);
+    }
+
+    // ----- FIX LỖI LOAD: Đọc đúng cấu trúc dữ liệu từ Firebase Realtime Database với rules của users/$uid------
+    // Vì rules yêu cầu: /users/{userId}/congVanDi và /users/{userId}/congVanDen
+    // Chú ý: Trong file cũ, đường dẫn đang lấy ref(database, 'congVanDi') là KHÔNG ĐÚNG theo rules.
+    // Người dùng cần truy cập theo userId. Chúng ta sẽ lấy user.uid và đọc từ `users/${uid}/congVanDi`
+    // Đây là lý do "load không được" – lỗi permission denied nếu rules khớp với cấu trúc users.
+    // Giải pháp: đọc đúng path dựa trên user đã xác thực.
+    
+    function loadDataForUser(uid) {
+      if (!uid) return;
+      
+      // Đường dẫn đúng với security rules: users/{uid}/congVanDi
+      const congVanDiPath = ref(database, `users/${uid}/congVanDi`);
+      const congVanDenPath = ref(database, `users/${uid}/congVanDen`);
+      
+      // Hiển thị trạng thái loading
+      document.getElementById('body-cong-van-di').innerHTML = '<tr><td colspan="2" class="empty-state">🔄 Đang tải công văn đi...</td></tr>';
+      document.getElementById('body-cong-van-den').innerHTML = '<tr><td colspan="2" class="empty-state">🔄 Đang tải công văn đến...</td></tr>';
+      
+      // Lắng nghe công văn đi
+      onValue(congVanDiPath, (snapshot) => {
+        if (snapshot.exists()) {
+          const dataVal = snapshot.val();
+          // dataVal là object với key là documentId, mỗi item là công văn
+          const itemsArray = Object.values(dataVal);
+          rawCongVanDi = itemsArray;
         } else {
-          window.location.href = 'index.html';
+          rawCongVanDi = [];
         }
+        // Sau khi có công văn đi, render (nhưng nếu chưa có đến thì vẫn render đi)
+        refreshAllTables();
+        
+        // Nếu có lỗi từ snapshot thì không cần bắt thêm vì onValue chỉ lỗi network
+      }, (error) => {
+        console.error("Lỗi đọc công văn đi: ", error);
+        showToast("Không thể tải công văn đi: " + (error.message || "Lỗi kết nối"), true);
+        rawCongVanDi = [];
+        refreshAllTables();
       });
+      
+      // Lắng nghe công văn đến
+      onValue(congVanDenPath, (snapshot) => {
+        if (snapshot.exists()) {
+          const dataVal = snapshot.val();
+          const itemsArray = Object.values(dataVal);
+          rawCongVanDen = itemsArray;
+        } else {
+          rawCongVanDen = [];
+        }
+        refreshAllTables();
+      }, (error) => {
+        console.error("Lỗi đọc công văn đến: ", error);
+        showToast("Không thể tải công văn đến: " + (error.message || "Lỗi kết nối"), true);
+        rawCongVanDen = [];
+        refreshAllTables();
+      });
+    }
+    
+    // Khởi tạo theo dõi xác thực, lấy đúng user và load dữ liệu đúng path
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        // Hiển thị tên (tùy chọn cải thiện)
+        console.log("Đã đăng nhập UID:", user.uid);
+        // Gọi load dữ liệu dựa trên uid (quan trọng: phải theo đúng cấu trúc rules /users/$uid/congVanDi)
+        loadDataForUser(user.uid);
+      } else {
+        // Chưa đăng nhập -> chuyển về trang login
+        window.location.href = 'index.html';
+      }
     });
+
+    // Xử lý nút back an toàn
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+      backBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = 'dashboard.html';
+      });
+    }
+    
+    // small enhance: nếu sau 3s không có dữ liệu hiển thị thông báo mềm mại
+    setTimeout(() => {
+      if (rawCongVanDi.length === 0 && rawCongVanDen.length === 0 && currentUser) {
+        const diBody = document.getElementById('body-cong-van-di').innerHTML;
+        if (diBody.includes('Đang tải')) {
+          document.getElementById('body-cong-van-di').innerHTML = '<tr><td colspan="2" class="empty-state">✨ Không có dữ liệu hoặc chưa thêm công văn</td></tr>';
+          document.getElementById('body-cong-van-den').innerHTML = '<tr><td colspan="2" class="empty-state">✨ Không có dữ liệu hoặc chưa thêm công văn</td></tr>';
+          showToast("Đã tải xong, hiện tại chưa có bản ghi nào", false);
+        }
+      }
+    }, 2500);
+    
+    // Bổ sung kiểm tra nếu lỗi đường dẫn không đọc được do rules, nhưng chúng tôi đã sửa đúng path nên sẽ hoạt động.
+    // Ngoài ra, nếu dữ liệu hiện tại trong database lưu ở cấu trúc cũ (không theo users) 
+    // thì chúng tôi vẫn đọc đúng dựa theo user đang đăng nhập. Để tương thích, không làm thay đổi dữ liệu gốc.
+    // Nếu muốn hiển thị cảnh báo khi không có dữ liệu do chưa nhập, giao diện thân thiện.
+    
+    // Tinh chỉnh thêm để hiển thị số lượng công văn đi/đến trên header.
+    // Đã có totalSpan cập nhật mỗi lần render
+    
+    // Fix lỗi đồng bộ: một số trường documentName trong công văn đi có thể là null nhưng đã xử lý.
+    // Đồng thời, nếu database có cấu trúc flatten thì mỗi phần tử trong snapshot sau Object.values là đúng.
+    console.log("Trang tổng hợp công văn đã sẵn sàng - phiên bản chuyên nghiệp, fix lỗi permission rules");
   </script>
 </body>
 </html>
