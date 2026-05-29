@@ -501,10 +501,10 @@
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
-        showMessage("Đăng nhập thành công! Đang chuyển hướng...", false);
+        showMessage("Đăng nhập thành công! ...", false);
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
-        showMessage("Đăng ký thành công! Đang chuyển hướng...", false);
+        showMessage("Đăng ký thành công! ...", false);
       }
     } catch (error) {
       let errorMessage = "";
