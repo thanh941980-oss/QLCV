@@ -260,8 +260,8 @@
   try {
 
     const snapshot = await get(
-      ref(database, `users/${currentUid}/githubConfig`)
-    );
+  ref(database, 'system/githubConfig')
+);
 
     if (snapshot.exists()) {
 
@@ -298,9 +298,9 @@
   try {
 
     await set(
-      ref(database, `users/${currentUid}/githubConfig`),
-      githubConfig
-    );
+  ref(database, 'system/githubConfig'),
+  githubConfig
+);
 
     updateGithubStatus();
 
