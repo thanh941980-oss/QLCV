@@ -35,15 +35,16 @@
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      transition: width 0.25s ease, margin 0.25s ease;
-      overflow: hidden;
+      transition: width 0.25s ease;
+      overflow-x: hidden;
+      overflow-y: auto;
       position: relative;
       z-index: 10;
     }
 
-    /* Trạng thái thu gọn */
+    /* Trạng thái thu gọn mặc định */
     .sidebar.collapsed {
-      width: 70px;
+      width: 65px;
     }
 
     /* Ẩn text khi thu gọn */
@@ -76,6 +77,64 @@
 
     .sidebar.collapsed .user-section {
       padding: 20px 12px;
+    }
+
+    /* ========= HIỆN TEXT KHI HOVER ========= */
+    /* Với sidebar đang thu gọn, khi hover vào nav-item sẽ hiện text bên cạnh */
+    .sidebar.collapsed .nav-item {
+      position: relative;
+    }
+
+    .sidebar.collapsed .nav-item span {
+      display: none;
+      position: absolute;
+      left: 55px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #1e6f9f;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .sidebar.collapsed .nav-item:hover span {
+      display: block;
+      animation: fadeIn 0.15s ease;
+    }
+
+    /* Tooltip cho logo và user section khi collapsed */
+    .sidebar.collapsed .logo-area {
+      position: relative;
+    }
+
+    .sidebar.collapsed .logo-area .tooltip-text {
+      display: none;
+      position: absolute;
+      left: 55px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #1e6f9f;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      z-index: 100;
+    }
+
+    .sidebar.collapsed .logo-area:hover .tooltip-text {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-50%) translateX(-5px); }
+      to { opacity: 1; transform: translateY(-50%) translateX(0); }
     }
 
     .logo-area {
@@ -154,11 +213,6 @@
     .nav-item:hover {
       background: rgba(255, 255, 255, 0.08);
       color: white;
-      transform: translateX(4px);
-    }
-
-    .sidebar.collapsed .nav-item:hover {
-      transform: translateX(0);
     }
 
     .nav-item.active {
@@ -208,6 +262,35 @@
       transform: translateY(-1px);
     }
 
+    /* Tooltip cho user email khi collapsed */
+    .sidebar.collapsed .user-section {
+      position: relative;
+    }
+
+    .sidebar.collapsed .user-email {
+      position: relative;
+    }
+
+    .sidebar.collapsed .user-email .tooltip-email {
+      display: none;
+      position: absolute;
+      left: 55px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #1e6f9f;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+      z-index: 100;
+    }
+
+    .sidebar.collapsed .user-email:hover .tooltip-email {
+      display: block;
+    }
+
     /* ========= MAIN CONTENT ========= */
     .main {
       flex: 1;
@@ -227,7 +310,7 @@
       gap: 16px;
     }
 
-    /* Nút toggle thứ 2 (hiện khi sidebar ẩn) */
+    /* Nút toggle thứ 2 (hiện khi sidebar ẩn trên mobile) */
     .show-sidebar-btn {
       background: #eef2ff;
       border: none;
@@ -310,7 +393,7 @@
 <body>
 <div class="app">
   <!-- Sidebar -->
-  <div class="sidebar" id="sidebar">
+  <div class="sidebar collapsed" id="sidebar">
     <div class="logo-area">
       <div>
         <h3><i class="fa-regular fa-folder-open"></i><span> Văn bản</span></h3>
@@ -319,6 +402,7 @@
       <button class="toggle-sidebar-btn" id="collapseSidebarBtn" title="Thu gọn">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
+      <span class="tooltip-text">Văn bản Office</span>
     </div>
     <div class="nav-menu">
       <div class="nav-item active" data-module="outgoing">
@@ -335,7 +419,10 @@
       </div>
     </div>
     <div class="user-section">
-      <div class="user-email" id="userEmail">Đang tải...</div>
+      <div class="user-email" id="userEmail">
+        Đang tải...
+        <span class="tooltip-email" id="userEmailTooltip">Đang tải...</span>
+      </div>
       <button class="logout-btn" id="logoutBtn">
         <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Đăng xuất</span>
       </button>
@@ -393,7 +480,6 @@
     if (collapse) {
       sidebar.classList.add('collapsed');
       localStorage.setItem('sidebarCollapsed', 'true');
-      // Trên mobile, khi collapsed thì ẩn hoàn toàn
       if (window.innerWidth <= 640) {
         sidebar.style.transform = 'translateX(-100%)';
         showSidebarBtn.style.display = 'flex';
@@ -408,9 +494,10 @@
     }
   }
 
-  // Lưu trạng thái sidebar
+  // Lưu trạng thái sidebar (mặc định là collapsed)
   function loadSidebarState() {
-    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    // Mặc định là collapsed (true) khi đăng nhập
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') !== 'false';
     if (isCollapsed) {
       sidebar.classList.add('collapsed');
       if (window.innerWidth <= 640) {
@@ -427,14 +514,19 @@
   }
 
   // Sự kiện nút thu gọn
-  collapseBtn.addEventListener('click', () => {
-    toggleSidebar(true);
-  });
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', () => {
+      const isCurrentlyCollapsed = sidebar.classList.contains('collapsed');
+      toggleSidebar(!isCurrentlyCollapsed);
+    });
+  }
 
-  // Sự kiện nút hiện sidebar (khi đang ẩn)
-  showSidebarBtn.addEventListener('click', () => {
-    toggleSidebar(false);
-  });
+  // Sự kiện nút hiện sidebar (khi đang ẩn trên mobile)
+  if (showSidebarBtn) {
+    showSidebarBtn.addEventListener('click', () => {
+      toggleSidebar(false);
+    });
+  }
 
   // Xử lý resize cho responsive
   window.addEventListener('resize', () => {
@@ -467,7 +559,6 @@
       contentFrame.src = m.url;
       pageTitle.innerHTML = `<i class="${m.icon} me-2"></i>${m.title}`;
     }
-    // Lưu module đang chọn
     localStorage.setItem('currentModule', moduleKey);
   }
 
@@ -477,7 +568,6 @@
       const moduleKey = el.getAttribute('data-module');
       if (moduleKey && modules[moduleKey]) {
         setActiveModule(moduleKey);
-        // Trên mobile, sau khi chọn thì tự động thu gọn sidebar
         if (window.innerWidth <= 640) {
           toggleSidebar(true);
         }
@@ -485,22 +575,33 @@
     });
   });
 
+  // Cập nhật tooltip email
+  function updateEmailTooltip(email) {
+    const userEmailSpan = document.getElementById('userEmail');
+    const userEmailTooltip = document.getElementById('userEmailTooltip');
+    if (userEmailSpan) userEmailSpan.innerText = email;
+    if (userEmailTooltip) userEmailTooltip.innerText = email;
+  }
+
   // Firebase auth
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      document.getElementById('userEmail').innerText = user.email;
+      updateEmailTooltip(user.email);
     } else {
       window.location.href = 'index.html';
     }
   });
 
   // Logout
-  document.getElementById('logoutBtn').addEventListener('click', async () => {
-    await signOut(auth);
-    window.location.href = 'index.html';
-  });
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = 'index.html';
+    });
+  }
 
-  // Khôi phục trạng thái
+  // Khôi phục trạng thái (mặc định sidebar đã thu gọn)
   loadSidebarState();
   const savedModule = localStorage.getItem('currentModule');
   if (savedModule && modules[savedModule]) {
