@@ -224,7 +224,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+    import { getDatabase, ref, push, set, get, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBWKTyXVK1y2dqxWUWprIxd5CCHMzSMc_o",
@@ -262,23 +262,70 @@
       else { if (progressDiv) progressDiv.style.display = 'none'; if (progressBar) progressBar.style.width = '0%'; }
     }
 
-    function loadGithubConfig() {
-      const saved = localStorage.getItem(`github_config_${currentUid}`);
-      if (saved) {
-        githubConfig = JSON.parse(saved);
-        document.getElementById('github-token').value = githubConfig.token;
-        document.getElementById('github-owner').value = githubConfig.owner;
-        document.getElementById('github-repo').value = githubConfig.repo;
-        updateGithubStatus();
-      }
+    async function loadGithubConfig() {
+
+  try {
+
+    const snapshot = await get(
+      ref(database, `users/${currentUid}/githubConfig`)
+    );
+
+    if (snapshot.exists()) {
+
+      githubConfig = snapshot.val();
+
+      document.getElementById('github-token').value =
+        githubConfig.token || '';
+
+      document.getElementById('github-owner').value =
+        githubConfig.owner || '';
+
+      document.getElementById('github-repo').value =
+        githubConfig.repo || '';
+
+      updateGithubStatus();
     }
 
-    function saveGithubConfig() {
-      githubConfig = { token: document.getElementById('github-token').value, owner: document.getElementById('github-owner').value, repo: document.getElementById('github-repo').value };
-      localStorage.setItem(`github_config_${currentUid}`, JSON.stringify(githubConfig));
-      updateGithubStatus();
-      showNotification('Đã lưu cấu hình GitHub!', true);
-    }
+  } catch (error) {
+
+    console.error(error);
+
+  }
+
+}
+
+   async function saveGithubConfig() {
+
+  githubConfig = {
+    token: document.getElementById('github-token').value.trim(),
+    owner: document.getElementById('github-owner').value.trim(),
+    repo: document.getElementById('github-repo').value.trim()
+  };
+
+  try {
+
+    await set(
+      ref(database, `users/${currentUid}/githubConfig`),
+      githubConfig
+    );
+
+    updateGithubStatus();
+
+    showNotification(
+      'Đã lưu cấu hình GitHub!',
+      true
+    );
+
+  } catch (error) {
+
+    showNotification(
+      'Lỗi lưu cấu hình: ' + error.message,
+      false
+    );
+
+  }
+
+}
 
     function updateGithubStatus() {
       const statusDiv = document.getElementById('github-status');
@@ -453,13 +500,44 @@ function renderThongKe(docs) {
       document.getElementById('save-github-config').onclick = saveGithubConfig;
       document.getElementById('them-nam-btn').onclick = () => themMoi('nam', 'years'); document.getElementById('them-ten-vb-btn').onclick = () => themMoi('ten-vb', 'documentTypes');
       document.getElementById('them-nguoi-ky-btn').onclick = () => themMoi('nguoi-ky', 'signers'); document.getElementById('them-noi-ban-hanh-btn').onclick = () => themMoi('noi-ban-hanh', 'issuingPlaces');
-      onAuthStateChanged(auth, (user) => {
-        if (user) { currentUser = user; currentUid = user.uid; console.log('Đã đăng nhập:', user.email, 'UID:', currentUid);
-          loadGithubConfig(); loadCategories('nam', 'years'); loadCategories('ten-vb', 'documentTypes'); loadCategories('nguoi-ky', 'signers'); loadCategories('noi-ban-hanh', 'issuingPlaces');
-          document.getElementById('loading').style.display = 'block';
-          onValue(ref(database, getDbPath('congVanDi')), (snapshot) => { document.getElementById('loading').style.display = 'none'; displayDocuments(snapshot); });
-        } else window.location.href = 'index.html';
-      });
+      onAuthStateChanged(auth, async (user) => {
+
+  if (user) {
+
+    currentUser = user;
+    currentUid = user.uid;
+
+    console.log(
+      'Đã đăng nhập:',
+      user.email,
+      'UID:',
+      currentUid
+    );
+
+    await loadGithubConfig();
+
+    loadCategories('nam', 'years');
+    loadCategories('ten-vb', 'documentTypes');
+    loadCategories('nguoi-ky', 'signers');
+    loadCategories('noi-ban-hanh', 'issuingPlaces');
+
+    document.getElementById('loading').style.display = 'block';
+
+    onValue(
+      ref(database, getDbPath('congVanDi')),
+      (snapshot) => {
+        document.getElementById('loading').style.display = 'none';
+        displayDocuments(snapshot);
+      }
+    );
+
+  } else {
+
+    window.location.href = 'index.html';
+
+  }
+
+});
     });
   </script>
 </body>
