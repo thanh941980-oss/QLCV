@@ -23,30 +23,90 @@
       overflow: hidden;
     }
 
-    /* Layout chính: cố định form, cuộn list */
+    /* Layout chính: cố định toàn bộ phần trên, cuộn phần table body */
     .app-layout {
       display: flex;
       flex-direction: column;
       height: 100vh;
-      padding: 8px 16px 8px 16px;
-      gap: 8px;
+      padding: 6px 12px 6px 12px;
+      gap: 4px;
     }
 
-    /* Phần form thông tin - cố định */
+    /* GitHub button row */
+    .github-row {
+      flex-shrink: 0;
+      margin-bottom: 0;
+    }
+
+    /* GitHub config card */
+    .github-config-card {
+      flex-shrink: 0;
+      margin-bottom: 4px;
+    }
+
+    /* Form thông tin - cố định */
     .form-fixed {
       flex-shrink: 0;
     }
 
-    /* Phần danh sách - cuộn được */
-    .list-scrollable {
+    /* Phần tìm kiếm + bảng - cố định header tìm kiếm */
+    .table-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* Card chứa bảng */
+    .table-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      background: white;
+    }
+
+    .table-card .card-header {
+      flex-shrink: 0;
+    }
+
+    .table-container {
       flex: 1;
       overflow: auto;
       min-height: 0;
     }
 
+    .table {
+      margin-bottom: 0;
+    }
+
+    .table thead th {
+      background: #f8fafc;
+      font-weight: 700;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 6px 4px;
+      border-bottom: 1.5px solid #e2e8f0;
+      color: #1e293b;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .table tbody td {
+      padding: 5px 4px;
+      vertical-align: middle;
+      font-size: 11px;
+      border-bottom: 1px solid #edf2f7;
+    }
+
     /* Card styling */
     .card {
-      border-radius: 12px;
+      border-radius: 10px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       border: none;
       background: white;
@@ -56,36 +116,35 @@
       background: linear-gradient(105deg, #0066cc 0%, #004d99 100%);
       color: white;
       font-weight: 600;
-      font-size: 12px;
-      padding: 6px 14px;
-      border-radius: 12px 12px 0 0 !important;
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: 10px 10px 0 0 !important;
       border: none;
-      letter-spacing: 0.3px;
     }
 
     .card-header i {
-      margin-right: 6px;
+      margin-right: 5px;
     }
 
     .card-body {
-      padding: 10px 14px;
+      padding: 8px 12px;
     }
 
-    /* Form nhỏ gọn */
+    /* Form cực nhỏ */
     .form-label {
       font-weight: 600;
       color: #1e2a3a;
-      margin-bottom: 2px;
-      font-size: 10px;
+      margin-bottom: 1px;
+      font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
 
     .form-control, .form-select {
-      border-radius: 6px;
+      border-radius: 5px;
       border: 1px solid #dce3ec;
-      padding: 4px 8px;
-      font-size: 12px;
+      padding: 3px 6px;
+      font-size: 11px;
       transition: 0.2s;
     }
 
@@ -95,27 +154,28 @@
     }
 
     textarea.form-control {
-      padding: 4px 8px;
+      padding: 3px 6px;
+      min-height: 32px;
     }
 
     .input-group .btn {
-      padding: 4px 8px;
+      padding: 3px 6px;
     }
 
     .btn {
-      border-radius: 6px;
-      padding: 4px 12px;
-      font-size: 11px;
+      border-radius: 5px;
+      padding: 3px 10px;
+      font-size: 10px;
       font-weight: 500;
     }
 
     .btn-sm-custom {
-      padding: 4px 8px;
-      font-size: 11px;
+      padding: 3px 6px;
+      font-size: 10px;
     }
 
     .btn i {
-      margin-right: 4px;
+      margin-right: 3px;
     }
 
     .btn-primary {
@@ -131,69 +191,32 @@
       border: none;
       color: white;
     }
-    .btn-warning:hover {
-      background: linear-gradient(105deg, #e67e22, #d35400);
-    }
 
     .btn-secondary {
       background: #5a6c7e;
       border: none;
     }
-    .btn-secondary:hover {
-      background: #3e4d5e;
-    }
 
     hr {
-      margin: 6px 0;
+      margin: 4px 0;
       opacity: 0.3;
-    }
-
-    /* Table styling */
-    .table {
-      margin-bottom: 0;
-    }
-
-    .table thead th {
-      background: #f8fafc;
-      font-weight: 700;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      padding: 8px 6px;
-      border-bottom: 1.5px solid #e2e8f0;
-      color: #1e293b;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .table tbody td {
-      padding: 6px 6px;
-      vertical-align: middle;
-      font-size: 11px;
-      border-bottom: 1px solid #edf2f7;
-    }
-
-    .table tbody tr:hover {
-      background: #f9fafb;
     }
 
     /* Action buttons */
     .action-buttons {
       display: flex;
-      gap: 4px;
+      gap: 3px;
       justify-content: center;
-      flex-wrap: wrap;
     }
 
     .action-btn {
-      padding: 3px 8px;
-      border-radius: 16px;
-      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 14px;
+      font-size: 9px;
       font-weight: 500;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       cursor: pointer;
       border: none;
       transition: 0.2s;
@@ -207,14 +230,14 @@
     .action-btn.delete:hover { background: #b91c1c; color: white; }
 
     .content-preview {
-      max-width: 180px;
+      max-width: 160px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       cursor: pointer;
       color: #0066cc;
       font-weight: 500;
-      font-size: 11px;
+      font-size: 10px;
     }
     .content-preview:hover {
       color: #003f7f;
@@ -224,22 +247,22 @@
     .badge-info {
       background: #e6f0ff;
       color: #0066cc;
-      padding: 2px 6px;
-      border-radius: 16px;
-      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 12px;
+      font-size: 9px;
       font-weight: 600;
     }
 
     .file-link {
       background: #f1f5f9;
-      padding: 3px 8px;
-      border-radius: 16px;
+      padding: 2px 6px;
+      border-radius: 14px;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       text-decoration: none;
       color: #2c3e66;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 500;
       cursor: pointer;
       border: none;
@@ -255,13 +278,13 @@
       border: 1px solid rgba(0, 102, 204, 0.3);
       color: #0066cc;
       border-radius: 30px;
-      padding: 3px 10px;
-      font-size: 10px;
+      padding: 2px 8px;
+      font-size: 9px;
       cursor: pointer;
       transition: 0.2s;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
     .github-toggle-btn:hover {
       background: #0066cc;
@@ -271,113 +294,118 @@
 
     .current-file-info {
       background: #f1f5f9;
-      padding: 5px 10px;
-      border-radius: 8px;
-      margin-top: 5px;
-      border-left: 3px solid #0066cc;
-      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-top: 3px;
+      border-left: 2px solid #0066cc;
+      font-size: 9px;
     }
 
     .inline-stats {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       flex-wrap: wrap;
     }
     .inline-stat-item {
       background: rgba(255, 255, 255, 0.2);
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 16px;
+      font-size: 9px;
       font-weight: 500;
       color: white;
     }
 
     .notification {
       position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 8px 16px;
+      top: 15px;
+      right: 15px;
+      padding: 6px 14px;
       border-radius: 30px;
       color: white;
       display: none;
       z-index: 2000;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      animation: slideIn 0.25s ease;
-    }
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     .notification.success { background: linear-gradient(105deg, #2ecc71, #27ae60); }
     .notification.error { background: linear-gradient(105deg, #e74c3c, #c0392b); }
-    .notification.info { background: linear-gradient(105deg, #3498db, #2980b9); }
 
     .upload-progress {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      bottom: 15px;
+      right: 15px;
       background: white;
-      padding: 10px 14px;
-      border-radius: 10px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       display: none;
       z-index: 2000;
-      min-width: 250px;
+      min-width: 220px;
+      font-size: 10px;
     }
 
+    /* Search row - cố định ngay dưới header */
+    .search-row th {
+      background: #ffffff !important;
+      padding: 3px 4px !important;
+    }
     .search-row input {
-      font-size: 10px;
-      padding: 3px 5px;
+      font-size: 9px;
+      padding: 2px 4px;
       border-radius: 4px;
     }
 
-    /* Scrollbar */
-    .list-scrollable::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
+    /* Scrollbar đẹp */
+    .table-container::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
     }
-    .list-scrollable::-webkit-scrollbar-track {
+    .table-container::-webkit-scrollbar-track {
       background: #e2e8f0;
       border-radius: 10px;
     }
-    .list-scrollable::-webkit-scrollbar-thumb {
+    .table-container::-webkit-scrollbar-thumb {
       background: #94a3b8;
       border-radius: 10px;
+    }
+
+    /* Khoảng cách giữa các row trong form */
+    .row.g-1 {
+      --bs-gutter-y: 0.2rem;
     }
   </style>
 </head>
 <body>
 <div class="app-layout">
-  <!-- Nút GitHub nhỏ gọn -->
-  <div class="d-flex justify-content-end" style="margin-bottom: 0;">
+  <!-- GitHub button row -->
+  <div class="github-row d-flex justify-content-end">
     <button class="github-toggle-btn" id="toggleGithubBtn">
       <i class="fa-brands fa-github"></i> GitHub
       <i class="fa-solid fa-chevron-down" id="toggleIcon"></i>
     </button>
   </div>
 
-  <!-- GitHub config card - có thể ẩn/hiện -->
-  <div class="card form-fixed" id="githubConfigCard" style="display: none; margin-bottom: 6px;">
-    <div class="card-header py-1"><i class="fa-brands fa-github"></i> Cấu hình GitHub</div>
-    <div class="card-body py-2">
+  <!-- GitHub config card -->
+  <div class="github-config-card card" id="githubConfigCard" style="display: none;">
+    <div class="card-header py-0"><i class="fa-brands fa-github"></i> Cấu hình GitHub</div>
+    <div class="card-body py-1">
       <div class="row g-1">
         <div class="col-md-4">
           <label class="form-label">Token</label>
-          <input type="password" id="github-token" class="form-control form-control-sm" placeholder="ghp_xxxxxx">
+          <input type="password" id="github-token" class="form-control" placeholder="ghp_xxxxxx">
         </div>
         <div class="col-md-3">
           <label class="form-label">Owner</label>
-          <input type="text" id="github-owner" class="form-control form-control-sm" placeholder="username">
+          <input type="text" id="github-owner" class="form-control" placeholder="username">
         </div>
         <div class="col-md-3">
           <label class="form-label">Repository</label>
-          <input type="text" id="github-repo" class="form-control form-control-sm" placeholder="repo-name">
+          <input type="text" id="github-repo" class="form-control" placeholder="repo-name">
         </div>
         <div class="col-md-2">
-          <button class="btn btn-primary btn-sm w-100" id="save-github-config"><i class="fa-solid fa-save"></i> Lưu</button>
+          <button class="btn btn-primary w-100" id="save-github-config"><i class="fa-solid fa-save"></i> Lưu</button>
         </div>
       </div>
       <div id="github-status" class="mt-1"></div>
@@ -386,57 +414,57 @@
 
   <!-- Form thông tin văn bản - CỐ ĐỊNH -->
   <div class="card form-fixed">
-    <div class="card-header py-1"><i class="fa-solid fa-file-signature"></i> Thông tin văn bản</div>
-    <div class="card-body py-2">
+    <div class="card-header py-0"><i class="fa-solid fa-file-signature"></i> Thông tin văn bản</div>
+    <div class="card-body py-1">
       <div class="row g-1">
         <div class="col-md-2">
           <label class="form-label">Năm *</label>
           <div class="input-group">
-            <select id="nam" class="form-select form-select-sm" required><option value="">Chọn</option></select>
+            <select id="nam" class="form-select" required><option value="">Chọn</option></select>
             <button class="btn btn-outline-primary btn-sm-custom" id="them-nam-btn"><i class="fa fa-plus"></i></button>
           </div>
         </div>
         <div class="col-md-2">
           <label class="form-label">Số CV *</label>
-          <input type="text" id="so-vb" class="form-control form-control-sm" placeholder="VD: 123/QĐ" required>
+          <input type="text" id="so-vb" class="form-control" placeholder="VD: 123/QĐ" required>
         </div>
         <div class="col-md-2">
           <label class="form-label">Ngày ký *</label>
-          <input type="date" id="ngay-ky" class="form-control form-control-sm" required>
+          <input type="date" id="ngay-ky" class="form-control" required>
         </div>
         <div class="col-md-2">
           <label class="form-label">Tên VB *</label>
           <div class="input-group">
-            <select id="ten-vb" class="form-select form-select-sm" required><option value="">Chọn</option></select>
+            <select id="ten-vb" class="form-select" required><option value="">Chọn</option></select>
             <button class="btn btn-outline-primary btn-sm-custom" id="them-ten-vb-btn"><i class="fa fa-plus"></i></button>
           </div>
         </div>
         <div class="col-md-2">
           <label class="form-label">Người ký *</label>
           <div class="input-group">
-            <select id="nguoi-ky" class="form-select form-select-sm" required><option value="">Chọn</option></select>
+            <select id="nguoi-ky" class="form-select" required><option value="">Chọn</option></select>
             <button class="btn btn-outline-primary btn-sm-custom" id="them-nguoi-ky-btn"><i class="fa fa-plus"></i></button>
           </div>
         </div>
         <div class="col-md-2">
           <label class="form-label">Nơi BH *</label>
           <div class="input-group">
-            <select id="noi-ban-hanh" class="form-select form-select-sm" required><option value="">Chọn</option></select>
+            <select id="noi-ban-hanh" class="form-select" required><option value="">Chọn</option></select>
             <button class="btn btn-outline-primary btn-sm-custom" id="them-noi-ban-hanh-btn"><i class="fa fa-plus"></i></button>
           </div>
         </div>
         <div class="col-md-8">
           <label class="form-label">Nội dung *</label>
-          <textarea id="noi-dung" class="form-control form-control-sm" rows="1" placeholder="Nhập nội dung công văn..." required></textarea>
+          <textarea id="noi-dung" class="form-control" rows="1" placeholder="Nhập nội dung công văn..." required></textarea>
         </div>
         <div class="col-md-4">
           <label class="form-label">File đính kèm</label>
-          <input type="file" id="file-dinh-kem" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar">
+          <input type="file" id="file-dinh-kem" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar">
           <div id="current-file-info" class="current-file-info" style="display: none;"></div>
         </div>
         <div class="col-12">
           <hr>
-          <div class="d-flex justify-content-end gap-2">
+          <div class="d-flex justify-content-end gap-1">
             <button class="btn btn-secondary btn-sm" id="reset-cvdi-btn"><i class="fa fa-rotate"></i> Làm mới</button>
             <button class="btn btn-primary btn-sm" id="save-cvdi-btn"><i class="fa fa-save"></i> Lưu</button>
             <button class="btn btn-warning btn-sm" id="update-cvdi-btn" style="display: none;"><i class="fa fa-pen"></i> Cập nhật</button>
@@ -446,21 +474,22 @@
     </div>
   </div>
 
-  <!-- Danh sách công văn - CUỘN ĐƯỢC -->
-  <div class="card list-scrollable">
-    <div class="card-header py-1 d-flex align-items-center gap-2 flex-wrap">
-      <div><i class="fa-solid fa-list"></i> Danh sách công văn <span id="totalCount" class="badge bg-light text-dark ms-1">0</span></div>
-      <div id="thongKeContainer" class="inline-stats"></div>
-    </div>
-    <div class="card-body p-0">
-      <div id="loading" class="text-center py-4" style="display: none;">
-        <i class="fa-solid fa-spinner fa-spin fa-2x mb-1"></i>
-        <div class="small">Đang tải dữ liệu...</div>
+  <!-- Danh sách công văn - CỐ ĐỊNH PHẦN TÌM KIẾM, CUỘN DỮ LIỆU -->
+  <div class="table-wrapper">
+    <div class="table-card">
+      <div class="card-header py-0 d-flex align-items-center gap-2 flex-wrap">
+        <div><i class="fa-solid fa-list"></i> Danh sách công văn <span id="totalCount" class="badge bg-light text-dark ms-1">0</span></div>
+        <div id="thongKeContainer" class="inline-stats"></div>
       </div>
-      <div class="table-responsive">
+      <div class="table-container">
+        <div id="loading" class="text-center py-3" style="display: none;">
+          <i class="fa-solid fa-spinner fa-spin"></i> Đang tải...
+        </div>
         <table class="table table-hover mb-0">
           <thead>
-            <tr><th width="4%">STT</th><th width="7%">Năm</th><th width="11%">Số VB</th><th width="7%">Tên VB</th><th width="9%">Ngày ký</th><th width="9%">Người ký</th><th width="10%">Nơi BH</th><th width="20%">Nội dung</th><th width="10%">File</th><th width="11%">Thao tác</th></tr>
+            <tr>
+              <th width="4%">STT</th><th width="7%">Năm</th><th width="10%">Số VB</th><th width="8%">Tên VB</th><th width="9%">Ngày ký</th><th width="11%">Người ký</th><th width="10%">Nơi BH</th><th width="20%">Nội dung</th><th width="10%">File</th><th width="11%">Thao tác</th>
+            </tr>
             <tr class="search-row">
               <th></th><th><input type="text" class="form-control column-search" data-column="1" placeholder="Tìm"></th>
               <th><input type="text" class="form-control column-search" data-column="2" placeholder="Tìm"></th>
@@ -473,7 +502,8 @@
               <th></th>
             </tr>
           </thead>
-          <tbody id="documentsBody"><tr><td colspan="10" class="text-center text-muted py-4"><i class="fa-solid fa-inbox fa-2x mb-1 d-block"></i>Chưa có công văn nào</td></tr>
+          <tbody id="documentsBody">
+            <tr><td colspan="10" class="text-center text-muted py-3"><i class="fa-solid fa-inbox fa-2x mb-1 d-block"></i>Chưa có công văn nào</td></tr>
           </tbody>
         </table>
       </div>
@@ -482,12 +512,11 @@
 </div>
 
 <!-- Modals -->
-<div id="uploadProgress" class="upload-progress"><div><i class="fa-solid fa-spinner fa-spin"></i> Đang upload...</div><div class="progress mt-1"><div id="uploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div></div></div>
-<div class="modal fade" id="filePreviewModal" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-centered"><div class="modal-content"><div class="modal-header py-1"><h6 class="modal-title"><i class="fa-solid fa-file"></i> <span id="previewFileName"></span></h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0" id="filePreviewContent"><div class="text-center p-5"><i class="fa-solid fa-spinner fa-spin fa-3x"></i><p>Đang tải file...</p></div></div><div class="modal-footer py-1"><a href="#" id="downloadFileBtn" class="btn btn-primary btn-sm" download><i class="fa-solid fa-download"></i> Tải xuống</a><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button></div></div></div></div>
-<div class="modal fade" id="contentModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header py-1"><h6 class="modal-title"><i class="fa-solid fa-align-left"></i> Nội dung công văn</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="contentModalBody"></div><div class="modal-footer py-1"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button></div></div></div></div>
+<div id="uploadProgress" class="upload-progress"><div><i class="fa-solid fa-spinner fa-spin"></i> Đang upload...</div><div class="progress mt-1" style="height: 3px;"><div id="uploadProgressBar" class="progress-bar" style="width: 0%"></div></div></div>
+<div class="modal fade" id="filePreviewModal" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-centered"><div class="modal-content"><div class="modal-header py-1"><h6 class="modal-title"><i class="fa-solid fa-file"></i> <span id="previewFileName"></span></h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0" id="filePreviewContent"><div class="text-center p-4"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p>Đang tải...</p></div></div><div class="modal-footer py-1"><a href="#" id="downloadFileBtn" class="btn btn-primary btn-sm" download><i class="fa-solid fa-download"></i> Tải</a><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button></div></div></div></div>
+<div class="modal fade" id="contentModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header py-1"><h6 class="modal-title"><i class="fa-solid fa-align-left"></i> Nội dung</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="contentModalBody"></div><div class="modal-footer py-1"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button></div></div></div></div>
 <div id="successNotification" class="notification success"></div>
 <div id="errorNotification" class="notification error"></div>
-<div id="infoNotification" class="notification info"></div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -513,7 +542,7 @@
 
   function showNotification(message, isSuccess = true) {
     const notification = document.getElementById(isSuccess ? 'successNotification' : 'errorNotification');
-    if (notification) { notification.textContent = message; notification.style.display = 'block'; setTimeout(() => { notification.style.display = 'none'; }, 2500); }
+    if (notification) { notification.textContent = message; notification.style.display = 'block'; setTimeout(() => { notification.style.display = 'none'; }, 2000); }
   }
 
   async function loadGithubConfig() {
@@ -545,8 +574,8 @@
   function updateGithubStatus() {
     const statusDiv = document.getElementById('github-status');
     if (statusDiv) {
-      if (githubConfig.token && githubConfig.owner && githubConfig.repo) statusDiv.innerHTML = '<small class="text-success"><i class="fa-solid fa-check-circle"></i> Đã cấu hình: ' + githubConfig.owner + '/' + githubConfig.repo + '</small>';
-      else statusDiv.innerHTML = '<small class="text-warning"><i class="fa-solid fa-exclamation-triangle"></i> Cần cấu hình GitHub để upload file</small>';
+      if (githubConfig.token && githubConfig.owner && githubConfig.repo) statusDiv.innerHTML = '<small class="text-success"><i class="fa-solid fa-check-circle"></i> ' + githubConfig.owner + '/' + githubConfig.repo + '</small>';
+      else statusDiv.innerHTML = '<small class="text-warning"><i class="fa-solid fa-exclamation-triangle"></i> Cần cấu hình GitHub</small>';
     }
   }
 
@@ -618,10 +647,9 @@
     document.getElementById('ngay-ky').value = data.signDate || ''; document.getElementById('nguoi-ky').value = data.signer || ''; document.getElementById('noi-ban-hanh').value = data.issuingPlace || '';
     document.getElementById('noi-dung').value = data.content || ''; currentFileData = data.fileData || null; editingId = id;
     const div = document.getElementById('current-file-info');
-    if (currentFileData?.url) { div.style.display = 'block'; div.innerHTML = `<strong><i class="fa-solid fa-paperclip"></i> File:</strong> ${currentFileData.name} <button class="btn btn-sm btn-outline-primary ms-2" onclick='window.openCurrentFile()'><i class="fa-solid fa-eye"></i></button>`; }
+    if (currentFileData?.url) { div.style.display = 'block'; div.innerHTML = `<i class="fa-solid fa-paperclip"></i> ${currentFileData.name} <button class="btn btn-sm btn-outline-primary" onclick='window.openCurrentFile()'><i class="fa-solid fa-eye"></i></button>`; }
     else { div.style.display = 'block'; div.innerHTML = `<i class="fa-regular fa-file"></i> Chưa có file`; }
     document.getElementById('update-cvdi-btn').style.display = 'inline-block'; document.getElementById('save-cvdi-btn').style.display = 'none';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function openFile(fileData) { if (!fileData?.url) return; const modal = new bootstrap.Modal(document.getElementById('filePreviewModal')); document.getElementById('previewFileName').textContent = fileData.name; document.getElementById('downloadFileBtn').href = fileData.url; const ext = fileData.name.split('.').pop().toLowerCase(); const preview = document.getElementById('filePreviewContent'); if (['jpg','jpeg','png','gif'].includes(ext)) preview.innerHTML = `<img src="${fileData.url}" class="img-fluid">`; else if (ext === 'pdf') preview.innerHTML = `<iframe src="${fileData.url}" width="100%" height="550px"></iframe>`; else preview.innerHTML = `<div class="text-center p-4"><i class="fa-solid fa-file fa-3x"></i><p><a href="${fileData.url}" target="_blank">Tải file</a></p></div>`; modal.show(); }
@@ -632,8 +660,8 @@
     const tbody = document.getElementById('documentsBody'); const totalSpan = document.getElementById('totalCount'); tbody.innerHTML = '';
     if (!snapshot.exists()) { tbody.innerHTML = '<tr><td colspan="10" class="text-center py-3">Chưa có công văn nào</td></tr>'; totalSpan.textContent = '0'; return; }
     const docs = snapshot.val(); documentsDataGlobal = docs; renderThongKe(docs); let stt = 1, total = 0;
-    for (const id in docs) { const doc = docs[id]; total++; const hasFile = doc.hasFile && doc.fileData; const contentText = doc.content || ''; const contentPreview = contentText.length > 70 ? contentText.substring(0,70)+'...' : contentText; const fileNameDisplay = hasFile ? (doc.fileData.name.length > 12 ? doc.fileData.name.substring(0,12)+'...' : doc.fileData.name) : '';
-      tbody.innerHTML += `<tr><td class="text-center">${stt}</td><td class="text-center"><span class="badge-info">${escapeHtml(doc.year||'')}</span></td><td><strong>${escapeHtml(doc.documentNumber||'')}</strong></td><td>${escapeHtml(doc.documentName||'')}</td><td>${doc.signDate||''}</td><td>${escapeHtml(doc.signer||'')}</td><td>${escapeHtml(doc.issuingPlace||'')}</td><td><div class="content-preview" onclick='window.viewFullContentFromGlobal(${JSON.stringify(contentText)})'>${escapeHtml(contentPreview)||'Chưa có'}</div></td><td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileNameDisplay)}</button>` : '<span class="text-muted">—</span>'}</td><td><div class="action-buttons">${hasFile ? `<button class="action-btn view" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-eye"></i></button>` : ''}<button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i></button></div></td></tr>`;
+    for (const id in docs) { const doc = docs[id]; total++; const hasFile = doc.hasFile && doc.fileData; const contentText = doc.content || ''; const contentPreview = contentText.length > 65 ? contentText.substring(0,65)+'...' : contentText; const fileNameDisplay = hasFile ? (doc.fileData.name.length > 10 ? doc.fileData.name.substring(0,10)+'...' : doc.fileData.name) : '';
+      tbody.innerHTML += `<tr><td class="text-center">${stt}</td><td class="text-center"><span class="badge-info">${escapeHtml(doc.year||'')}</span></td><td><strong>${escapeHtml(doc.documentNumber||'')}</strong></td><td>${escapeHtml(doc.documentName||'')}</td><td class="text-center">${doc.signDate||''}</td><td>${escapeHtml(doc.signer||'')}</td><td>${escapeHtml(doc.issuingPlace||'')}</td><td><div class="content-preview" onclick='window.viewFullContentFromGlobal(${JSON.stringify(contentText)})'>${escapeHtml(contentPreview)||'Chưa có'}</div></td><td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileNameDisplay)}</button>` : '<span class="text-muted">—</span>'}</td><td><div class="action-buttons">${hasFile ? `<button class="action-btn view" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-eye"></i></button>` : ''}<button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i></button></div></td></tr>`;
       stt++;
     } totalSpan.textContent = total;
   }
