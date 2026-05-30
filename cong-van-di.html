@@ -302,12 +302,16 @@
     repo: document.getElementById('github-repo').value.trim()
   };
 
+  alert("UID = " + currentUid);
+
   try {
 
     await set(
       ref(database, `users/${currentUid}/githubConfig`),
       githubConfig
     );
+
+    alert("Lưu thành công");
 
     updateGithubStatus();
 
@@ -317,6 +321,10 @@
     );
 
   } catch (error) {
+
+    alert(error.message);
+
+    console.error(error);
 
     showNotification(
       'Lỗi lưu cấu hình: ' + error.message,
