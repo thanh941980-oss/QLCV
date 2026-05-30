@@ -7,81 +7,359 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', system-ui; background: #f0f2f5; height: 100vh; overflow: hidden; }
-    
-    /* Layout */
-    .app { display: flex; height: 100vh; width: 100%; }
-    
-    /* Sidebar siêu gọn */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f0f2f5;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Layout chính */
+    .app {
+      display: flex;
+      height: 100vh;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    /* ========= SIDEBAR ========= */
     .sidebar {
       width: 260px;
       background: linear-gradient(180deg, #0d2b3e 0%, #071826 100%);
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
+      transition: width 0.25s ease, margin 0.25s ease;
+      overflow: hidden;
+      position: relative;
+      z-index: 10;
     }
-    
-    .logo-area { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 20px; }
-    .logo-area h3 { color: white; font-size: 18px; font-weight: 600; margin: 0; }
-    .logo-area small { color: #8aaec0; font-size: 11px; }
-    
+
+    /* Trạng thái thu gọn */
+    .sidebar.collapsed {
+      width: 70px;
+    }
+
+    /* Ẩn text khi thu gọn */
+    .sidebar.collapsed .logo-area h3 span,
+    .sidebar.collapsed .logo-area small,
+    .sidebar.collapsed .nav-item span,
+    .sidebar.collapsed .user-email,
+    .sidebar.collapsed .logout-btn span {
+      display: none;
+    }
+
+    /* Canh giữa icon khi thu gọn */
+    .sidebar.collapsed .nav-item {
+      justify-content: center;
+      padding: 12px 0;
+    }
+
+    .sidebar.collapsed .nav-item i {
+      margin: 0;
+      font-size: 1.3rem;
+    }
+
+    .sidebar.collapsed .logout-btn {
+      justify-content: center;
+    }
+
+    .sidebar.collapsed .logout-btn i {
+      margin: 0;
+    }
+
+    .sidebar.collapsed .user-section {
+      padding: 20px 12px;
+    }
+
+    .logo-area {
+      padding: 20px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-area h3 {
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-area small {
+      color: #8aaec0;
+      font-size: 11px;
+      display: block;
+      margin-top: 4px;
+    }
+
+    /* Nút toggle sidebar */
+    .toggle-sidebar-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toggle-sidebar-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+
+    /* Menu items */
+    .nav-menu {
+      flex: 1;
+      padding: 0 12px;
+    }
+
     .nav-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 20px;
-      margin: 4px 12px;
+      padding: 10px 16px;
+      margin: 4px 0;
       border-radius: 12px;
       cursor: pointer;
       color: #cbd5e1;
       font-size: 14px;
       font-weight: 500;
       transition: 0.2s;
+      white-space: nowrap;
     }
-    .nav-item i { width: 22px; font-size: 16px; }
-    .nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
-    .nav-item.active { background: #1e6f9f; color: white; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
-    
-    .user-section { margin-top: auto; padding: 20px; border-top: 1px solid rgba(255,255,255,0.08); }
-    .user-email { background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 11px; text-align: center; margin-bottom: 12px; color: #ddd; }
-    .logout-btn { width: 100%; background: #dc3545; border: none; padding: 8px; border-radius: 30px; color: white; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.2s; }
-    .logout-btn:hover { background: #c82333; transform: translateY(-1px); }
-    
-    /* Main content */
-    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #f4f7fc; }
-    .topbar { background: white; padding: 12px 24px; border-bottom: 1px solid #e2e8f0; }
-    .topbar h4 { margin: 0; font-size: 18px; font-weight: 600; color: #1e4663; }
-    .iframe-container { flex: 1; padding: 16px 20px; overflow: auto; }
-    iframe { width: 100%; height: 100%; border: none; border-radius: 16px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-    
-    @media (max-width: 640px) { .sidebar { width: 70px; } .logo-area h3, .logo-area small, .nav-item span, .user-email, .logout-btn span { display: none; } .nav-item { justify-content: center; padding: 12px 0; } .logout-btn { justify-content: center; } }
+
+    .nav-item i {
+      width: 24px;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      transform: translateX(4px);
+    }
+
+    .sidebar.collapsed .nav-item:hover {
+      transform: translateX(0);
+    }
+
+    .nav-item.active {
+      background: #1e6f9f;
+      color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* User section */
+    .user-section {
+      margin-top: auto;
+      padding: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .user-email {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      text-align: center;
+      margin-bottom: 12px;
+      color: #ddd;
+      word-break: break-all;
+      transition: 0.2s;
+    }
+
+    .logout-btn {
+      width: 100%;
+      background: #dc3545;
+      border: none;
+      padding: 8px;
+      border-radius: 30px;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #c82333;
+      transform: translateY(-1px);
+    }
+
+    /* ========= MAIN CONTENT ========= */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #f4f7fc;
+      transition: all 0.25s ease;
+    }
+
+    .topbar {
+      background: white;
+      padding: 12px 24px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Nút toggle thứ 2 (hiện khi sidebar ẩn) */
+    .show-sidebar-btn {
+      background: #eef2ff;
+      border: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      color: #1e4663;
+      cursor: pointer;
+      transition: 0.2s;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .show-sidebar-btn:hover {
+      background: #e0e7ff;
+      transform: scale(1.02);
+    }
+
+    .topbar h4 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e4663;
+    }
+
+    .iframe-container {
+      flex: 1;
+      padding: 16px 20px;
+      overflow: auto;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s;
+    }
+
+    /* Scrollbar đẹp */
+    .sidebar::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: #0f2a36;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: #2c6e8f;
+      border-radius: 10px;
+    }
+
+    /* Responsive nhỏ */
+    @media (max-width: 640px) {
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(0);
+      }
+      .sidebar.collapsed {
+        transform: translateX(-100%);
+        width: 0;
+      }
+      .show-sidebar-btn {
+        display: flex !important;
+      }
+      .iframe-container {
+        padding: 12px;
+      }
+    }
   </style>
 </head>
 <body>
 <div class="app">
-  <div class="sidebar">
-    <div class="logo-area"><h3><i class="fa-regular fa-folder-open me-1"></i> Văn bản</h3><small>Quản lý tập trung</small></div>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="logo-area">
+      <div>
+        <h3><i class="fa-regular fa-folder-open"></i><span> Văn bản</span></h3>
+        <small>Quản lý tập trung</small>
+      </div>
+      <button class="toggle-sidebar-btn" id="collapseSidebarBtn" title="Thu gọn">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+    </div>
     <div class="nav-menu">
-      <div class="nav-item active" data-module="outgoing"><i class="fa-solid fa-paper-plane"></i><span>Văn bản đi</span></div>
-      <div class="nav-item" data-module="incoming"><i class="fa-solid fa-inbox"></i><span>Văn bản đến</span></div>
-      <div class="nav-item" data-module="search"><i class="fa-solid fa-magnifying-glass"></i><span>Tìm kiếm</span></div>
-      <div class="nav-item" data-module="summary"><i class="fa-solid fa-chart-simple"></i><span>Tổng hợp</span></div>
+      <div class="nav-item active" data-module="outgoing">
+        <i class="fa-solid fa-paper-plane"></i><span>Văn bản đi</span>
+      </div>
+      <div class="nav-item" data-module="incoming">
+        <i class="fa-solid fa-inbox"></i><span>Văn bản đến</span>
+      </div>
+      <div class="nav-item" data-module="search">
+        <i class="fa-solid fa-magnifying-glass"></i><span>Tìm kiếm</span>
+      </div>
+      <div class="nav-item" data-module="summary">
+        <i class="fa-solid fa-chart-simple"></i><span>Tổng hợp</span>
+      </div>
     </div>
     <div class="user-section">
       <div class="user-email" id="userEmail">Đang tải...</div>
-      <button class="logout-btn" id="logoutBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i><span>Đăng xuất</span></button>
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Đăng xuất</span>
+      </button>
     </div>
   </div>
+
+  <!-- Main content -->
   <div class="main">
-    <div class="topbar"><h4 id="pageTitle"><i class="fa-solid fa-paper-plane me-2"></i>Văn bản đi</h4></div>
-    <div class="iframe-container"><iframe id="contentFrame" src="cong-van-di.html"></iframe></div>
+    <div class="topbar">
+      <button class="show-sidebar-btn" id="showSidebarBtn" title="Hiện menu" style="display: none;">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <h4 id="pageTitle"><i class="fa-solid fa-paper-plane me-2"></i>Văn bản đi</h4>
+    </div>
+    <div class="iframe-container">
+      <iframe id="contentFrame" src="cong-van-di.html"></iframe>
+    </div>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
   const firebaseConfig = {
     apiKey: "AIzaSyBWKTyXVK1y2dqxWUWprIxd5CCHMzSMc_o",
     authDomain: "quan-ly-cong-van-dede3.firebaseapp.com",
@@ -91,21 +369,145 @@
     messagingSenderId: "1080528314069",
     appId: "1:1080528314069:web:831f1b3c497ba082f80c5c"
   };
+
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
-  
-  const modules = { outgoing: { url: "cong-van-di.html", title: "Văn bản đi", icon: "fa-solid fa-paper-plane" }, incoming: { url: "cong-van-den.html", title: "Văn bản đến", icon: "fa-solid fa-inbox" }, search: { url: "tim-kiem.html", title: "Tìm kiếm", icon: "fa-solid fa-magnifying-glass" }, summary: { url: "tong-hop.html", title: "Tổng hợp", icon: "fa-solid fa-chart-simple" } };
-  
-  function setActive(moduleKey) {
-    document.querySelectorAll('.nav-item').forEach(el => { if(el.getAttribute('data-module') === moduleKey) el.classList.add('active'); else el.classList.remove('active'); });
-    const m = modules[moduleKey];
-    if(m) { document.getElementById('contentFrame').src = m.url; document.getElementById('pageTitle').innerHTML = `<i class="${m.icon} me-2"></i>${m.title}`; }
+
+  // Modules mapping
+  const modules = {
+    outgoing: { url: "cong-van-di.html", title: "Văn bản đi", icon: "fa-solid fa-paper-plane" },
+    incoming: { url: "cong-van-den.html", title: "Văn bản đến", icon: "fa-solid fa-inbox" },
+    search: { url: "tim-kiem.html", title: "Tìm kiếm", icon: "fa-solid fa-magnifying-glass" },
+    summary: { url: "tong-hop.html", title: "Tổng hợp & Báo cáo", icon: "fa-solid fa-chart-simple" }
+  };
+
+  // DOM elements
+  const sidebar = document.getElementById('sidebar');
+  const collapseBtn = document.getElementById('collapseSidebarBtn');
+  const showSidebarBtn = document.getElementById('showSidebarBtn');
+  const contentFrame = document.getElementById('contentFrame');
+  const pageTitle = document.getElementById('pageTitle');
+
+  // Toggle sidebar collapse
+  function toggleSidebar(collapse) {
+    if (collapse) {
+      sidebar.classList.add('collapsed');
+      localStorage.setItem('sidebarCollapsed', 'true');
+      // Trên mobile, khi collapsed thì ẩn hoàn toàn
+      if (window.innerWidth <= 640) {
+        sidebar.style.transform = 'translateX(-100%)';
+        showSidebarBtn.style.display = 'flex';
+      }
+    } else {
+      sidebar.classList.remove('collapsed');
+      localStorage.setItem('sidebarCollapsed', 'false');
+      if (window.innerWidth <= 640) {
+        sidebar.style.transform = 'translateX(0)';
+        showSidebarBtn.style.display = 'none';
+      }
+    }
   }
-  document.querySelectorAll('.nav-item').forEach(el => { el.addEventListener('click', () => setActive(el.getAttribute('data-module'))); });
-  
-  onAuthStateChanged(auth, (user) => { if(user) document.getElementById('userEmail').innerText = user.email; else window.location.href = 'index.html'; });
-  document.getElementById('logoutBtn').addEventListener('click', async () => { await signOut(auth); window.location.href = 'index.html'; });
-  setActive('outgoing');
+
+  // Lưu trạng thái sidebar
+  function loadSidebarState() {
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    if (isCollapsed) {
+      sidebar.classList.add('collapsed');
+      if (window.innerWidth <= 640) {
+        sidebar.style.transform = 'translateX(-100%)';
+        showSidebarBtn.style.display = 'flex';
+      }
+    } else {
+      sidebar.classList.remove('collapsed');
+      if (window.innerWidth <= 640) {
+        sidebar.style.transform = 'translateX(0)';
+        showSidebarBtn.style.display = 'none';
+      }
+    }
+  }
+
+  // Sự kiện nút thu gọn
+  collapseBtn.addEventListener('click', () => {
+    toggleSidebar(true);
+  });
+
+  // Sự kiện nút hiện sidebar (khi đang ẩn)
+  showSidebarBtn.addEventListener('click', () => {
+    toggleSidebar(false);
+  });
+
+  // Xử lý resize cho responsive
+  window.addEventListener('resize', () => {
+    if (window.innerWidth <= 640) {
+      const isCollapsed = sidebar.classList.contains('collapsed');
+      if (isCollapsed) {
+        sidebar.style.transform = 'translateX(-100%)';
+        showSidebarBtn.style.display = 'flex';
+      } else {
+        sidebar.style.transform = 'translateX(0)';
+        showSidebarBtn.style.display = 'none';
+      }
+    } else {
+      sidebar.style.transform = '';
+      showSidebarBtn.style.display = 'none';
+    }
+  });
+
+  // Active menu & chuyển iframe
+  function setActiveModule(moduleKey) {
+    document.querySelectorAll('.nav-item').forEach(el => {
+      if (el.getAttribute('data-module') === moduleKey) {
+        el.classList.add('active');
+      } else {
+        el.classList.remove('active');
+      }
+    });
+    const m = modules[moduleKey];
+    if (m) {
+      contentFrame.src = m.url;
+      pageTitle.innerHTML = `<i class="${m.icon} me-2"></i>${m.title}`;
+    }
+    // Lưu module đang chọn
+    localStorage.setItem('currentModule', moduleKey);
+  }
+
+  // Gán sự kiện cho menu
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const moduleKey = el.getAttribute('data-module');
+      if (moduleKey && modules[moduleKey]) {
+        setActiveModule(moduleKey);
+        // Trên mobile, sau khi chọn thì tự động thu gọn sidebar
+        if (window.innerWidth <= 640) {
+          toggleSidebar(true);
+        }
+      }
+    });
+  });
+
+  // Firebase auth
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById('userEmail').innerText = user.email;
+    } else {
+      window.location.href = 'index.html';
+    }
+  });
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await signOut(auth);
+    window.location.href = 'index.html';
+  });
+
+  // Khôi phục trạng thái
+  loadSidebarState();
+  const savedModule = localStorage.getItem('currentModule');
+  if (savedModule && modules[savedModule]) {
+    setActiveModule(savedModule);
+  } else {
+    setActiveModule('outgoing');
+  }
 </script>
 </body>
 </html>
