@@ -302,17 +302,13 @@
     repo: document.getElementById('github-repo').value.trim()
   };
 
-  alert("UID = " + currentUid);
-
-  try {
+ try {
 
    await set(
   ref(database, 'system/githubConfig'),
   githubConfig
 );
-    alert("Lưu thành công");
-
-    updateGithubStatus();
+     updateGithubStatus();
 
     showNotification(
       'Đã lưu cấu hình GitHub!',
