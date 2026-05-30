@@ -3,279 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard | Hệ thống quản lý văn bản</title>
+  <title>Dashboard | Quản lý văn bản</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: #f0f2f5;
-      overflow: hidden;
-      height: 100vh;
-    }
-
-    /* Layout chính */
-    .app-wrapper {
-      display: flex;
-      height: 100vh;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    /* ========= SIDEBAR ========= */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui; background: #f0f2f5; height: 100vh; overflow: hidden; }
+    
+    /* Layout */
+    .app { display: flex; height: 100vh; width: 100%; }
+    
+    /* Sidebar siêu gọn */
     .sidebar {
-      width: 280px;
-      background: linear-gradient(180deg, #0b2b3b 0%, #0a1c2a 100%);
-      color: #e0edf5;
+      width: 260px;
+      background: linear-gradient(180deg, #0d2b3e 0%, #071826 100%);
       display: flex;
       flex-direction: column;
-      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
-      transition: all 0.2s;
       flex-shrink: 0;
-      overflow-y: auto;
-      z-index: 100;
     }
-
-    .sidebar-header {
-      padding: 28px 24px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      margin-bottom: 24px;
-    }
-
-    .sidebar-header h3 {
-      font-size: 20px;
-      font-weight: 700;
-      margin: 0;
-      background: linear-gradient(135deg, #ffffff, #a0d2ff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      letter-spacing: -0.3px;
-    }
-
-    .sidebar-header p {
-      font-size: 12px;
-      opacity: 0.7;
-      margin-top: 8px;
-      margin-bottom: 0;
-    }
-
-    .nav-menu {
-      flex: 1;
-      padding: 0 16px;
-    }
-
+    
+    .logo-area { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 20px; }
+    .logo-area h3 { color: white; font-size: 18px; font-weight: 600; margin: 0; }
+    .logo-area small { color: #8aaec0; font-size: 11px; }
+    
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 12px 18px;
-      margin-bottom: 8px;
-      border-radius: 14px;
+      gap: 12px;
+      padding: 10px 20px;
+      margin: 4px 12px;
+      border-radius: 12px;
       cursor: pointer;
-      transition: all 0.2s ease;
-      color: #cbdde6;
+      color: #cbd5e1;
+      font-size: 14px;
       font-weight: 500;
-      font-size: 15px;
-    }
-
-    .nav-item i {
-      width: 24px;
-      font-size: 1.2rem;
-      text-align: center;
-    }
-
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: white;
-      transform: translateX(4px);
-    }
-
-    .nav-item.active {
-      background: #1e6f9f;
-      color: white;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .nav-item.active i {
-      color: white;
-    }
-
-    .user-section {
-      padding: 20px 20px 24px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      margin-top: auto;
-    }
-
-    .user-email {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 8px 12px;
-      border-radius: 40px;
-      font-size: 12px;
-      text-align: center;
-      font-weight: 500;
-      margin-bottom: 12px;
-      word-break: break-all;
-    }
-
-    .logout-btn {
-      width: 100%;
-      background: rgba(220, 53, 69, 0.85);
-      border: none;
-      padding: 10px;
-      border-radius: 40px;
-      color: white;
-      font-weight: 600;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
       transition: 0.2s;
     }
-
-    .logout-btn:hover {
-      background: #dc3545;
-      transform: translateY(-2px);
-    }
-
-    /* ========= MAIN CONTENT ========= */
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background: #f4f7fc;
-    }
-
-    .topbar {
-      background: white;
-      padding: 16px 28px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-      border-bottom: 1px solid #e9edf2;
-    }
-
-    .topbar h2 {
-      font-size: 1.6rem;
-      font-weight: 600;
-      color: #1e4663;
-      margin: 0;
-    }
-
-    .content-iframe-container {
-      flex: 1;
-      padding: 20px 24px;
-      overflow: auto;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      border-radius: 20px;
-      background: white;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      transition: all 0.2s;
-    }
-
-    /* Scrollbar đẹp */
-    .sidebar::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .sidebar::-webkit-scrollbar-track {
-      background: #0f2a36;
-    }
-
-    .sidebar::-webkit-scrollbar-thumb {
-      background: #2c6e8f;
-      border-radius: 10px;
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        width: 80px;
-      }
-      .sidebar-header h3, .sidebar-header p, .nav-item span:not(i) {
-        display: none;
-      }
-      .nav-item {
-        justify-content: center;
-        padding: 12px 0;
-      }
-      .nav-item i {
-        margin: 0;
-        font-size: 1.4rem;
-      }
-      .user-email, .logout-btn span {
-        display: none;
-      }
-      .logout-btn i {
-        margin: 0;
-        font-size: 1.2rem;
-      }
-      .logout-btn {
-        justify-content: center;
-      }
-    }
+    .nav-item i { width: 22px; font-size: 16px; }
+    .nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+    .nav-item.active { background: #1e6f9f; color: white; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    
+    .user-section { margin-top: auto; padding: 20px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .user-email { background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 11px; text-align: center; margin-bottom: 12px; color: #ddd; }
+    .logout-btn { width: 100%; background: #dc3545; border: none; padding: 8px; border-radius: 30px; color: white; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.2s; }
+    .logout-btn:hover { background: #c82333; transform: translateY(-1px); }
+    
+    /* Main content */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #f4f7fc; }
+    .topbar { background: white; padding: 12px 24px; border-bottom: 1px solid #e2e8f0; }
+    .topbar h4 { margin: 0; font-size: 18px; font-weight: 600; color: #1e4663; }
+    .iframe-container { flex: 1; padding: 16px 20px; overflow: auto; }
+    iframe { width: 100%; height: 100%; border: none; border-radius: 16px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    
+    @media (max-width: 640px) { .sidebar { width: 70px; } .logo-area h3, .logo-area small, .nav-item span, .user-email, .logout-btn span { display: none; } .nav-item { justify-content: center; padding: 12px 0; } .logout-btn { justify-content: center; } }
   </style>
 </head>
 <body>
-<div class="app-wrapper">
-  <!-- Sidebar dọc chuyên nghiệp -->
+<div class="app">
   <div class="sidebar">
-    <div class="sidebar-header">
-      <h3><i class="fa-regular fa-folder-open me-2"></i> Văn bản Office</h3>
-      <p>Quản lý tập trung</p>
-    </div>
+    <div class="logo-area"><h3><i class="fa-regular fa-folder-open me-1"></i> Văn bản</h3><small>Quản lý tập trung</small></div>
     <div class="nav-menu">
-      <div class="nav-item" data-module="outgoing">
-        <i class="fa-solid fa-paper-plane"></i>
-        <span>Văn bản đi</span>
-      </div>
-      <div class="nav-item" data-module="incoming">
-        <i class="fa-solid fa-inbox"></i>
-        <span>Văn bản đến</span>
-      </div>
-      <div class="nav-item" data-module="search">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <span>Tìm kiếm nâng cao</span>
-      </div>
-      <div class="nav-item" data-module="summary">
-        <i class="fa-solid fa-chart-simple"></i>
-        <span>Tổng hợp & Báo cáo</span>
-      </div>
+      <div class="nav-item active" data-module="outgoing"><i class="fa-solid fa-paper-plane"></i><span>Văn bản đi</span></div>
+      <div class="nav-item" data-module="incoming"><i class="fa-solid fa-inbox"></i><span>Văn bản đến</span></div>
+      <div class="nav-item" data-module="search"><i class="fa-solid fa-magnifying-glass"></i><span>Tìm kiếm</span></div>
+      <div class="nav-item" data-module="summary"><i class="fa-solid fa-chart-simple"></i><span>Tổng hợp</span></div>
     </div>
     <div class="user-section">
-      <div class="user-email" id="userEmailSidebar">—</div>
-      <button class="logout-btn" id="logoutBtnSidebar">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Đăng xuất</span>
-      </button>
+      <div class="user-email" id="userEmail">Đang tải...</div>
+      <button class="logout-btn" id="logoutBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i><span>Đăng xuất</span></button>
     </div>
   </div>
-
-  <!-- Khu vực nội dung bên phải -->
-  <div class="main-content">
-    <div class="topbar">
-      <h2 id="pageTitle"><i class="fa-regular fa-file-lines me-2"></i>Văn bản đi</h2>
-    </div>
-    <div class="content-iframe-container">
-      <iframe id="contentFrame" src="cong-van-di.html" title="Nội dung chính"></iframe>
-    </div>
+  <div class="main">
+    <div class="topbar"><h4 id="pageTitle"><i class="fa-solid fa-paper-plane me-2"></i>Văn bản đi</h4></div>
+    <div class="iframe-container"><iframe id="contentFrame" src="cong-van-di.html"></iframe></div>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-
   const firebaseConfig = {
     apiKey: "AIzaSyBWKTyXVK1y2dqxWUWprIxd5CCHMzSMc_o",
     authDomain: "quan-ly-cong-van-dede3.firebaseapp.com",
@@ -285,89 +91,21 @@
     messagingSenderId: "1080528314069",
     appId: "1:1080528314069:web:831f1b3c497ba082f80c5c"
   };
-
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
-
-  // DOM elements
-  const userEmailSpan = document.getElementById("userEmailSidebar");
-  const logoutBtn = document.getElementById("logoutBtnSidebar");
-  const contentFrame = document.getElementById("contentFrame");
-  const pageTitle = document.getElementById("pageTitle");
-
-  // Mapping module -> iframe url + title
-  const modules = {
-    outgoing: {
-      url: "cong-van-di.html",
-      title: "Văn bản đi",
-      icon: "fa-regular fa-paper-plane"
-    },
-    incoming: {
-      url: "cong-van-den.html",
-      title: "Văn bản đến",
-      icon: "fa-regular fa-inbox"
-    },
-    search: {
-      url: "tim-kiem.html",
-      title: "Tìm kiếm nâng cao",
-      icon: "fa-solid fa-magnifying-glass"
-    },
-    summary: {
-      url: "tong-hop.html",
-      title: "Tổng hợp & Báo cáo",
-      icon: "fa-solid fa-chart-simple"
-    }
-  };
-
-  // Active menu highlight
-  let currentModule = "outgoing";
-
-  function setActiveModule(moduleKey) {
-    // Update UI active class
-    document.querySelectorAll('.nav-item').forEach(item => {
-      if (item.getAttribute('data-module') === moduleKey) {
-        item.classList.add('active');
-      } else {
-        item.classList.remove('active');
-      }
-    });
-    // Update iframe & title
-    const moduleData = modules[moduleKey];
-    if (moduleData) {
-      contentFrame.src = moduleData.url;
-      pageTitle.innerHTML = `<i class="${moduleData.icon} me-2"></i>${moduleData.title}`;
-      currentModule = moduleKey;
-    }
+  
+  const modules = { outgoing: { url: "cong-van-di.html", title: "Văn bản đi", icon: "fa-solid fa-paper-plane" }, incoming: { url: "cong-van-den.html", title: "Văn bản đến", icon: "fa-solid fa-inbox" }, search: { url: "tim-kiem.html", title: "Tìm kiếm", icon: "fa-solid fa-magnifying-glass" }, summary: { url: "tong-hop.html", title: "Tổng hợp", icon: "fa-solid fa-chart-simple" } };
+  
+  function setActive(moduleKey) {
+    document.querySelectorAll('.nav-item').forEach(el => { if(el.getAttribute('data-module') === moduleKey) el.classList.add('active'); else el.classList.remove('active'); });
+    const m = modules[moduleKey];
+    if(m) { document.getElementById('contentFrame').src = m.url; document.getElementById('pageTitle').innerHTML = `<i class="${m.icon} me-2"></i>${m.title}`; }
   }
-
-  // Navigation event listeners
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const module = item.getAttribute('data-module');
-      if (module && modules[module]) {
-        setActiveModule(module);
-      }
-    });
-  });
-
-  // Authentication + redirect if not logged in
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      userEmailSpan.innerText = user.email;
-    } else {
-      window.location.href = "index.html";
-    }
-  });
-
-  // Logout
-  logoutBtn.addEventListener("click", async () => {
-    await signOut(auth);
-    // Chuyển hướng về login
-    window.location.href = "index.html";
-  });
-
-  // Mặc định active outgoing khi tải trang
-  setActiveModule('outgoing');
+  document.querySelectorAll('.nav-item').forEach(el => { el.addEventListener('click', () => setActive(el.getAttribute('data-module'))); });
+  
+  onAuthStateChanged(auth, (user) => { if(user) document.getElementById('userEmail').innerText = user.email; else window.location.href = 'index.html'; });
+  document.getElementById('logoutBtn').addEventListener('click', async () => { await signOut(auth); window.location.href = 'index.html'; });
+  setActive('outgoing');
 </script>
 </body>
 </html>
