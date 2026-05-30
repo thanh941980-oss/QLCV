@@ -10,32 +10,44 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <style>
-    * { font-size: 13px; }
-    body {
-      background: #f4f7fc;
-      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-      overflow: auto;
+    * {
+      margin: 0;
       padding: 0;
-      margin: 0;
+      box-sizing: border-box;
     }
 
-    /* Ẩn header cũ khi chạy trong iframe dashboard */
-    body > .container > .d-flex.justify-content-between,
-    body > .container > .d-flex.mb-3,
-    .d-flex.justify-content-between.align-items-center {
-      display: none !important;
+    body {
+      background: #f0f2f5;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    .container {
-      max-width: 100%;
-      padding: 16px 20px;
-      margin: 0;
+    /* Layout chính: cố định form, cuộn list */
+    .app-layout {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 8px 16px 8px 16px;
+      gap: 8px;
     }
 
-    /* Card */
+    /* Phần form thông tin - cố định */
+    .form-fixed {
+      flex-shrink: 0;
+    }
+
+    /* Phần danh sách - cuộn được */
+    .list-scrollable {
+      flex: 1;
+      overflow: auto;
+      min-height: 0;
+    }
+
+    /* Card styling */
     .card {
-      border-radius: 14px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       border: none;
       background: white;
     }
@@ -44,46 +56,67 @@
       background: linear-gradient(105deg, #0066cc 0%, #004d99 100%);
       color: white;
       font-weight: 600;
-      font-size: 13px;
-      padding: 10px 18px;
-      border-radius: 14px 14px 0 0 !important;
+      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: 12px 12px 0 0 !important;
       border: none;
+      letter-spacing: 0.3px;
     }
 
-    .card-header i { margin-right: 8px; }
+    .card-header i {
+      margin-right: 6px;
+    }
 
+    .card-body {
+      padding: 10px 14px;
+    }
+
+    /* Form nhỏ gọn */
     .form-label {
       font-weight: 600;
       color: #1e2a3a;
-      margin-bottom: 4px;
-      font-size: 11px;
+      margin-bottom: 2px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
 
     .form-control, .form-select {
-      border-radius: 8px;
+      border-radius: 6px;
       border: 1px solid #dce3ec;
-      padding: 6px 10px;
-      font-size: 13px;
+      padding: 4px 8px;
+      font-size: 12px;
       transition: 0.2s;
     }
 
     .form-control:focus, .form-select:focus {
       border-color: #0066cc;
-      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+      box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+    }
+
+    textarea.form-control {
+      padding: 4px 8px;
+    }
+
+    .input-group .btn {
+      padding: 4px 8px;
     }
 
     .btn {
-      border-radius: 8px;
-      padding: 5px 14px;
-      font-size: 12px;
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 11px;
       font-weight: 500;
-      transition: 0.2s;
     }
 
-    .btn-sm-custom { padding: 4px 10px; font-size: 12px; }
-    .btn i { margin-right: 5px; }
+    .btn-sm-custom {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+
+    .btn i {
+      margin-right: 4px;
+    }
 
     .btn-primary {
       background: linear-gradient(105deg, #0066cc, #0052a3);
@@ -91,7 +124,6 @@
     }
     .btn-primary:hover {
       background: linear-gradient(105deg, #0052a3, #003f7f);
-      transform: translateY(-1px);
     }
 
     .btn-warning {
@@ -101,28 +133,72 @@
     }
     .btn-warning:hover {
       background: linear-gradient(105deg, #e67e22, #d35400);
-      transform: translateY(-1px);
     }
 
     .btn-secondary {
       background: #5a6c7e;
       border: none;
     }
-    .btn-secondary:hover { background: #3e4d5e; transform: translateY(-1px); }
+    .btn-secondary:hover {
+      background: #3e4d5e;
+    }
 
-    .action-buttons { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
-    .action-btn {
-      padding: 4px 10px;
-      border-radius: 20px;
+    hr {
+      margin: 6px 0;
+      opacity: 0.3;
+    }
+
+    /* Table styling */
+    .table {
+      margin-bottom: 0;
+    }
+
+    .table thead th {
+      background: #f8fafc;
+      font-weight: 700;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 8px 6px;
+      border-bottom: 1.5px solid #e2e8f0;
+      color: #1e293b;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .table tbody td {
+      padding: 6px 6px;
+      vertical-align: middle;
       font-size: 11px;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .table tbody tr:hover {
+      background: #f9fafb;
+    }
+
+    /* Action buttons */
+    .action-buttons {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      padding: 3px 8px;
+      border-radius: 16px;
+      font-size: 10px;
       font-weight: 500;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       cursor: pointer;
       border: none;
       transition: 0.2s;
     }
+
     .action-btn.view { background: #eef2ff; color: #1e40af; }
     .action-btn.view:hover { background: #1e40af; color: white; }
     .action-btn.edit { background: #fff3e6; color: #e67e22; }
@@ -130,87 +206,105 @@
     .action-btn.delete { background: #fee2e2; color: #b91c1c; }
     .action-btn.delete:hover { background: #b91c1c; color: white; }
 
-    .table { margin-bottom: 0; }
-    .table thead th {
-      background: #f8fafc;
-      font-weight: 700;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 12px 8px;
-      border-bottom: 1.5px solid #e2e8f0;
-      color: #1e293b;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .table tbody td {
-      padding: 10px 8px;
-      vertical-align: middle;
-      font-size: 12px;
-      border-bottom: 1px solid #edf2f7;
-    }
-    .table tbody tr:hover { background: #f9fafb; }
-
     .content-preview {
-      max-width: 200px;
+      max-width: 180px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       cursor: pointer;
       color: #0066cc;
       font-weight: 500;
+      font-size: 11px;
     }
-    .content-preview:hover { color: #003f7f; text-decoration: underline; }
+    .content-preview:hover {
+      color: #003f7f;
+      text-decoration: underline;
+    }
 
     .badge-info {
       background: #e6f0ff;
       color: #0066cc;
-      padding: 3px 8px;
-      border-radius: 20px;
-      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 16px;
+      font-size: 10px;
       font-weight: 600;
     }
 
     .file-link {
       background: #f1f5f9;
-      padding: 4px 10px;
-      border-radius: 20px;
+      padding: 3px 8px;
+      border-radius: 16px;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       text-decoration: none;
       color: #2c3e66;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 500;
       cursor: pointer;
       border: none;
     }
-    .file-link:hover { background: #e2e8f0; color: #0066cc; }
+    .file-link:hover {
+      background: #e2e8f0;
+      color: #0066cc;
+    }
 
-    .info-card { margin-bottom: 16px; }
-    .list-card { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    .list-card .card-body { flex: 1; overflow: auto; padding: 0; }
-    .list-card .table-responsive { height: 100%; overflow: auto; }
+    /* GitHub toggle button */
+    .github-toggle-btn {
+      background: transparent;
+      border: 1px solid rgba(0, 102, 204, 0.3);
+      color: #0066cc;
+      border-radius: 30px;
+      padding: 3px 10px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .github-toggle-btn:hover {
+      background: #0066cc;
+      color: white;
+      border-color: #0066cc;
+    }
 
-    .search-row input {
-      font-size: 11px;
-      padding: 5px 6px;
-      border-radius: 6px;
+    .current-file-info {
+      background: #f1f5f9;
+      padding: 5px 10px;
+      border-radius: 8px;
+      margin-top: 5px;
+      border-left: 3px solid #0066cc;
+      font-size: 10px;
+    }
+
+    .inline-stats {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .inline-stat-item {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 500;
+      color: white;
     }
 
     .notification {
       position: fixed;
       top: 20px;
       right: 20px;
-      padding: 10px 18px;
-      border-radius: 40px;
+      padding: 8px 16px;
+      border-radius: 30px;
       color: white;
       display: none;
       z-index: 2000;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       animation: slideIn 0.25s ease;
     }
     @keyframes slideIn {
@@ -221,151 +315,127 @@
     .notification.error { background: linear-gradient(105deg, #e74c3c, #c0392b); }
     .notification.info { background: linear-gradient(105deg, #3498db, #2980b9); }
 
-    .current-file-info {
-      background: #f1f5f9;
-      padding: 8px 12px;
-      border-radius: 10px;
-      margin-top: 6px;
-      border-left: 3px solid #0066cc;
-      font-size: 11px;
-    }
-
     .upload-progress {
       position: fixed;
       bottom: 20px;
       right: 20px;
       background: white;
-      padding: 12px 16px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 10px 14px;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.1);
       display: none;
       z-index: 2000;
-      min-width: 280px;
+      min-width: 250px;
     }
 
-    .inline-stats { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .inline-stat-item {
-      background: rgba(255,255,255,0.2);
-      padding: 3px 12px;
-      border-radius: 30px;
-      font-size: 12px;
-      font-weight: 500;
-      color: white;
+    .search-row input {
+      font-size: 10px;
+      padding: 3px 5px;
+      border-radius: 4px;
     }
 
-    hr { margin: 8px 0; opacity: 0.4; }
-
-    /* Nút cấu hình GitHub nhỏ gọn */
-    .github-toggle-btn {
-      background: transparent;
-      border: 1px solid rgba(0,102,204,0.3);
-      color: #0066cc;
-      border-radius: 30px;
-      padding: 4px 12px;
-      font-size: 11px;
-      cursor: pointer;
-      transition: 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 12px;
+    /* Scrollbar */
+    .list-scrollable::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
     }
-    .github-toggle-btn:hover {
-      background: #0066cc;
-      color: white;
-      border-color: #0066cc;
+    .list-scrollable::-webkit-scrollbar-track {
+      background: #e2e8f0;
+      border-radius: 10px;
+    }
+    .list-scrollable::-webkit-scrollbar-thumb {
+      background: #94a3b8;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
-<div class="container">
-  <!-- Chỉ giữ lại nút bật/tắt cấu hình GitHub -->
-  <div class="d-flex justify-content-end mb-2">
+<div class="app-layout">
+  <!-- Nút GitHub nhỏ gọn -->
+  <div class="d-flex justify-content-end" style="margin-bottom: 0;">
     <button class="github-toggle-btn" id="toggleGithubBtn">
-      <i class="fa-brands fa-github"></i> Cấu hình GitHub
+      <i class="fa-brands fa-github"></i> GitHub
       <i class="fa-solid fa-chevron-down" id="toggleIcon"></i>
     </button>
   </div>
 
-  <!-- GitHub config card -->
-  <div class="card mb-3" id="githubConfigCard" style="display: none;">
-    <div class="card-header py-2"><i class="fa-brands fa-github"></i> Cấu hình GitHub Storage</div>
+  <!-- GitHub config card - có thể ẩn/hiện -->
+  <div class="card form-fixed" id="githubConfigCard" style="display: none; margin-bottom: 6px;">
+    <div class="card-header py-1"><i class="fa-brands fa-github"></i> Cấu hình GitHub</div>
     <div class="card-body py-2">
-      <div class="row g-2">
+      <div class="row g-1">
         <div class="col-md-4">
-          <label class="form-label">GitHub Token</label>
+          <label class="form-label">Token</label>
           <input type="password" id="github-token" class="form-control form-control-sm" placeholder="ghp_xxxxxx">
-          <small class="text-muted">Personal access token (classic)</small>
         </div>
         <div class="col-md-3">
-          <label class="form-label">Repository Owner</label>
+          <label class="form-label">Owner</label>
           <input type="text" id="github-owner" class="form-control form-control-sm" placeholder="username">
         </div>
         <div class="col-md-3">
-          <label class="form-label">Repository Name</label>
+          <label class="form-label">Repository</label>
           <input type="text" id="github-repo" class="form-control form-control-sm" placeholder="repo-name">
         </div>
         <div class="col-md-2">
           <button class="btn btn-primary btn-sm w-100" id="save-github-config"><i class="fa-solid fa-save"></i> Lưu</button>
         </div>
       </div>
-      <div id="github-status" class="mt-2"></div>
+      <div id="github-status" class="mt-1"></div>
     </div>
   </div>
 
-  <!-- Form nhập thông tin -->
-  <div class="card info-card">
-    <div class="card-header py-2"><i class="fa-solid fa-file-signature"></i> Thông tin văn bản</div>
+  <!-- Form thông tin văn bản - CỐ ĐỊNH -->
+  <div class="card form-fixed">
+    <div class="card-header py-1"><i class="fa-solid fa-file-signature"></i> Thông tin văn bản</div>
     <div class="card-body py-2">
-      <div class="row g-2">
+      <div class="row g-1">
         <div class="col-md-2">
-          <label class="form-label">Năm <span class="text-danger">*</span></label>
+          <label class="form-label">Năm *</label>
           <div class="input-group">
-            <select id="nam" class="form-select form-select-sm" required><option value="">Chọn năm</option></select>
-            <button class="btn btn-outline-primary btn-sm-custom" id="them-nam-btn" title="Thêm năm mới"><i class="fa fa-plus"></i></button>
+            <select id="nam" class="form-select form-select-sm" required><option value="">Chọn</option></select>
+            <button class="btn btn-outline-primary btn-sm-custom" id="them-nam-btn"><i class="fa fa-plus"></i></button>
           </div>
         </div>
         <div class="col-md-2">
-          <label class="form-label">Số CV <span class="text-danger">*</span></label>
-          <input type="text" id="so-vb" class="form-control form-control-sm" placeholder="VD: 123/QĐ-UBND" required>
+          <label class="form-label">Số CV *</label>
+          <input type="text" id="so-vb" class="form-control form-control-sm" placeholder="VD: 123/QĐ" required>
         </div>
         <div class="col-md-2">
-          <label class="form-label">Ngày ký <span class="text-danger">*</span></label>
+          <label class="form-label">Ngày ký *</label>
           <input type="date" id="ngay-ky" class="form-control form-control-sm" required>
         </div>
         <div class="col-md-2">
-          <label class="form-label">Tên VB <span class="text-danger">*</span></label>
+          <label class="form-label">Tên VB *</label>
           <div class="input-group">
             <select id="ten-vb" class="form-select form-select-sm" required><option value="">Chọn</option></select>
-            <button class="btn btn-outline-primary btn-sm-custom" id="them-ten-vb-btn" title="Thêm mới"><i class="fa fa-plus"></i></button>
+            <button class="btn btn-outline-primary btn-sm-custom" id="them-ten-vb-btn"><i class="fa fa-plus"></i></button>
           </div>
         </div>
         <div class="col-md-2">
-          <label class="form-label">Người ký <span class="text-danger">*</span></label>
+          <label class="form-label">Người ký *</label>
           <div class="input-group">
             <select id="nguoi-ky" class="form-select form-select-sm" required><option value="">Chọn</option></select>
-            <button class="btn btn-outline-primary btn-sm-custom" id="them-nguoi-ky-btn" title="Thêm mới"><i class="fa fa-plus"></i></button>
+            <button class="btn btn-outline-primary btn-sm-custom" id="them-nguoi-ky-btn"><i class="fa fa-plus"></i></button>
           </div>
         </div>
         <div class="col-md-2">
-          <label class="form-label">Nơi BH <span class="text-danger">*</span></label>
+          <label class="form-label">Nơi BH *</label>
           <div class="input-group">
             <select id="noi-ban-hanh" class="form-select form-select-sm" required><option value="">Chọn</option></select>
-            <button class="btn btn-outline-primary btn-sm-custom" id="them-noi-ban-hanh-btn" title="Thêm mới"><i class="fa fa-plus"></i></button>
+            <button class="btn btn-outline-primary btn-sm-custom" id="them-noi-ban-hanh-btn"><i class="fa fa-plus"></i></button>
           </div>
         </div>
         <div class="col-md-8">
-          <label class="form-label">Nội dung <span class="text-danger">*</span></label>
-          <textarea id="noi-dung" class="form-control form-control-sm" rows="2" placeholder="Nhập nội dung công văn..." required style="resize: vertical;"></textarea>
+          <label class="form-label">Nội dung *</label>
+          <textarea id="noi-dung" class="form-control form-control-sm" rows="1" placeholder="Nhập nội dung công văn..." required></textarea>
         </div>
         <div class="col-md-4">
           <label class="form-label">File đính kèm</label>
           <input type="file" id="file-dinh-kem" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar">
-          <small class="text-muted">Mọi định dạng, không giới hạn dung lượng</small>
           <div id="current-file-info" class="current-file-info" style="display: none;"></div>
         </div>
         <div class="col-12">
-          <hr class="my-2">
+          <hr>
           <div class="d-flex justify-content-end gap-2">
             <button class="btn btn-secondary btn-sm" id="reset-cvdi-btn"><i class="fa fa-rotate"></i> Làm mới</button>
             <button class="btn btn-primary btn-sm" id="save-cvdi-btn"><i class="fa fa-save"></i> Lưu</button>
@@ -376,34 +446,35 @@
     </div>
   </div>
 
-  <!-- Danh sách văn bản -->
-  <div class="card list-card">
-    <div class="card-header py-2 d-flex align-items-center gap-3 flex-wrap">
-      <div><i class="fa-solid fa-list"></i> Danh sách công văn <span id="totalCount" class="badge bg-light text-dark ms-2">0</span></div>
+  <!-- Danh sách công văn - CUỘN ĐƯỢC -->
+  <div class="card list-scrollable">
+    <div class="card-header py-1 d-flex align-items-center gap-2 flex-wrap">
+      <div><i class="fa-solid fa-list"></i> Danh sách công văn <span id="totalCount" class="badge bg-light text-dark ms-1">0</span></div>
       <div id="thongKeContainer" class="inline-stats"></div>
     </div>
     <div class="card-body p-0">
-      <div id="loading" class="text-center py-5" style="display: none;">
-        <i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i>
-        <div>Đang tải dữ liệu...</div>
+      <div id="loading" class="text-center py-4" style="display: none;">
+        <i class="fa-solid fa-spinner fa-spin fa-2x mb-1"></i>
+        <div class="small">Đang tải dữ liệu...</div>
       </div>
       <div class="table-responsive">
         <table class="table table-hover mb-0">
           <thead>
             <tr><th width="4%">STT</th><th width="7%">Năm</th><th width="9%">Số VB</th><th width="11%">Tên VB</th><th width="9%">Ngày ký</th><th width="9%">Người ký</th><th width="10%">Nơi BH</th><th width="20%">Nội dung</th><th width="10%">File</th><th width="11%">Thao tác</th></tr>
             <tr class="search-row">
-              <th></th><th><input type="text" class="form-control column-search" data-column="1" placeholder="Tìm năm"></th>
-              <th><input type="text" class="form-control column-search" data-column="2" placeholder="Tìm số VB"></th>
-              <th><input type="text" class="form-control column-search" data-column="3" placeholder="Tìm tên VB"></th>
-              <th><input type="text" class="form-control column-search" data-column="4" placeholder="Tìm ngày ký"></th>
-              <th><input type="text" class="form-control column-search" data-column="5" placeholder="Tìm người ký"></th>
-              <th><input type="text" class="form-control column-search" data-column="6" placeholder="Tìm nơi BH"></th>
-              <th><input type="text" class="form-control column-search" data-column="7" placeholder="Tìm nội dung"></th>
-              <th><input type="text" class="form-control column-search" data-column="8" placeholder="Tìm file"></th>
+              <th></th><th><input type="text" class="form-control column-search" data-column="1" placeholder="Tìm"></th>
+              <th><input type="text" class="form-control column-search" data-column="2" placeholder="Tìm"></th>
+              <th><input type="text" class="form-control column-search" data-column="3" placeholder="Tìm"></th>
+              <th><input type="text" class="form-control column-search" data-column="4" placeholder="Tìm"></th>
+              <th><input type="text" class="form-control column-search" data-column="5" placeholder="Tìm"></th>
+              <th><input type="text" class="form-control column-search" data-column="6" placeholder="Tìm"></th>
+              <th><input type="text" class="form-control column-search" data-column="7" placeholder="Tìm"></th>
+              <th><input type="text" class="form-control column-search" data-column="8" placeholder="Tìm"></th>
               <th></th>
             </tr>
           </thead>
-          <tbody id="documentsBody"><tr><td colspan="10" class="text-center text-muted py-4"><i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>Chưa có công văn nào</td></tr></tbody>
+          <tbody id="documentsBody"><tr><td colspan="10" class="text-center text-muted py-4"><i class="fa-solid fa-inbox fa-2x mb-1 d-block"></i>Chưa có công văn nào</td></tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -412,8 +483,8 @@
 
 <!-- Modals -->
 <div id="uploadProgress" class="upload-progress"><div><i class="fa-solid fa-spinner fa-spin"></i> Đang upload...</div><div class="progress mt-1"><div id="uploadProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div></div></div>
-<div class="modal fade" id="filePreviewModal" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-centered"><div class="modal-content"><div class="modal-header py-2"><h6 class="modal-title"><i class="fa-solid fa-file"></i> <span id="previewFileName"></span></h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0" id="filePreviewContent"><div class="text-center p-5"><i class="fa-solid fa-spinner fa-spin fa-3x"></i><p class="mt-3">Đang tải file...</p></div></div><div class="modal-footer py-2"><a href="#" id="downloadFileBtn" class="btn btn-primary btn-sm" download><i class="fa-solid fa-download"></i> Tải xuống</a><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button></div></div></div></div>
-<div class="modal fade" id="contentModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header py-2"><h6 class="modal-title"><i class="fa-solid fa-align-left"></i> Nội dung công văn</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="contentModalBody"></div><div class="modal-footer py-2"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button></div></div></div></div>
+<div class="modal fade" id="filePreviewModal" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-centered"><div class="modal-content"><div class="modal-header py-1"><h6 class="modal-title"><i class="fa-solid fa-file"></i> <span id="previewFileName"></span></h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0" id="filePreviewContent"><div class="text-center p-5"><i class="fa-solid fa-spinner fa-spin fa-3x"></i><p>Đang tải file...</p></div></div><div class="modal-footer py-1"><a href="#" id="downloadFileBtn" class="btn btn-primary btn-sm" download><i class="fa-solid fa-download"></i> Tải xuống</a><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button></div></div></div></div>
+<div class="modal fade" id="contentModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header py-1"><h6 class="modal-title"><i class="fa-solid fa-align-left"></i> Nội dung công văn</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="contentModalBody"></div><div class="modal-footer py-1"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button></div></div></div></div>
 <div id="successNotification" class="notification success"></div>
 <div id="errorNotification" class="notification error"></div>
 <div id="infoNotification" class="notification info"></div>
@@ -440,18 +511,9 @@
   let currentUser = null, currentUid = null, editingId = null, currentFileData = null, documentsDataGlobal = {};
   let githubConfig = { token: '', owner: '', repo: '' };
 
-  function showNotification(message, isSuccess = true, isInfo = false) {
-    const notifId = isInfo ? 'infoNotification' : (isSuccess ? 'successNotification' : 'errorNotification');
-    const notification = document.getElementById(notifId);
-    if (notification) { notification.textContent = message; notification.style.display = 'block'; setTimeout(() => { notification.style.display = 'none'; }, 3000); }
-  }
-
-  function showUploadProgress(show, percent = 0, message = 'Đang upload lên GitHub...') {
-    const progressDiv = document.getElementById('uploadProgress');
-    const progressBar = document.getElementById('uploadProgressBar');
-    const msgDiv = progressDiv ? progressDiv.querySelector('div:first-child') : null;
-    if (show) { if (msgDiv) msgDiv.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${message}`; if (progressDiv) progressDiv.style.display = 'block'; if (progressBar) progressBar.style.width = percent + '%'; }
-    else { if (progressDiv) progressDiv.style.display = 'none'; if (progressBar) progressBar.style.width = '0%'; }
+  function showNotification(message, isSuccess = true) {
+    const notification = document.getElementById(isSuccess ? 'successNotification' : 'errorNotification');
+    if (notification) { notification.textContent = message; notification.style.display = 'block'; setTimeout(() => { notification.style.display = 'none'; }, 2500); }
   }
 
   async function loadGithubConfig() {
@@ -477,41 +539,34 @@
       await set(ref(database, 'system/githubConfig'), githubConfig);
       updateGithubStatus();
       showNotification('Đã lưu cấu hình GitHub!', true);
-    } catch (error) {
-      console.error(error);
-      showNotification('Lỗi lưu cấu hình: ' + error.message, false);
-    }
+    } catch (error) { showNotification('Lỗi: ' + error.message, false); }
   }
 
   function updateGithubStatus() {
     const statusDiv = document.getElementById('github-status');
     if (statusDiv) {
-      if (githubConfig.token && githubConfig.owner && githubConfig.repo) statusDiv.innerHTML = '<div class="alert alert-success py-1 mb-0"><i class="fa-solid fa-check-circle"></i> Đã cấu hình: ' + githubConfig.owner + '/' + githubConfig.repo + '</div>';
-      else statusDiv.innerHTML = '<div class="alert alert-warning py-1 mb-0"><i class="fa-solid fa-exclamation-triangle"></i> Vui lòng cấu hình GitHub Token, Owner và Repository để upload file</div>';
+      if (githubConfig.token && githubConfig.owner && githubConfig.repo) statusDiv.innerHTML = '<small class="text-success"><i class="fa-solid fa-check-circle"></i> Đã cấu hình: ' + githubConfig.owner + '/' + githubConfig.repo + '</small>';
+      else statusDiv.innerHTML = '<small class="text-warning"><i class="fa-solid fa-exclamation-triangle"></i> Cần cấu hình GitHub để upload file</small>';
     }
   }
 
   async function uploadToGitHub(file, docId) {
-    if (!githubConfig.token || !githubConfig.owner || !githubConfig.repo) throw new Error('Vui lòng cấu hình GitHub trước khi upload file!');
+    if (!githubConfig.token || !githubConfig.owner || !githubConfig.repo) throw new Error('Vui lòng cấu hình GitHub!');
     const fileName = `congvan_${currentUid}_${docId}_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
     const filePath = `cong-van-di/${currentUid}/${fileName}`;
-    const base64 = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = error => reject(error); });
-    showUploadProgress(true, 30, 'Đang upload lên GitHub...');
+    const base64 = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result.split(',')[1]); reader.onerror = reject; });
     const response = await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${filePath}`, {
       method: 'PUT', headers: { 'Authorization': `token ${githubConfig.token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: `Upload file ${fileName}`, content: base64, branch: 'main' })
+      body: JSON.stringify({ message: `Upload ${fileName}`, content: base64, branch: 'main' })
     });
-    showUploadProgress(true, 80, 'Đang xử lý...');
-    if (!response.ok) { const error = await response.json(); throw new Error(error.message || 'Upload lên GitHub thất bại'); }
+    if (!response.ok) throw new Error('Upload thất bại');
     const data = await response.json();
-    showUploadProgress(false);
     return { name: file.name, url: data.content.download_url, path: filePath, size: file.size, type: file.type, sha: data.content.sha };
   }
 
   async function deleteFromGitHub(filePath, sha) {
-    if (!filePath || !sha) return;
-    if (!githubConfig.token || !githubConfig.owner || !githubConfig.repo) return;
-    try { await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${filePath}`, { method: 'DELETE', headers: { 'Authorization': `token ${githubConfig.token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Xóa file`, sha: sha, branch: 'main' }) }); } catch (error) { console.log('Không thể xóa file:', error); }
+    if (!filePath || !sha || !githubConfig.token) return;
+    try { await fetch(`https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${filePath}`, { method: 'DELETE', headers: { 'Authorization': `token ${githubConfig.token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ message: `Xóa file`, sha: sha, branch: 'main' }) }); } catch (error) { console.log('Xóa file lỗi:', error); }
   }
 
   function getDbPath(path) { return `users/${currentUid}/${path}`; }
@@ -528,22 +583,22 @@
     const year = document.getElementById('nam').value, documentNumber = document.getElementById('so-vb').value, documentName = document.getElementById('ten-vb').value;
     const signDate = document.getElementById('ngay-ky').value, signer = document.getElementById('nguoi-ky').value, issuingPlace = document.getElementById('noi-ban-hanh').value;
     const content = document.getElementById('noi-dung').value, file = document.getElementById('file-dinh-kem').files[0];
-    if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { showNotification('Vui lòng điền đầy đủ thông tin bắt buộc!', false); return; }
+    if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { showNotification('Vui lòng điền đầy đủ!', false); return; }
     try {
       const newDocRef = push(ref(database, getDbPath('congVanDi'))); const newId = newDocRef.key;
       let fileData = null;
-      if (file) { try { fileData = await uploadToGitHub(file, newId); } catch (uploadError) { showNotification('Upload file thất bại: ' + uploadError.message, false); return; } }
+      if (file) { try { fileData = await uploadToGitHub(file, newId); } catch (uploadError) { showNotification('Upload thất bại: ' + uploadError.message, false); return; } }
       await set(newDocRef, { year, documentNumber, documentName, signDate, signer, issuingPlace, content, fileData, hasFile: !!fileData, createdAt: new Date().toISOString(), createdBy: currentUid });
-      showNotification('Thêm công văn thành công!'); refreshForm();
+      showNotification('Thêm thành công!'); refreshForm();
     } catch (error) { showNotification('Lỗi: ' + error.message, false); }
   }
 
   async function updateDocument() {
-    if (!editingId) { showNotification('Không tìm thấy ID công văn cần cập nhật!', false); return; }
+    if (!editingId) return;
     const year = document.getElementById('nam').value, documentNumber = document.getElementById('so-vb').value, documentName = document.getElementById('ten-vb').value;
     const signDate = document.getElementById('ngay-ky').value, signer = document.getElementById('nguoi-ky').value, issuingPlace = document.getElementById('noi-ban-hanh').value;
     const content = document.getElementById('noi-dung').value, newFile = document.getElementById('file-dinh-kem').files[0];
-    if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { showNotification('Vui lòng điền đầy đủ thông tin bắt buộc', false); return; }
+    if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { showNotification('Điền đầy đủ thông tin!', false); return; }
     try {
       let fileData = currentFileData;
       if (newFile) { if (currentFileData?.path && currentFileData?.sha) await deleteFromGitHub(currentFileData.path, currentFileData.sha); fileData = await uploadToGitHub(newFile, editingId); }
@@ -553,31 +608,32 @@
   }
 
   async function deleteDocument(id) {
-    if (!confirm('Bạn có chắc chắn muốn xóa công văn này?')) return;
+    if (!confirm('Xóa công văn này?')) return;
     const doc = documentsDataGlobal[id];
-    try { if (doc?.fileData?.path && doc?.fileData?.sha) await deleteFromGitHub(doc.fileData.path, doc.fileData.sha); await remove(ref(database, getDbPath(`congVanDi/${id}`))); showNotification('Xóa công văn thành công!'); } catch (error) { showNotification('Xóa thất bại: ' + error.message, false); }
+    try { if (doc?.fileData?.path && doc?.fileData?.sha) await deleteFromGitHub(doc.fileData.path, doc.fileData.sha); await remove(ref(database, getDbPath(`congVanDi/${id}`))); showNotification('Xóa thành công!'); } catch (error) { showNotification('Xóa thất bại: ' + error.message, false); }
   }
 
   function editDocument(id, data) {
     document.getElementById('nam').value = data.year || ''; document.getElementById('so-vb').value = data.documentNumber || ''; document.getElementById('ten-vb').value = data.documentName || '';
     document.getElementById('ngay-ky').value = data.signDate || ''; document.getElementById('nguoi-ky').value = data.signer || ''; document.getElementById('noi-ban-hanh').value = data.issuingPlace || '';
     document.getElementById('noi-dung').value = data.content || ''; currentFileData = data.fileData || null; editingId = id;
-    const currentFileDiv = document.getElementById('current-file-info');
-    if (currentFileData?.url) { currentFileDiv.style.display = 'block'; currentFileDiv.innerHTML = `<strong><i class="fa-solid fa-paperclip"></i> File hiện tại:</strong><div class="d-flex gap-2 mt-1"><button type="button" class="btn btn-sm btn-outline-primary" onclick='window.openCurrentFile()'><i class="fa-solid fa-eye"></i> Mở file</button><span class="text-muted small">${currentFileData.name} (${(currentFileData.size / 1024 / 1024).toFixed(2)} MB)</span></div><small class="text-muted">📌 Chọn file mới để thay thế</small>`; }
-    else { currentFileDiv.style.display = 'block'; currentFileDiv.innerHTML = `<strong><i class="fa-regular fa-file"></i> Chưa có file</strong><br><small>📌 Chọn file bên dưới để thêm mới</small>`; }
-    document.getElementById('update-cvdi-btn').style.display = 'inline-block'; document.getElementById('save-cvdi-btn').style.display = 'none'; window.scrollTo({ top: 0, behavior: 'smooth' });
+    const div = document.getElementById('current-file-info');
+    if (currentFileData?.url) { div.style.display = 'block'; div.innerHTML = `<strong><i class="fa-solid fa-paperclip"></i> File:</strong> ${currentFileData.name} <button class="btn btn-sm btn-outline-primary ms-2" onclick='window.openCurrentFile()'><i class="fa-solid fa-eye"></i></button>`; }
+    else { div.style.display = 'block'; div.innerHTML = `<i class="fa-regular fa-file"></i> Chưa có file`; }
+    document.getElementById('update-cvdi-btn').style.display = 'inline-block'; document.getElementById('save-cvdi-btn').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function openFile(fileData) { if (!fileData?.url) { showNotification('Không có file đính kèm!', false); return; } const modal = new bootstrap.Modal(document.getElementById('filePreviewModal')); const previewContent = document.getElementById('filePreviewContent'); document.getElementById('previewFileName').textContent = fileData.name; document.getElementById('downloadFileBtn').href = fileData.url; const ext = fileData.name.split('.').pop().toLowerCase(); if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) previewContent.innerHTML = `<img src="${fileData.url}" class="img-fluid" style="max-height: 70vh; width: 100%; object-fit: contain;">`; else if (ext === 'pdf') previewContent.innerHTML = `<iframe src="${fileData.url}" width="100%" height="600px" style="border: none;"></iframe>`; else previewContent.innerHTML = `<div class="text-center p-5"><i class="fa-solid fa-file fa-4x mb-3"></i><p>Không thể xem trước</p><a href="${fileData.url}" class="btn btn-primary" target="_blank">Tải file</a></div>`; modal.show(); }
-  function viewFullContent(content) { if (!content?.trim()) { showNotification('Không có nội dung!', false); return; } const modal = new bootstrap.Modal(document.getElementById('contentModal')); document.getElementById('contentModalBody').innerHTML = `<div style="white-space: pre-wrap; max-height: 500px; overflow-y: auto;">${escapeHtml(content).replace(/\n/g, '<br>')}</div>`; modal.show(); }
+  function openFile(fileData) { if (!fileData?.url) return; const modal = new bootstrap.Modal(document.getElementById('filePreviewModal')); document.getElementById('previewFileName').textContent = fileData.name; document.getElementById('downloadFileBtn').href = fileData.url; const ext = fileData.name.split('.').pop().toLowerCase(); const preview = document.getElementById('filePreviewContent'); if (['jpg','jpeg','png','gif'].includes(ext)) preview.innerHTML = `<img src="${fileData.url}" class="img-fluid">`; else if (ext === 'pdf') preview.innerHTML = `<iframe src="${fileData.url}" width="100%" height="550px"></iframe>`; else preview.innerHTML = `<div class="text-center p-4"><i class="fa-solid fa-file fa-3x"></i><p><a href="${fileData.url}" target="_blank">Tải file</a></p></div>`; modal.show(); }
+  function viewFullContent(content) { if (!content?.trim()) return; const modal = new bootstrap.Modal(document.getElementById('contentModal')); document.getElementById('contentModalBody').innerHTML = `<div style="white-space: pre-wrap;">${escapeHtml(content)}</div>`; modal.show(); }
   function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ''; }
 
   function displayDocuments(snapshot) {
     const tbody = document.getElementById('documentsBody'); const totalSpan = document.getElementById('totalCount'); tbody.innerHTML = '';
-    if (!snapshot.exists()) { tbody.innerHTML = '<tr><td colspan="10" class="text-center py-4">Chưa có công văn nào</td></tr>'; totalSpan.textContent = '0'; return; }
+    if (!snapshot.exists()) { tbody.innerHTML = '<tr><td colspan="10" class="text-center py-3">Chưa có công văn nào</td></tr>'; totalSpan.textContent = '0'; return; }
     const docs = snapshot.val(); documentsDataGlobal = docs; renderThongKe(docs); let stt = 1, total = 0;
-    for (const id in docs) { const doc = docs[id]; total++; const hasFile = doc.hasFile && doc.fileData; const contentText = doc.content || ''; const contentPreview = contentText.length > 80 ? contentText.substring(0, 80) + '...' : contentText; const fileNameDisplay = hasFile ? (doc.fileData.name.length > 15 ? doc.fileData.name.substring(0, 15) + '...' : doc.fileData.name) : '';
-      tbody.innerHTML += `<tr><td class="text-center">${stt}</td><td class="text-center"><span class="badge-info">${escapeHtml(doc.year || '')}</span></td><td><strong>${escapeHtml(doc.documentNumber || '')}</strong></td><td>${escapeHtml(doc.documentName || '')}</td><td class="text-center">${doc.signDate || ''}</td><td>${escapeHtml(doc.signer || '')}</td><td>${escapeHtml(doc.issuingPlace || '')}</td><td><div class="content-preview" onclick='window.viewFullContentFromGlobal(${JSON.stringify(contentText)})'>${escapeHtml(contentPreview) || 'Chưa có nội dung'}</div></td><td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileNameDisplay)}</button>` : '<span class="text-muted">Không có file</span>'}</td><td><div class="action-buttons">${hasFile ? `<button class="action-btn view" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-eye"></i> Mở</button>` : ''}<button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i> Sửa</button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i> Xóa</button></div></td></tr>`;
+    for (const id in docs) { const doc = docs[id]; total++; const hasFile = doc.hasFile && doc.fileData; const contentText = doc.content || ''; const contentPreview = contentText.length > 70 ? contentText.substring(0,70)+'...' : contentText; const fileNameDisplay = hasFile ? (doc.fileData.name.length > 12 ? doc.fileData.name.substring(0,12)+'...' : doc.fileData.name) : '';
+      tbody.innerHTML += `<tr><td class="text-center">${stt}</td><td class="text-center"><span class="badge-info">${escapeHtml(doc.year||'')}</span></td><td><strong>${escapeHtml(doc.documentNumber||'')}</strong></td><td>${escapeHtml(doc.documentName||'')}</td><td>${doc.signDate||''}</td><td>${escapeHtml(doc.signer||'')}</td><td>${escapeHtml(doc.issuingPlace||'')}</td><td><div class="content-preview" onclick='window.viewFullContentFromGlobal(${JSON.stringify(contentText)})'>${escapeHtml(contentPreview)||'Chưa có'}</div></td><td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileNameDisplay)}</button>` : '<span class="text-muted">—</span>'}</td><td><div class="action-buttons">${hasFile ? `<button class="action-btn view" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-eye"></i></button>` : ''}<button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i></button></div></td></tr>`;
       stt++;
     } totalSpan.textContent = total;
   }
@@ -589,74 +645,67 @@
     const stats = {};
     for (const id in docs) {
       const doc = docs[id];
-      const tenVB = doc.documentName || 'Không rõ';
+      const tenVB = doc.documentName || 'Khác';
       const soVB = doc.documentNumber || '';
       const match = soVB.match(/\d+/);
       const so = match ? parseInt(match[0]) : 0;
-      if (!stats[tenVB] || so > stats[tenVB]) { stats[tenVB] = so; }
+      if (!stats[tenVB] || so > stats[tenVB]) stats[tenVB] = so;
     }
-    Object.entries(stats).sort((a, b) => b[1] - a[1]).forEach(([name, maxSo]) => { container.innerHTML += `<span class="inline-stat-item">${name}: ${maxSo}</span>`; });
+    Object.entries(stats).sort((a,b)=>b[1]-a[1]).forEach(([name,maxSo]) => { container.innerHTML += `<span class="inline-stat-item">${name}: ${maxSo}</span>`; });
   }
 
   document.addEventListener('input', function(e) {
     if (!e.target.classList.contains('column-search')) return;
-    const rows = document.querySelectorAll('#documentsBody tr'); const searchInputs = document.querySelectorAll('.column-search');
-    rows.forEach(row => { let visible = true; searchInputs.forEach(input => { const colIndex = parseInt(input.dataset.column); const keyword = input.value.trim().toLowerCase(); if (keyword !== '') { const cell = row.children[colIndex]; if (cell && !cell.innerText.toLowerCase().includes(keyword)) visible = false; } }); row.style.display = visible ? '' : 'none'; });
+    const rows = document.querySelectorAll('#documentsBody tr'); const inputs = document.querySelectorAll('.column-search');
+    rows.forEach(row => { let visible = true; inputs.forEach(input => { const col = parseInt(input.dataset.column); const keyword = input.value.trim().toLowerCase(); if (keyword && row.children[col] && !row.children[col].innerText.toLowerCase().includes(keyword)) visible = false; }); row.style.display = visible ? '' : 'none'; });
   });
 
-  window.openFileFromGlobal = (id) => { if (documentsDataGlobal[id]?.fileData) openFile(documentsDataGlobal[id].fileData); else showNotification('Không có file!', false); };
-  window.openCurrentFile = () => { if (currentFileData?.url) openFile(currentFileData); else showNotification('Không có file!', false); };
+  window.openFileFromGlobal = (id) => { if (documentsDataGlobal[id]?.fileData) openFile(documentsDataGlobal[id].fileData); };
+  window.openCurrentFile = () => { if (currentFileData?.url) openFile(currentFileData); };
   window.viewFullContentFromGlobal = (content) => viewFullContent(content);
   window.editDocumentFromGlobal = (id) => { if (documentsDataGlobal[id]) editDocument(id, documentsDataGlobal[id]); };
   window.deleteDocumentFromGlobal = (id) => deleteDocument(id);
 
   async function themMoi(selectId, category) {
     const tenMoi = prompt('Nhập giá trị mới:');
-    if (tenMoi?.trim()) { const tenMoiTrimmed = tenMoi.trim(); const select = document.getElementById(selectId); for (let i = 0; i < select.options.length; i++) if (select.options[i].value === tenMoiTrimmed) { showNotification('Giá trị đã tồn tại!', false); return; }
-      const newData = { name: tenMoiTrimmed, createdAt: new Date().toISOString(), createdBy: currentUid }; const newItemRef = push(ref(database, getDbPath(`categories/${category}`))); await set(newItemRef, newData);
-      const option = document.createElement('option'); option.value = tenMoiTrimmed; option.textContent = tenMoiTrimmed; select.appendChild(option); select.value = tenMoiTrimmed; showNotification('Thêm mới thành công!');
+    if (tenMoi?.trim()) { const val = tenMoi.trim(); const select = document.getElementById(selectId); for(let i=0;i<select.options.length;i++) if(select.options[i].value===val) { showNotification('Đã tồn tại!', false); return; }
+      const newData = { name: val, createdAt: new Date().toISOString(), createdBy: currentUid }; const newRef = push(ref(database, getDbPath(`categories/${category}`))); await set(newRef, newData);
+      const opt = document.createElement('option'); opt.value = val; opt.textContent = val; select.appendChild(opt); select.value = val; showNotification('Thêm thành công!');
     }
   }
 
   function loadCategories(selectId, category) {
     onValue(ref(database, getDbPath(`categories/${category}`)), (snapshot) => {
-      const select = document.getElementById(selectId); const defaultValue = select.value;
-      select.innerHTML = `<option value="">${selectId === 'nam' ? 'Chọn năm' : 'Chọn'}</option>`;
-      if (snapshot.exists()) { const items = Object.values(snapshot.val()).map(v => v.name).sort(); items.forEach(name => { const opt = document.createElement('option'); opt.value = name; opt.textContent = name; select.appendChild(opt); }); }
-      if (defaultValue) select.value = defaultValue;
+      const select = document.getElementById(selectId); const def = select.value;
+      select.innerHTML = `<option value="">${selectId==='nam'?'Chọn năm':'Chọn'}</option>`;
+      if (snapshot.exists()) { Object.values(snapshot.val()).map(v=>v.name).sort().forEach(name => { const opt = document.createElement('option'); opt.value = name; opt.textContent = name; select.appendChild(opt); }); }
+      if (def) select.value = def;
     });
   }
 
-  // Toggle GitHub config card
   const toggleBtn = document.getElementById('toggleGithubBtn');
   const githubCard = document.getElementById('githubConfigCard');
   const toggleIcon = document.getElementById('toggleIcon');
   if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
-      if (githubCard.style.display === 'none') {
-        githubCard.style.display = 'block';
-        toggleIcon.className = 'fa-solid fa-chevron-up';
-      } else {
-        githubCard.style.display = 'none';
-        toggleIcon.className = 'fa-solid fa-chevron-down';
-      }
+      if (githubCard.style.display === 'none') { githubCard.style.display = 'block'; toggleIcon.className = 'fa-solid fa-chevron-up'; }
+      else { githubCard.style.display = 'none'; toggleIcon.className = 'fa-solid fa-chevron-down'; }
     });
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('ngay-ky').valueAsDate = new Date(); document.getElementById('update-cvdi-btn').style.display = 'none';
-    document.getElementById('reset-cvdi-btn').onclick = refreshForm; document.getElementById('save-cvdi-btn').onclick = addDocument; document.getElementById('update-cvdi-btn').onclick = () => updateDocument();
+    document.getElementById('ngay-ky').valueAsDate = new Date();
+    document.getElementById('reset-cvdi-btn').onclick = refreshForm;
+    document.getElementById('save-cvdi-btn').onclick = addDocument;
+    document.getElementById('update-cvdi-btn').onclick = updateDocument;
     document.getElementById('save-github-config').onclick = saveGithubConfig;
-    document.getElementById('them-nam-btn').onclick = () => themMoi('nam', 'years'); document.getElementById('them-ten-vb-btn').onclick = () => themMoi('ten-vb', 'documentTypes');
-    document.getElementById('them-nguoi-ky-btn').onclick = () => themMoi('nguoi-ky', 'signers'); document.getElementById('them-noi-ban-hanh-btn').onclick = () => themMoi('noi-ban-hanh', 'issuingPlaces');
+    document.getElementById('them-nam-btn').onclick = () => themMoi('nam', 'years');
+    document.getElementById('them-ten-vb-btn').onclick = () => themMoi('ten-vb', 'documentTypes');
+    document.getElementById('them-nguoi-ky-btn').onclick = () => themMoi('nguoi-ky', 'signers');
+    document.getElementById('them-noi-ban-hanh-btn').onclick = () => themMoi('noi-ban-hanh', 'issuingPlaces');
     onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        currentUser = user; currentUid = user.uid;
-        await loadGithubConfig();
-        loadCategories('nam', 'years'); loadCategories('ten-vb', 'documentTypes'); loadCategories('nguoi-ky', 'signers'); loadCategories('noi-ban-hanh', 'issuingPlaces');
-        document.getElementById('loading').style.display = 'block';
-        onValue(ref(database, getDbPath('congVanDi')), (snapshot) => { document.getElementById('loading').style.display = 'none'; displayDocuments(snapshot); });
-      } else { window.location.href = 'index.html'; }
+      if (user) { currentUser = user; currentUid = user.uid; await loadGithubConfig(); loadCategories('nam','years'); loadCategories('ten-vb','documentTypes'); loadCategories('nguoi-ky','signers'); loadCategories('noi-ban-hanh','issuingPlaces'); onValue(ref(database, getDbPath('congVanDi')), (snapshot) => displayDocuments(snapshot)); }
+      else { window.location.href = 'index.html'; }
     });
   });
 </script>
