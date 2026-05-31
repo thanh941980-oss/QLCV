@@ -8,6 +8,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Thêm thư viện xuất Excel -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
   <style>
     * {
@@ -197,6 +199,15 @@
       border: none;
     }
 
+    .btn-success {
+      background: linear-gradient(105deg, #2ecc71, #27ae60);
+      border: none;
+      color: white;
+    }
+    .btn-success:hover {
+      background: linear-gradient(105deg, #27ae60, #1e8449);
+    }
+
     hr {
       margin: 4px 0;
       opacity: 0.3;
@@ -376,19 +387,19 @@
       --bs-gutter-y: 0.2rem;
     }
     /* Thêm vào cuối thẻ <style> */
-.btn-loading {
-  opacity: 0.7;
-  cursor: wait;
-}
+    .btn-loading {
+      opacity: 0.7;
+      cursor: wait;
+    }
 
-.btn-loading i {
-  animation: spin 1s linear infinite;
-}
+    .btn-loading i {
+      animation: spin 1s linear infinite;
+    }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -480,6 +491,7 @@
           <hr>
           <div class="d-flex justify-content-end gap-1">
             <button class="btn btn-secondary btn-sm" id="reset-cvdi-btn"><i class="fa fa-rotate"></i> Làm mới</button>
+            <button class="btn btn-success btn-sm" id="export-excel-btn"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
             <button class="btn btn-primary btn-sm" id="save-cvdi-btn"><i class="fa fa-save"></i> Lưu</button>
             <button class="btn btn-warning btn-sm" id="update-cvdi-btn" style="display: none;"><i class="fa fa-pen"></i> Cập nhật</button>
           </div>
@@ -499,7 +511,7 @@
         <div id="loading" class="text-center py-3" style="display: none;">
           <i class="fa-solid fa-spinner fa-spin"></i> Đang tải...
         </div>
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0" id="data-table">
           <thead>
             <tr>
               <th width="4%">STT</th><th width="7%">Năm</th><th width="10%">Số VB</th><th width="8%">Tên VB</th><th width="9%">Ngày ký</th><th width="11%">Người ký</th><th width="10%">Nơi BH</th><th width="20%">Nội dung</th><th width="10%">File</th><th width="11%">Thao tác</th>
@@ -623,111 +635,53 @@
   }
 
   async function addDocument() {
-  // Lấy nút lưu
-  const saveBtn = document.getElementById('save-cvdi-btn');
-  
-  // Lưu text gốc và thêm class loading
-  const originalText = saveBtn.innerHTML;
-  saveBtn.classList.add('btn-loading');
-  saveBtn.disabled = true;
-  
-  try {
-    const year = document.getElementById('nam').value, documentNumber = document.getElementById('so-vb').value, documentName = document.getElementById('ten-vb').value;
-    const signDate = document.getElementById('ngay-ky').value, signer = document.getElementById('nguoi-ky').value, issuingPlace = document.getElementById('noi-ban-hanh').value;
-    const content = document.getElementById('noi-dung').value, file = document.getElementById('file-dinh-kem').files[0];
-    
-    if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { 
-      showNotification('Vui lòng điền đầy đủ!', false); 
-      saveBtn.classList.remove('btn-loading');
-      saveBtn.disabled = false;
-      return; 
-    }
-    
+    const saveBtn = document.getElementById('save-cvdi-btn');
+    saveBtn.classList.add('btn-loading');
+    saveBtn.disabled = true;
     try {
+      const year = document.getElementById('nam').value, documentNumber = document.getElementById('so-vb').value, documentName = document.getElementById('ten-vb').value;
+      const signDate = document.getElementById('ngay-ky').value, signer = document.getElementById('nguoi-ky').value, issuingPlace = document.getElementById('noi-ban-hanh').value;
+      const content = document.getElementById('noi-dung').value, file = document.getElementById('file-dinh-kem').files[0];
+      
+      if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { 
+        showNotification('Vui lòng điền đầy đủ!', false); 
+        return; 
+      }
+      
       const newDocRef = push(ref(database, getDbPath('congVanDi'))); 
       const newId = newDocRef.key;
       let fileData = null;
-      
       if (file) { 
         try { 
           fileData = await uploadToGitHub(file, newId); 
         } catch (uploadError) { 
           showNotification('Upload thất bại: ' + uploadError.message, false); 
-          saveBtn.classList.remove('btn-loading');
-          saveBtn.disabled = false;
           return; 
         } 
       }
-      
-      await set(newDocRef, { 
-        year, documentNumber, documentName, signDate, signer, issuingPlace, content, 
-        fileData, hasFile: !!fileData, createdAt: new Date().toISOString(), createdBy: currentUid 
-      });
-      
-      showNotification('Thêm thành công!'); 
-      refreshForm();
-      
-    } catch (error) { 
-      showNotification('Lỗi: ' + error.message, false); 
-    }
-    
-  } finally {
-    // Khôi phục nút
-    saveBtn.classList.remove('btn-loading');
-    saveBtn.disabled = false;
+      await set(newDocRef, { year, documentNumber, documentName, signDate, signer, issuingPlace, content, fileData, hasFile: !!fileData, createdAt: new Date().toISOString(), createdBy: currentUid });
+      showNotification('Thêm thành công!'); refreshForm();
+    } catch (error) { showNotification('Lỗi: ' + error.message, false); }
+    finally { saveBtn.classList.remove('btn-loading'); saveBtn.disabled = false; }
   }
-}
 
   async function updateDocument() {
-  if (!editingId) return;
-  
-  // Lấy nút cập nhật
-  const updateBtn = document.getElementById('update-cvdi-btn');
-  
-  // Lưu text gốc và thêm class loading
-  const originalText = updateBtn.innerHTML;
-  updateBtn.classList.add('btn-loading');
-  updateBtn.disabled = true;
-  
-  try {
-    const year = document.getElementById('nam').value, documentNumber = document.getElementById('so-vb').value, documentName = document.getElementById('ten-vb').value;
-    const signDate = document.getElementById('ngay-ky').value, signer = document.getElementById('nguoi-ky').value, issuingPlace = document.getElementById('noi-ban-hanh').value;
-    const content = document.getElementById('noi-dung').value, newFile = document.getElementById('file-dinh-kem').files[0];
-    
-    if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { 
-      showNotification('Điền đầy đủ thông tin!', false); 
-      updateBtn.classList.remove('btn-loading');
-      updateBtn.disabled = false;
-      return; 
-    }
-    
+    if (!editingId) return;
+    const updateBtn = document.getElementById('update-cvdi-btn');
+    updateBtn.classList.add('btn-loading');
+    updateBtn.disabled = true;
     try {
+      const year = document.getElementById('nam').value, documentNumber = document.getElementById('so-vb').value, documentName = document.getElementById('ten-vb').value;
+      const signDate = document.getElementById('ngay-ky').value, signer = document.getElementById('nguoi-ky').value, issuingPlace = document.getElementById('noi-ban-hanh').value;
+      const content = document.getElementById('noi-dung').value, newFile = document.getElementById('file-dinh-kem').files[0];
+      if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { showNotification('Điền đầy đủ thông tin!', false); return; }
       let fileData = currentFileData;
-      if (newFile) { 
-        if (currentFileData?.path && currentFileData?.sha) 
-          await deleteFromGitHub(currentFileData.path, currentFileData.sha); 
-        fileData = await uploadToGitHub(newFile, editingId); 
-      }
-      
-      await update(ref(database, getDbPath(`congVanDi/${editingId}`)), { 
-        year, documentNumber, documentName, signDate, signer, issuingPlace, content, 
-        fileData: fileData || null, hasFile: !!fileData, 
-        updatedAt: new Date().toISOString(), updatedBy: currentUid 
-      });
-      
-      showNotification('Cập nhật thành công!'); 
-      refreshForm();
-      
-    } catch (error) { 
-      showNotification('Cập nhật thất bại: ' + error.message, false); 
-    }
-    
-  } finally {
-    // Khôi phục nút
-    updateBtn.classList.remove('btn-loading');
-    updateBtn.disabled = false;
+      if (newFile) { if (currentFileData?.path && currentFileData?.sha) await deleteFromGitHub(currentFileData.path, currentFileData.sha); fileData = await uploadToGitHub(newFile, editingId); }
+      await update(ref(database, getDbPath(`congVanDi/${editingId}`)), { year, documentNumber, documentName, signDate, signer, issuingPlace, content, fileData: fileData || null, hasFile: !!fileData, updatedAt: new Date().toISOString(), updatedBy: currentUid });
+      showNotification('Cập nhật thành công!'); refreshForm();
+    } catch (error) { showNotification('Cập nhật thất bại: ' + error.message, false); }
+    finally { updateBtn.classList.remove('btn-loading'); updateBtn.disabled = false; }
   }
-}
 
   async function deleteDocument(id) {
     if (!confirm('Xóa công văn này?')) return;
@@ -748,6 +702,75 @@
   function openFile(fileData) { if (!fileData?.url) return; const modal = new bootstrap.Modal(document.getElementById('filePreviewModal')); document.getElementById('previewFileName').textContent = fileData.name; document.getElementById('downloadFileBtn').href = fileData.url; const ext = fileData.name.split('.').pop().toLowerCase(); const preview = document.getElementById('filePreviewContent'); if (['jpg','jpeg','png','gif'].includes(ext)) preview.innerHTML = `<img src="${fileData.url}" class="img-fluid">`; else if (ext === 'pdf') preview.innerHTML = `<iframe src="${fileData.url}" width="100%" height="550px"></iframe>`; else preview.innerHTML = `<div class="text-center p-4"><i class="fa-solid fa-file fa-3x"></i><p><a href="${fileData.url}" target="_blank">Tải file</a></p></div>`; modal.show(); }
   function viewFullContent(content) { if (!content?.trim()) return; const modal = new bootstrap.Modal(document.getElementById('contentModal')); document.getElementById('contentModalBody').innerHTML = `<div style="white-space: pre-wrap;">${escapeHtml(content)}</div>`; modal.show(); }
   function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ''; }
+
+  // Hàm xuất Excel dựa trên dữ liệu hiển thị (đã lọc tìm kiếm)
+  function exportToExcel() {
+    const table = document.getElementById('data-table');
+    const rows = table.querySelectorAll('tbody tr');
+    const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+    
+    if (visibleRows.length === 0) {
+      showNotification('Không có dữ liệu để xuất!', false);
+      return;
+    }
+
+    // Tạo mảng dữ liệu cho Excel
+    const excelData = [];
+    
+    // Thêm 3 dòng trống phía trên (hàng 1,2,3 để trống)
+    excelData.push(['', '', '', '', '', '', '', '', '', '']);
+    excelData.push(['', '', '', '', '', '', '', '', '', '']);
+    excelData.push(['', '', '', '', '', '', '', '', '', '']);
+    
+    // Thêm tiêu đề cột (hàng thứ 4)
+    const headers = ['STT', 'Năm', 'Số VB', 'Tên VB', 'Ngày ký', 'Người ký', 'Nơi BH', 'Nội dung', 'File', 'Thao tác'];
+    excelData.push(headers);
+    
+    // Thêm dữ liệu từ các hàng visible
+    visibleRows.forEach((row, idx) => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 9) {
+        const rowData = [];
+        // STT (tính lại từ 1)
+        rowData.push(idx + 1);
+        // Năm
+        rowData.push(cells[1]?.innerText.trim() || '');
+        // Số VB
+        rowData.push(cells[2]?.innerText.trim() || '');
+        // Tên VB
+        rowData.push(cells[3]?.innerText.trim() || '');
+        // Ngày ký
+        rowData.push(cells[4]?.innerText.trim() || '');
+        // Người ký
+        rowData.push(cells[5]?.innerText.trim() || '');
+        // Nơi BH
+        rowData.push(cells[6]?.innerText.trim() || '');
+        // Nội dung (lấy text thuần)
+        const contentDiv = cells[7]?.querySelector('.content-preview');
+        rowData.push(contentDiv?.innerText.trim() || cells[7]?.innerText.trim() || '');
+        // File (tên file nếu có)
+        const fileBtn = cells[8]?.querySelector('.file-link');
+        rowData.push(fileBtn?.innerText.trim() || '—');
+        // Thao tác (không xuất)
+        rowData.push('');
+        excelData.push(rowData);
+      }
+    });
+    
+    // Tạo workbook và worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
+    
+    // Tùy chỉnh độ rộng cột
+    ws['!cols'] = [{wch:5},{wch:8},{wch:12},{wch:15},{wch:12},{wch:15},{wch:12},{wch:40},{wch:15},{wch:8}];
+    
+    XLSX.utils.book_append_sheet(wb, ws, 'Danh sách văn bản đi');
+    
+    // Xuất file
+    const fileName = `danh_sach_van_ban_di_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    showNotification(`Xuất Excel thành công! (${visibleRows.length} dòng dữ liệu)`, true);
+  }
 
   function displayDocuments(snapshot) {
     const tbody = document.getElementById('documentsBody'); const totalSpan = document.getElementById('totalCount'); tbody.innerHTML = '';
@@ -820,6 +843,7 @@
     document.getElementById('save-cvdi-btn').onclick = addDocument;
     document.getElementById('update-cvdi-btn').onclick = updateDocument;
     document.getElementById('save-github-config').onclick = saveGithubConfig;
+    document.getElementById('export-excel-btn').onclick = exportToExcel;
     document.getElementById('them-nam-btn').onclick = () => themMoi('nam', 'years');
     document.getElementById('them-ten-vb-btn').onclick = () => themMoi('ten-vb', 'documentTypes');
     document.getElementById('them-nguoi-ky-btn').onclick = () => themMoi('nguoi-ky', 'signers');
