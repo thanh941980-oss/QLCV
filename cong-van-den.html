@@ -360,6 +360,20 @@
     .row.g-1 {
       --bs-gutter-y: 0.2rem;
     }
+    /* Thêm vào cuối thẻ <style> */
+.btn-loading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.btn-loading i {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
   </style>
 </head>
 <body>
@@ -629,35 +643,111 @@
   }
 
   async function addDocument() {
+  // Lấy nút lưu
+  const saveBtn = document.getElementById('save-cvden-btn');
+  
+  // Thêm class loading và vô hiệu hóa nút
+  saveBtn.classList.add('btn-loading');
+  saveBtn.disabled = true;
+  
+  try {
     const year = document.getElementById('nam').value, soDen = document.getElementById('so-den').value, nguoiNhan = document.getElementById('nguoi-nhan').value;
     const ngayNhan = document.getElementById('ngay-nhan').value, soCongVan = document.getElementById('so-cong-van').value, tenVanBan = document.getElementById('ten-van-ban').value;
     const ngayKy = document.getElementById('ngay-ky').value, nguoiKy = document.getElementById('nguoi-ky').value, noiBanHanh = document.getElementById('noi-ban-hanh').value;
     const soTo = document.getElementById('so-to').value, content = document.getElementById('noi-dung').value, file = document.getElementById('file-dinh-kem').files[0];
-    if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) { showNotification('Vui lòng điền đầy đủ!', false); return; }
+    
+    if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) { 
+      showNotification('Vui lòng điền đầy đủ!', false); 
+      saveBtn.classList.remove('btn-loading');
+      saveBtn.disabled = false;
+      return; 
+    }
+    
     try {
-      const newDocRef = push(ref(database, getDbPath('congVanDen'))); const newId = newDocRef.key;
+      const newDocRef = push(ref(database, getDbPath('congVanDen'))); 
+      const newId = newDocRef.key;
       let fileData = null;
-      if (file) { try { fileData = await uploadToGitHub(file, newId); } catch (uploadError) { showNotification('Upload thất bại: ' + uploadError.message, false); return; } }
-      await set(newDocRef, { year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, noiBanHanh, soTo, content, fileData, hasFile: !!fileData, createdAt: new Date().toISOString(), createdBy: currentUid });
-      showNotification('Thêm thành công!'); refreshForm();
-    } catch (error) { showNotification('Lỗi: ' + error.message, false); }
+      
+      if (file) { 
+        try { 
+          fileData = await uploadToGitHub(file, newId); 
+        } catch (uploadError) { 
+          showNotification('Upload thất bại: ' + uploadError.message, false); 
+          saveBtn.classList.remove('btn-loading');
+          saveBtn.disabled = false;
+          return; 
+        } 
+      }
+      
+      await set(newDocRef, { 
+        year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, 
+        noiBanHanh, soTo, content, fileData, hasFile: !!fileData, 
+        createdAt: new Date().toISOString(), createdBy: currentUid 
+      });
+      
+      showNotification('Thêm thành công!'); 
+      refreshForm();
+      
+    } catch (error) { 
+      showNotification('Lỗi: ' + error.message, false); 
+    }
+    
+  } finally {
+    // Khôi phục nút
+    saveBtn.classList.remove('btn-loading');
+    saveBtn.disabled = false;
   }
-
+}
   async function updateDocument() {
-    if (!editingId) return;
+  if (!editingId) return;
+  
+  // Lấy nút cập nhật
+  const updateBtn = document.getElementById('update-cvden-btn');
+  
+  // Thêm class loading và vô hiệu hóa nút
+  updateBtn.classList.add('btn-loading');
+  updateBtn.disabled = true;
+  
+  try {
     const year = document.getElementById('nam').value, soDen = document.getElementById('so-den').value, nguoiNhan = document.getElementById('nguoi-nhan').value;
     const ngayNhan = document.getElementById('ngay-nhan').value, soCongVan = document.getElementById('so-cong-van').value, tenVanBan = document.getElementById('ten-van-ban').value;
     const ngayKy = document.getElementById('ngay-ky').value, nguoiKy = document.getElementById('nguoi-ky').value, noiBanHanh = document.getElementById('noi-ban-hanh').value;
     const soTo = document.getElementById('so-to').value, content = document.getElementById('noi-dung').value, newFile = document.getElementById('file-dinh-kem').files[0];
-    if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) { showNotification('Điền đầy đủ!', false); return; }
+    
+    if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) { 
+      showNotification('Điền đầy đủ!', false); 
+      updateBtn.classList.remove('btn-loading');
+      updateBtn.disabled = false;
+      return; 
+    }
+    
     try {
       let fileData = currentFileData;
-      if (newFile) { if (currentFileData?.path && currentFileData?.sha) await deleteFromGitHub(currentFileData.path, currentFileData.sha); fileData = await uploadToGitHub(newFile, editingId); }
-      await update(ref(database, getDbPath(`congVanDen/${editingId}`)), { year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, noiBanHanh, soTo, content, fileData: fileData || null, hasFile: !!fileData, updatedAt: new Date().toISOString(), updatedBy: currentUid });
-      showNotification('Cập nhật thành công!'); refreshForm();
-    } catch (error) { showNotification('Cập nhật thất bại: ' + error.message, false); }
+      if (newFile) { 
+        if (currentFileData?.path && currentFileData?.sha) 
+          await deleteFromGitHub(currentFileData.path, currentFileData.sha); 
+        fileData = await uploadToGitHub(newFile, editingId); 
+      }
+      
+      await update(ref(database, getDbPath(`congVanDen/${editingId}`)), { 
+        year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, 
+        noiBanHanh, soTo, content, fileData: fileData || null, hasFile: !!fileData, 
+        updatedAt: new Date().toISOString(), updatedBy: currentUid 
+      });
+      
+      showNotification('Cập nhật thành công!'); 
+      refreshForm();
+      
+    } catch (error) { 
+      showNotification('Cập nhật thất bại: ' + error.message, false); 
+    }
+    
+  } finally {
+    // Khôi phục nút
+    updateBtn.classList.remove('btn-loading');
+    updateBtn.disabled = false;
   }
-
+}
   async function deleteDocument(id) {
     if (!confirm('Xóa công văn này?')) return;
     const doc = documentsDataGlobal[id];
