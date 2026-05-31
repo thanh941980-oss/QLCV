@@ -8,6 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
   <style>
     * {
@@ -23,7 +24,6 @@
       overflow: hidden;
     }
 
-    /* Layout chính */
     .app-layout {
       display: flex;
       flex-direction: column;
@@ -32,24 +32,20 @@
       gap: 4px;
     }
 
-    /* GitHub button row */
     .github-row {
       flex-shrink: 0;
       margin-bottom: 0;
     }
 
-    /* GitHub config card */
     .github-config-card {
       flex-shrink: 0;
       margin-bottom: 4px;
     }
 
-    /* Form thông tin - cố định */
     .form-fixed {
       flex-shrink: 0;
     }
 
-    /* Phần tìm kiếm + bảng - cố định header tìm kiếm */
     .table-wrapper {
       flex: 1;
       display: flex;
@@ -58,7 +54,6 @@
       min-height: 0;
     }
 
-    /* Card chứa bảng */
     .table-card {
       flex: 1;
       display: flex;
@@ -79,7 +74,6 @@
       min-height: 0;
     }
 
-    /* Card styling */
     .card {
       border-radius: 10px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -105,7 +99,6 @@
       padding: 8px 12px;
     }
 
-    /* Form cực nhỏ */
     .form-label {
       font-weight: 600;
       color: #1e2a3a;
@@ -172,12 +165,20 @@
       border: none;
     }
 
+    .btn-success {
+      background: linear-gradient(105deg, #2ecc71, #27ae60);
+      border: none;
+      color: white;
+    }
+    .btn-success:hover {
+      background: linear-gradient(105deg, #27ae60, #1e8449);
+    }
+
     hr {
       margin: 4px 0;
       opacity: 0.3;
     }
 
-    /* Action buttons */
     .action-buttons {
       display: flex;
       gap: 3px;
@@ -247,7 +248,6 @@
       color: #0066cc;
     }
 
-    /* GitHub toggle button */
     .github-toggle-btn {
       background: transparent;
       border: 1px solid rgba(0, 102, 204, 0.3);
@@ -306,7 +306,6 @@
       font-size: 10px;
     }
 
-    /* Table */
     .table {
       margin-bottom: 0;
     }
@@ -332,7 +331,6 @@
       border-bottom: 1px solid #edf2f7;
     }
 
-    /* Search row */
     .search-row th {
       background: #ffffff !important;
       padding: 2px 3px !important;
@@ -343,7 +341,6 @@
       border-radius: 4px;
     }
 
-    /* Scrollbar */
     .table-container::-webkit-scrollbar {
       width: 4px;
       height: 4px;
@@ -360,20 +357,20 @@
     .row.g-1 {
       --bs-gutter-y: 0.2rem;
     }
-    /* Thêm vào cuối thẻ <style> */
-.btn-loading {
-  opacity: 0.7;
-  cursor: wait;
-}
 
-.btn-loading i {
-  animation: spin 1s linear infinite;
-}
+    .btn-loading {
+      opacity: 0.7;
+      cursor: wait;
+    }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+    .btn-loading i {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -484,6 +481,7 @@
           <hr>
           <div class="d-flex justify-content-end gap-1">
             <button class="btn btn-secondary btn-sm" id="reset-cvden-btn"><i class="fa fa-rotate"></i> Làm mới</button>
+            <button class="btn btn-success btn-sm" id="export-excel-btn"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
             <button class="btn btn-primary btn-sm" id="save-cvden-btn"><i class="fa fa-save"></i> Lưu</button>
             <button class="btn btn-warning btn-sm" id="update-cvden-btn" style="display: none;"><i class="fa fa-pen"></i> Cập nhật</button>
           </div>
@@ -502,7 +500,7 @@
         <div id="loading" class="text-center py-3" style="display: none;">
           <i class="fa-solid fa-spinner fa-spin"></i> Đang tải...
         </div>
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0" id="data-table">
           <thead>
             <tr>
               <th width="3%">STT</th><th width="5%">Năm</th><th width="6%">Số đến</th><th width="7%">Người nhận</th><th width="7%">Ngày nhận</th><th width="6%">Số CV</th><th width="8%">Tên VB</th><th width="7%">Ngày ký</th><th width="7%">Người ký</th><th width="7%">Nơi BH</th><th width="4%">Tờ</th><th width="14%">Nội dung</th><th width="7%">File</th><th width="10%">Thao tác</th>
@@ -643,111 +641,52 @@
   }
 
   async function addDocument() {
-  // Lấy nút lưu
-  const saveBtn = document.getElementById('save-cvden-btn');
-  
-  // Thêm class loading và vô hiệu hóa nút
-  saveBtn.classList.add('btn-loading');
-  saveBtn.disabled = true;
-  
-  try {
-    const year = document.getElementById('nam').value, soDen = document.getElementById('so-den').value, nguoiNhan = document.getElementById('nguoi-nhan').value;
-    const ngayNhan = document.getElementById('ngay-nhan').value, soCongVan = document.getElementById('so-cong-van').value, tenVanBan = document.getElementById('ten-van-ban').value;
-    const ngayKy = document.getElementById('ngay-ky').value, nguoiKy = document.getElementById('nguoi-ky').value, noiBanHanh = document.getElementById('noi-ban-hanh').value;
-    const soTo = document.getElementById('so-to').value, content = document.getElementById('noi-dung').value, file = document.getElementById('file-dinh-kem').files[0];
-    
-    if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) { 
-      showNotification('Vui lòng điền đầy đủ!', false); 
-      saveBtn.classList.remove('btn-loading');
-      saveBtn.disabled = false;
-      return; 
-    }
-    
+    const saveBtn = document.getElementById('save-cvden-btn');
+    saveBtn.classList.add('btn-loading');
+    saveBtn.disabled = true;
     try {
+      const year = document.getElementById('nam').value, soDen = document.getElementById('so-den').value, nguoiNhan = document.getElementById('nguoi-nhan').value;
+      const ngayNhan = document.getElementById('ngay-nhan').value, soCongVan = document.getElementById('so-cong-van').value, tenVanBan = document.getElementById('ten-van-ban').value;
+      const ngayKy = document.getElementById('ngay-ky').value, nguoiKy = document.getElementById('nguoi-ky').value, noiBanHanh = document.getElementById('noi-ban-hanh').value;
+      const soTo = document.getElementById('so-to').value, content = document.getElementById('noi-dung').value, file = document.getElementById('file-dinh-kem').files[0];
+      
+      if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) { 
+        showNotification('Vui lòng điền đầy đủ!', false); 
+        return; 
+      }
+      
       const newDocRef = push(ref(database, getDbPath('congVanDen'))); 
       const newId = newDocRef.key;
       let fileData = null;
-      
       if (file) { 
-        try { 
-          fileData = await uploadToGitHub(file, newId); 
-        } catch (uploadError) { 
-          showNotification('Upload thất bại: ' + uploadError.message, false); 
-          saveBtn.classList.remove('btn-loading');
-          saveBtn.disabled = false;
-          return; 
-        } 
+        try { fileData = await uploadToGitHub(file, newId); } 
+        catch (uploadError) { showNotification('Upload thất bại: ' + uploadError.message, false); return; } 
       }
-      
-      await set(newDocRef, { 
-        year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, 
-        noiBanHanh, soTo, content, fileData, hasFile: !!fileData, 
-        createdAt: new Date().toISOString(), createdBy: currentUid 
-      });
-      
-      showNotification('Thêm thành công!'); 
-      refreshForm();
-      
-    } catch (error) { 
-      showNotification('Lỗi: ' + error.message, false); 
-    }
-    
-  } finally {
-    // Khôi phục nút
-    saveBtn.classList.remove('btn-loading');
-    saveBtn.disabled = false;
+      await set(newDocRef, { year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, noiBanHanh, soTo, content, fileData, hasFile: !!fileData, createdAt: new Date().toISOString(), createdBy: currentUid });
+      showNotification('Thêm thành công!'); refreshForm();
+    } catch (error) { showNotification('Lỗi: ' + error.message, false); }
+    finally { saveBtn.classList.remove('btn-loading'); saveBtn.disabled = false; }
   }
-}
+
   async function updateDocument() {
-  if (!editingId) return;
-  
-  // Lấy nút cập nhật
-  const updateBtn = document.getElementById('update-cvden-btn');
-  
-  // Thêm class loading và vô hiệu hóa nút
-  updateBtn.classList.add('btn-loading');
-  updateBtn.disabled = true;
-  
-  try {
-    const year = document.getElementById('nam').value, soDen = document.getElementById('so-den').value, nguoiNhan = document.getElementById('nguoi-nhan').value;
-    const ngayNhan = document.getElementById('ngay-nhan').value, soCongVan = document.getElementById('so-cong-van').value, tenVanBan = document.getElementById('ten-van-ban').value;
-    const ngayKy = document.getElementById('ngay-ky').value, nguoiKy = document.getElementById('nguoi-ky').value, noiBanHanh = document.getElementById('noi-ban-hanh').value;
-    const soTo = document.getElementById('so-to').value, content = document.getElementById('noi-dung').value, newFile = document.getElementById('file-dinh-kem').files[0];
-    
-    if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) { 
-      showNotification('Điền đầy đủ!', false); 
-      updateBtn.classList.remove('btn-loading');
-      updateBtn.disabled = false;
-      return; 
-    }
-    
+    if (!editingId) return;
+    const updateBtn = document.getElementById('update-cvden-btn');
+    updateBtn.classList.add('btn-loading');
+    updateBtn.disabled = true;
     try {
+      const year = document.getElementById('nam').value, soDen = document.getElementById('so-den').value, nguoiNhan = document.getElementById('nguoi-nhan').value;
+      const ngayNhan = document.getElementById('ngay-nhan').value, soCongVan = document.getElementById('so-cong-van').value, tenVanBan = document.getElementById('ten-van-ban').value;
+      const ngayKy = document.getElementById('ngay-ky').value, nguoiKy = document.getElementById('nguoi-ky').value, noiBanHanh = document.getElementById('noi-ban-hanh').value;
+      const soTo = document.getElementById('so-to').value, content = document.getElementById('noi-dung').value, newFile = document.getElementById('file-dinh-kem').files[0];
+      if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) { showNotification('Điền đầy đủ!', false); return; }
       let fileData = currentFileData;
-      if (newFile) { 
-        if (currentFileData?.path && currentFileData?.sha) 
-          await deleteFromGitHub(currentFileData.path, currentFileData.sha); 
-        fileData = await uploadToGitHub(newFile, editingId); 
-      }
-      
-      await update(ref(database, getDbPath(`congVanDen/${editingId}`)), { 
-        year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, 
-        noiBanHanh, soTo, content, fileData: fileData || null, hasFile: !!fileData, 
-        updatedAt: new Date().toISOString(), updatedBy: currentUid 
-      });
-      
-      showNotification('Cập nhật thành công!'); 
-      refreshForm();
-      
-    } catch (error) { 
-      showNotification('Cập nhật thất bại: ' + error.message, false); 
-    }
-    
-  } finally {
-    // Khôi phục nút
-    updateBtn.classList.remove('btn-loading');
-    updateBtn.disabled = false;
+      if (newFile) { if (currentFileData?.path && currentFileData?.sha) await deleteFromGitHub(currentFileData.path, currentFileData.sha); fileData = await uploadToGitHub(newFile, editingId); }
+      await update(ref(database, getDbPath(`congVanDen/${editingId}`)), { year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, noiBanHanh, soTo, content, fileData: fileData || null, hasFile: !!fileData, updatedAt: new Date().toISOString(), updatedBy: currentUid });
+      showNotification('Cập nhật thành công!'); refreshForm();
+    } catch (error) { showNotification('Cập nhật thất bại: ' + error.message, false); }
+    finally { updateBtn.classList.remove('btn-loading'); updateBtn.disabled = false; }
   }
-}
+
   async function deleteDocument(id) {
     if (!confirm('Xóa công văn này?')) return;
     const doc = documentsDataGlobal[id];
@@ -769,12 +708,106 @@
   function viewFullContent(content) { if (!content?.trim()) return; const modal = new bootstrap.Modal(document.getElementById('contentModal')); document.getElementById('contentModalBody').innerHTML = `<div style="white-space: pre-wrap;">${escapeHtml(content)}</div>`; modal.show(); }
   function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ''; }
 
+  // Hàm xuất Excel - xuất TOÀN BỘ nội dung
+  function exportToExcel() {
+    const rows = document.querySelectorAll('#documentsBody tr');
+    const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+    
+    if (visibleRows.length === 0) {
+      showNotification('Không có dữ liệu để xuất!', false);
+      return;
+    }
+
+    const excelData = [];
+    
+    // 3 dòng trống phía trên
+    excelData.push(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+    excelData.push(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+    excelData.push(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+    
+    // Tiêu đề cột (hàng thứ 4)
+    const headers = ['STT', 'Năm', 'Số đến', 'Người nhận', 'Ngày nhận', 'Số CV', 'Tên VB', 'Ngày ký', 'Người ký', 'Nơi BH', 'Số tờ', 'Nội dung', 'File', 'Thao tác'];
+    excelData.push(headers);
+    
+    // Duyệt từng dòng hiển thị
+    visibleRows.forEach((row, idx) => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 13) {
+        // Lấy ID của document từ nút sửa/xóa
+        let fullContent = '';
+        const editBtn = cells[13]?.querySelector('.action-btn.edit');
+        if (editBtn && editBtn.getAttribute('onclick')) {
+          const match = editBtn.getAttribute('onclick').match(/editDocumentFromGlobal\("([^"]+)"\)/);
+          if (match && match[1] && documentsDataGlobal[match[1]]) {
+            fullContent = documentsDataGlobal[match[1]].content || '';
+          }
+        }
+        if (!fullContent) {
+          const deleteBtn = cells[13]?.querySelector('.action-btn.delete');
+          if (deleteBtn && deleteBtn.getAttribute('onclick')) {
+            const match = deleteBtn.getAttribute('onclick').match(/deleteDocumentFromGlobal\("([^"]+)"\)/);
+            if (match && match[1] && documentsDataGlobal[match[1]]) {
+              fullContent = documentsDataGlobal[match[1]].content || '';
+            }
+          }
+        }
+        if (!fullContent) {
+          fullContent = cells[11]?.innerText.trim() || '';
+        }
+        
+        const rowData = [];
+        rowData.push(idx + 1);                                          // STT
+        rowData.push(cells[1]?.innerText.trim() || '');                 // Năm
+        rowData.push(cells[2]?.innerText.trim() || '');                 // Số đến
+        rowData.push(cells[3]?.innerText.trim() || '');                 // Người nhận
+        rowData.push(cells[4]?.innerText.trim() || '');                 // Ngày nhận
+        rowData.push(cells[5]?.innerText.trim() || '');                 // Số CV
+        rowData.push(cells[6]?.innerText.trim() || '');                 // Tên VB
+        rowData.push(cells[7]?.innerText.trim() || '');                 // Ngày ký
+        rowData.push(cells[8]?.innerText.trim() || '');                 // Người ký
+        rowData.push(cells[9]?.innerText.trim() || '');                 // Nơi BH
+        rowData.push(cells[10]?.innerText.trim() || '');                // Số tờ
+        rowData.push(fullContent);                                       // Nội dung (toàn bộ)
+        
+        const fileBtn = cells[12]?.querySelector('.file-link');
+        rowData.push(fileBtn?.innerText.trim() || '—');                  // File
+        rowData.push('');                                                 // Thao tác (để trống)
+        
+        excelData.push(rowData);
+      }
+    });
+    
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
+    ws['!cols'] = [{wch:5},{wch:8},{wch:12},{wch:15},{wch:12},{wch:12},{wch:18},{wch:12},{wch:15},{wch:12},{wch:6},{wch:50},{wch:15},{wch:8}];
+    
+    XLSX.utils.book_append_sheet(wb, ws, 'Danh sách văn bản đến');
+    const fileName = `danh_sach_van_ban_den_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    showNotification(`Xuất Excel thành công! (${visibleRows.length} dòng dữ liệu)`, true);
+  }
+
   function displayDocuments(snapshot) {
     const tbody = document.getElementById('documentsBody'); const totalSpan = document.getElementById('totalCount'); tbody.innerHTML = '';
-    if (!snapshot.exists()) { tbody.innerHTML = '<tr><td colspan="14" class="text-center py-3">Chưa có công văn nào</td></td>'; totalSpan.textContent = '0'; return; }
+    if (!snapshot.exists()) { tbody.innerHTML = '<tr><td colspan="14" class="text-center py-3">Chưa có công văn nào</td></tr>'; totalSpan.textContent = '0'; return; }
     const docs = snapshot.val(); documentsDataGlobal = docs; let stt = 1, total = 0;
     for (const id in docs) { const doc = docs[id]; total++; const hasFile = doc.hasFile && doc.fileData; const contentText = doc.content || ''; const contentPreview = contentText.length > 40 ? contentText.substring(0,40)+'...' : contentText; const fileNameDisplay = hasFile ? (doc.fileData.name.length > 10 ? doc.fileData.name.substring(0,10)+'...' : doc.fileData.name) : '';
-      tbody.innerHTML += `<tr><td class="text-center">${stt}</td><td class="text-center"><span class="badge-info">${escapeHtml(doc.year||'')}</span></td><td><strong>${escapeHtml(doc.soDen||'')}</strong></td><td>${escapeHtml(doc.nguoiNhan||'')}</td><td class="text-center">${doc.ngayNhan||''}</td><td>${escapeHtml(doc.soCongVan||'')}</td><td>${escapeHtml(doc.tenVanBan||'')}</td><td class="text-center">${doc.ngayKy||''}</td><td>${escapeHtml(doc.nguoiKy||'')}</td><td>${escapeHtml(doc.noiBanHanh||'')}</td><td class="text-center">${doc.soTo||''}</td><td><div class="content-preview" onclick='window.viewFullContentFromGlobal(${JSON.stringify(contentText)})'>${escapeHtml(contentPreview)||'Chưa có'}</div></td><td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileNameDisplay)}</button>` : '<span class="text-muted">—</span>'}</td><td><div class="action-buttons">${hasFile ? `<button class="action-btn view" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-eye"></i></button>` : ''}<button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i></button></div></td></tr>`;
+      tbody.innerHTML += `<tr>
+        <td class="text-center">${stt}</td>
+        <td class="text-center"><span class="badge-info">${escapeHtml(doc.year||'')}</span></td>
+        <td><strong>${escapeHtml(doc.soDen||'')}</strong></td>
+        <td>${escapeHtml(doc.nguoiNhan||'')}</td>
+        <td class="text-center">${doc.ngayNhan||''}</td>
+        <td>${escapeHtml(doc.soCongVan||'')}</td>
+        <td>${escapeHtml(doc.tenVanBan||'')}</td>
+        <td class="text-center">${doc.ngayKy||''}</td>
+        <td>${escapeHtml(doc.nguoiKy||'')}</td>
+        <td>${escapeHtml(doc.noiBanHanh||'')}</td>
+        <td class="text-center">${doc.soTo||''}</td>
+        <td><div class="content-preview" onclick='window.viewFullContentFromGlobal(${JSON.stringify(contentText)})'>${escapeHtml(contentPreview)||'Chưa có'}</div></td>
+        <td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileNameDisplay)}</button>` : '<span class="text-muted">—</span>'}</td>
+        <td><div class="action-buttons">${hasFile ? `<button class="action-btn view" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-eye"></i></button>` : ''}<button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i></button></div></td>
+      </tr>`;
       stt++;
     } totalSpan.textContent = total;
   }
@@ -824,6 +857,7 @@
     document.getElementById('save-cvden-btn').onclick = addDocument;
     document.getElementById('update-cvden-btn').onclick = updateDocument;
     document.getElementById('save-github-config').onclick = saveGithubConfig;
+    document.getElementById('export-excel-btn').onclick = exportToExcel;
     document.getElementById('them-nam-btn').onclick = () => themMoi('nam', 'years');
     document.getElementById('them-nguoi-nhan-btn').onclick = () => themMoi('nguoi-nhan', 'receivers');
     document.getElementById('them-ten-van-ban-btn').onclick = () => themMoi('ten-van-ban', 'documentTypes');
