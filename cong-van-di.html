@@ -8,7 +8,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Thêm thư viện xuất Excel -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
   <style>
@@ -25,7 +24,6 @@
       overflow: hidden;
     }
 
-    /* Layout chính: cố định toàn bộ phần trên, cuộn phần table body */
     .app-layout {
       display: flex;
       flex-direction: column;
@@ -34,24 +32,20 @@
       gap: 4px;
     }
 
-    /* GitHub button row */
     .github-row {
       flex-shrink: 0;
       margin-bottom: 0;
     }
 
-    /* GitHub config card */
     .github-config-card {
       flex-shrink: 0;
       margin-bottom: 4px;
     }
 
-    /* Form thông tin - cố định */
     .form-fixed {
       flex-shrink: 0;
     }
 
-    /* Phần tìm kiếm + bảng - cố định header tìm kiếm */
     .table-wrapper {
       flex: 1;
       display: flex;
@@ -60,7 +54,6 @@
       min-height: 0;
     }
 
-    /* Card chứa bảng */
     .table-card {
       flex: 1;
       display: flex;
@@ -106,7 +99,6 @@
       border-bottom: 1px solid #edf2f7;
     }
 
-    /* Card styling */
     .card {
       border-radius: 10px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -132,7 +124,6 @@
       padding: 8px 12px;
     }
 
-    /* Form cực nhỏ */
     .form-label {
       font-weight: 600;
       color: #1e2a3a;
@@ -213,7 +204,6 @@
       opacity: 0.3;
     }
 
-    /* Action buttons */
     .action-buttons {
       display: flex;
       gap: 3px;
@@ -283,7 +273,6 @@
       color: #0066cc;
     }
 
-    /* GitHub toggle button */
     .github-toggle-btn {
       background: transparent;
       border: 1px solid rgba(0, 102, 204, 0.3);
@@ -357,7 +346,6 @@
       font-size: 10px;
     }
 
-    /* Search row - cố định ngay dưới header */
     .search-row th {
       background: #ffffff !important;
       padding: 3px 4px !important;
@@ -368,7 +356,6 @@
       border-radius: 4px;
     }
 
-    /* Scrollbar đẹp */
     .table-container::-webkit-scrollbar {
       width: 4px;
       height: 4px;
@@ -382,11 +369,10 @@
       border-radius: 10px;
     }
 
-    /* Khoảng cách giữa các row trong form */
     .row.g-1 {
       --bs-gutter-y: 0.2rem;
     }
-    /* Thêm vào cuối thẻ <style> */
+
     .btn-loading {
       opacity: 0.7;
       cursor: wait;
@@ -404,7 +390,6 @@
 </head>
 <body>
 <div class="app-layout">
-  <!-- GitHub button row -->
   <div class="github-row d-flex justify-content-end">
     <button class="github-toggle-btn" id="toggleGithubBtn">
       <i class="fa-brands fa-github"></i> GitHub
@@ -412,7 +397,6 @@
     </button>
   </div>
 
-  <!-- GitHub config card -->
   <div class="github-config-card card" id="githubConfigCard" style="display: none;">
     <div class="card-header py-0"><i class="fa-brands fa-github"></i> Cấu hình GitHub</div>
     <div class="card-body py-1">
@@ -437,7 +421,6 @@
     </div>
   </div>
 
-  <!-- Form thông tin văn bản - CỐ ĐỊNH -->
   <div class="card form-fixed">
     <div class="card-header py-0"><i class="fa-solid fa-file-signature"></i> Thông tin văn bản đi</div>
     <div class="card-body py-1">
@@ -500,7 +483,6 @@
     </div>
   </div>
 
-  <!-- Danh sách công văn - CỐ ĐỊNH PHẦN TÌM KIẾM, CUỘN DỮ LIỆU -->
   <div class="table-wrapper">
     <div class="table-card">
       <div class="card-header py-0 d-flex align-items-center gap-2 flex-wrap">
@@ -537,7 +519,6 @@
   </div>
 </div>
 
-<!-- Modals -->
 <div id="uploadProgress" class="upload-progress"><div><i class="fa-solid fa-spinner fa-spin"></i> Đang upload...</div><div class="progress mt-1" style="height: 3px;"><div id="uploadProgressBar" class="progress-bar" style="width: 0%"></div></div></div>
 <div class="modal fade" id="filePreviewModal" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-centered"><div class="modal-content"><div class="modal-header py-1"><h6 class="modal-title"><i class="fa-solid fa-file"></i> <span id="previewFileName"></span></h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0" id="filePreviewContent"><div class="text-center p-4"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p>Đang tải...</p></div></div><div class="modal-footer py-1"><a href="#" id="downloadFileBtn" class="btn btn-primary btn-sm" download><i class="fa-solid fa-download"></i> Tải</a><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button></div></div></div></div>
 <div class="modal fade" id="contentModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header py-1"><h6 class="modal-title"><i class="fa-solid fa-align-left"></i> Nội dung</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="contentModalBody"></div><div class="modal-footer py-1"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button></div></div></div></div>
@@ -703,10 +684,9 @@
   function viewFullContent(content) { if (!content?.trim()) return; const modal = new bootstrap.Modal(document.getElementById('contentModal')); document.getElementById('contentModalBody').innerHTML = `<div style="white-space: pre-wrap;">${escapeHtml(content)}</div>`; modal.show(); }
   function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ''; }
 
-  // Hàm xuất Excel dựa trên dữ liệu hiển thị (đã lọc tìm kiếm)
+  // Hàm xuất Excel - xuất TOÀN BỘ nội dung (không cắt)
   function exportToExcel() {
-    const table = document.getElementById('data-table');
-    const rows = table.querySelectorAll('tbody tr');
+    const rows = document.querySelectorAll('#documentsBody tr');
     const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
     
     if (visibleRows.length === 0) {
@@ -714,59 +694,82 @@
       return;
     }
 
-    // Tạo mảng dữ liệu cho Excel
     const excelData = [];
     
-    // Thêm 3 dòng trống phía trên (hàng 1,2,3 để trống)
+    // 3 dòng trống phía trên
     excelData.push(['', '', '', '', '', '', '', '', '', '']);
     excelData.push(['', '', '', '', '', '', '', '', '', '']);
     excelData.push(['', '', '', '', '', '', '', '', '', '']);
     
-    // Thêm tiêu đề cột (hàng thứ 4)
+    // Tiêu đề cột (hàng thứ 4)
     const headers = ['STT', 'Năm', 'Số VB', 'Tên VB', 'Ngày ký', 'Người ký', 'Nơi BH', 'Nội dung', 'File', 'Thao tác'];
     excelData.push(headers);
     
-    // Thêm dữ liệu từ các hàng visible
+    // Duyệt từng dòng hiển thị và lấy dữ liệu
     visibleRows.forEach((row, idx) => {
       const cells = row.querySelectorAll('td');
       if (cells.length >= 9) {
+        // Lấy ID của document từ nút sửa/xóa (có onclick chứa id)
+        let fullContent = '';
+        // Tìm nội dung đầy đủ từ biến toàn cục documentsDataGlobal
+        const editBtn = cells[9]?.querySelector('.action-btn.edit');
+        if (editBtn && editBtn.getAttribute('onclick')) {
+          const match = editBtn.getAttribute('onclick').match(/editDocumentFromGlobal\("([^"]+)"\)/);
+          if (match && match[1] && documentsDataGlobal[match[1]]) {
+            fullContent = documentsDataGlobal[match[1]].content || '';
+          }
+        }
+        
+        // Nếu không tìm thấy qua editBtn, thử tìm qua deleteBtn
+        if (!fullContent) {
+          const deleteBtn = cells[9]?.querySelector('.action-btn.delete');
+          if (deleteBtn && deleteBtn.getAttribute('onclick')) {
+            const match = deleteBtn.getAttribute('onclick').match(/deleteDocumentFromGlobal\("([^"]+)"\)/);
+            if (match && match[1] && documentsDataGlobal[match[1]]) {
+              fullContent = documentsDataGlobal[match[1]].content || '';
+            }
+          }
+        }
+        
+        // Nếu vẫn chưa có, thử lấy từ text trong ô nội dung (có thể đã bị cắt)
+        if (!fullContent) {
+          const contentDiv = cells[7]?.querySelector('.content-preview');
+          if (contentDiv && contentDiv.getAttribute('onclick')) {
+            // Trường hợp này có thể lấy được content từ onclick
+            const match = contentDiv.getAttribute('onclick').match(/viewFullContentFromGlobal\((".*")\)/);
+            if (match && match[1]) {
+              try {
+                fullContent = JSON.parse(match[1]);
+              } catch(e) { fullContent = contentDiv.innerText || ''; }
+            }
+          } else {
+            fullContent = cells[7]?.innerText.trim() || '';
+          }
+        }
+        
         const rowData = [];
-        // STT (tính lại từ 1)
-        rowData.push(idx + 1);
-        // Năm
-        rowData.push(cells[1]?.innerText.trim() || '');
-        // Số VB
-        rowData.push(cells[2]?.innerText.trim() || '');
-        // Tên VB
-        rowData.push(cells[3]?.innerText.trim() || '');
-        // Ngày ký
-        rowData.push(cells[4]?.innerText.trim() || '');
-        // Người ký
-        rowData.push(cells[5]?.innerText.trim() || '');
-        // Nơi BH
-        rowData.push(cells[6]?.innerText.trim() || '');
-        // Nội dung (lấy text thuần)
-        const contentDiv = cells[7]?.querySelector('.content-preview');
-        rowData.push(contentDiv?.innerText.trim() || cells[7]?.innerText.trim() || '');
-        // File (tên file nếu có)
+        rowData.push(idx + 1);  // STT
+        rowData.push(cells[1]?.innerText.trim() || '');  // Năm
+        rowData.push(cells[2]?.innerText.trim() || '');  // Số VB
+        rowData.push(cells[3]?.innerText.trim() || '');  // Tên VB
+        rowData.push(cells[4]?.innerText.trim() || '');  // Ngày ký
+        rowData.push(cells[5]?.innerText.trim() || '');  // Người ký
+        rowData.push(cells[6]?.innerText.trim() || '');  // Nơi BH
+        rowData.push(fullContent);  // Nội dung (TOÀN BỘ, không cắt)
+        
         const fileBtn = cells[8]?.querySelector('.file-link');
-        rowData.push(fileBtn?.innerText.trim() || '—');
-        // Thao tác (không xuất)
-        rowData.push('');
+        rowData.push(fileBtn?.innerText.trim() || '—');  // File
+        rowData.push('');  // Thao tác (để trống)
+        
         excelData.push(rowData);
       }
     });
     
-    // Tạo workbook và worksheet
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(excelData);
-    
-    // Tùy chỉnh độ rộng cột
-    ws['!cols'] = [{wch:5},{wch:8},{wch:12},{wch:15},{wch:12},{wch:15},{wch:12},{wch:40},{wch:15},{wch:8}];
+    ws['!cols'] = [{wch:5},{wch:8},{wch:12},{wch:18},{wch:12},{wch:15},{wch:12},{wch:50},{wch:15},{wch:8}];
     
     XLSX.utils.book_append_sheet(wb, ws, 'Danh sách văn bản đi');
-    
-    // Xuất file
     const fileName = `danh_sach_van_ban_di_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`;
     XLSX.writeFile(wb, fileName);
     showNotification(`Xuất Excel thành công! (${visibleRows.length} dòng dữ liệu)`, true);
@@ -777,7 +780,18 @@
     if (!snapshot.exists()) { tbody.innerHTML = '<tr><td colspan="10" class="text-center py-3">Chưa có công văn nào</td></tr>'; totalSpan.textContent = '0'; return; }
     const docs = snapshot.val(); documentsDataGlobal = docs; renderThongKe(docs); let stt = 1, total = 0;
     for (const id in docs) { const doc = docs[id]; total++; const hasFile = doc.hasFile && doc.fileData; const contentText = doc.content || ''; const contentPreview = contentText.length > 65 ? contentText.substring(0,65)+'...' : contentText; const fileNameDisplay = hasFile ? (doc.fileData.name.length > 10 ? doc.fileData.name.substring(0,10)+'...' : doc.fileData.name) : '';
-      tbody.innerHTML += `<tr><td class="text-center">${stt}</td><td class="text-center"><span class="badge-info">${escapeHtml(doc.year||'')}</span></td><td><strong>${escapeHtml(doc.documentNumber||'')}</strong></td><td>${escapeHtml(doc.documentName||'')}</td><td class="text-center">${doc.signDate||''}</td><td>${escapeHtml(doc.signer||'')}</td><td>${escapeHtml(doc.issuingPlace||'')}</td><td><div class="content-preview" onclick='window.viewFullContentFromGlobal(${JSON.stringify(contentText)})'>${escapeHtml(contentPreview)||'Chưa có'}</div></td><td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileNameDisplay)}</button>` : '<span class="text-muted">—</span>'}</td><td><div class="action-buttons">${hasFile ? `<button class="action-btn view" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-eye"></i></button>` : ''}<button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i></button></div></td></tr>`;
+      tbody.innerHTML += `<tr>
+        <td class="text-center">${stt}</td>
+        <td class="text-center"><span class="badge-info">${escapeHtml(doc.year||'')}</span></td>
+        <td><strong>${escapeHtml(doc.documentNumber||'')}</strong></td>
+        <td>${escapeHtml(doc.documentName||'')}</td>
+        <td class="text-center">${doc.signDate||''}</td>
+        <td>${escapeHtml(doc.signer||'')}</td>
+        <td>${escapeHtml(doc.issuingPlace||'')}</td>
+        <td><div class="content-preview" onclick='window.viewFullContentFromGlobal(${JSON.stringify(contentText)})'>${escapeHtml(contentPreview)||'Chưa có'}</div></td>
+        <td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileNameDisplay)}</button>` : '<span class="text-muted">—</span>'}</td>
+        <td><div class="action-buttons">${hasFile ? `<button class="action-btn view" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-eye"></i></button>` : ''}<button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i></button></div></td>
+      </tr>`;
       stt++;
     } totalSpan.textContent = total;
   }
