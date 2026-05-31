@@ -623,32 +623,111 @@
   }
 
   async function addDocument() {
+  // Lấy nút lưu
+  const saveBtn = document.getElementById('save-cvdi-btn');
+  
+  // Lưu text gốc và thêm class loading
+  const originalText = saveBtn.innerHTML;
+  saveBtn.classList.add('btn-loading');
+  saveBtn.disabled = true;
+  
+  try {
     const year = document.getElementById('nam').value, documentNumber = document.getElementById('so-vb').value, documentName = document.getElementById('ten-vb').value;
     const signDate = document.getElementById('ngay-ky').value, signer = document.getElementById('nguoi-ky').value, issuingPlace = document.getElementById('noi-ban-hanh').value;
     const content = document.getElementById('noi-dung').value, file = document.getElementById('file-dinh-kem').files[0];
-    if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { showNotification('Vui lòng điền đầy đủ!', false); return; }
+    
+    if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { 
+      showNotification('Vui lòng điền đầy đủ!', false); 
+      saveBtn.classList.remove('btn-loading');
+      saveBtn.disabled = false;
+      return; 
+    }
+    
     try {
-      const newDocRef = push(ref(database, getDbPath('congVanDi'))); const newId = newDocRef.key;
+      const newDocRef = push(ref(database, getDbPath('congVanDi'))); 
+      const newId = newDocRef.key;
       let fileData = null;
-      if (file) { try { fileData = await uploadToGitHub(file, newId); } catch (uploadError) { showNotification('Upload thất bại: ' + uploadError.message, false); return; } }
-      await set(newDocRef, { year, documentNumber, documentName, signDate, signer, issuingPlace, content, fileData, hasFile: !!fileData, createdAt: new Date().toISOString(), createdBy: currentUid });
-      showNotification('Thêm thành công!'); refreshForm();
-    } catch (error) { showNotification('Lỗi: ' + error.message, false); }
+      
+      if (file) { 
+        try { 
+          fileData = await uploadToGitHub(file, newId); 
+        } catch (uploadError) { 
+          showNotification('Upload thất bại: ' + uploadError.message, false); 
+          saveBtn.classList.remove('btn-loading');
+          saveBtn.disabled = false;
+          return; 
+        } 
+      }
+      
+      await set(newDocRef, { 
+        year, documentNumber, documentName, signDate, signer, issuingPlace, content, 
+        fileData, hasFile: !!fileData, createdAt: new Date().toISOString(), createdBy: currentUid 
+      });
+      
+      showNotification('Thêm thành công!'); 
+      refreshForm();
+      
+    } catch (error) { 
+      showNotification('Lỗi: ' + error.message, false); 
+    }
+    
+  } finally {
+    // Khôi phục nút
+    saveBtn.classList.remove('btn-loading');
+    saveBtn.disabled = false;
   }
+}
 
   async function updateDocument() {
-    if (!editingId) return;
+  if (!editingId) return;
+  
+  // Lấy nút cập nhật
+  const updateBtn = document.getElementById('update-cvdi-btn');
+  
+  // Lưu text gốc và thêm class loading
+  const originalText = updateBtn.innerHTML;
+  updateBtn.classList.add('btn-loading');
+  updateBtn.disabled = true;
+  
+  try {
     const year = document.getElementById('nam').value, documentNumber = document.getElementById('so-vb').value, documentName = document.getElementById('ten-vb').value;
     const signDate = document.getElementById('ngay-ky').value, signer = document.getElementById('nguoi-ky').value, issuingPlace = document.getElementById('noi-ban-hanh').value;
     const content = document.getElementById('noi-dung').value, newFile = document.getElementById('file-dinh-kem').files[0];
-    if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { showNotification('Điền đầy đủ thông tin!', false); return; }
+    
+    if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { 
+      showNotification('Điền đầy đủ thông tin!', false); 
+      updateBtn.classList.remove('btn-loading');
+      updateBtn.disabled = false;
+      return; 
+    }
+    
     try {
       let fileData = currentFileData;
-      if (newFile) { if (currentFileData?.path && currentFileData?.sha) await deleteFromGitHub(currentFileData.path, currentFileData.sha); fileData = await uploadToGitHub(newFile, editingId); }
-      await update(ref(database, getDbPath(`congVanDi/${editingId}`)), { year, documentNumber, documentName, signDate, signer, issuingPlace, content, fileData: fileData || null, hasFile: !!fileData, updatedAt: new Date().toISOString(), updatedBy: currentUid });
-      showNotification('Cập nhật thành công!'); refreshForm();
-    } catch (error) { showNotification('Cập nhật thất bại: ' + error.message, false); }
+      if (newFile) { 
+        if (currentFileData?.path && currentFileData?.sha) 
+          await deleteFromGitHub(currentFileData.path, currentFileData.sha); 
+        fileData = await uploadToGitHub(newFile, editingId); 
+      }
+      
+      await update(ref(database, getDbPath(`congVanDi/${editingId}`)), { 
+        year, documentNumber, documentName, signDate, signer, issuingPlace, content, 
+        fileData: fileData || null, hasFile: !!fileData, 
+        updatedAt: new Date().toISOString(), updatedBy: currentUid 
+      });
+      
+      showNotification('Cập nhật thành công!'); 
+      refreshForm();
+      
+    } catch (error) { 
+      showNotification('Cập nhật thất bại: ' + error.message, false); 
+    }
+    
+  } finally {
+    // Khôi phục nút
+    updateBtn.classList.remove('btn-loading');
+    updateBtn.disabled = false;
   }
+}
 
   async function deleteDocument(id) {
     if (!confirm('Xóa công văn này?')) return;
