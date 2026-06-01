@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tra cứu công văn | Quản lý văn bản</title>
+  <title>Tra cứu & Xóa công văn | Quản lý văn bản</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
 
   <style>
     * {
@@ -24,7 +27,6 @@
       overflow: hidden;
     }
 
-    /* Layout chính */
     .app-layout {
       display: flex;
       flex-direction: column;
@@ -33,51 +35,31 @@
       gap: 4px;
     }
 
-    /* GitHub button row */
     .github-row {
       flex-shrink: 0;
       margin-bottom: 0;
     }
 
-    /* GitHub config card */
     .github-config-card {
       flex-shrink: 0;
       margin-bottom: 4px;
     }
 
-    /* Form tìm kiếm - cố định */
-    .form-fixed {
-      flex-shrink: 0;
+    /* 2 cột chính */
+    .two-columns {
+      flex: 1;
+      display: flex;
+      gap: 12px;
+      min-height: 0;
+      overflow: hidden;
     }
 
-    /* Phần kết quả - cuộn được */
-    .table-wrapper {
+    .col-search, .col-delete {
       flex: 1;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
       min-height: 0;
-    }
-
-    /* Card chứa bảng */
-    .table-card {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
       overflow: hidden;
-      border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      background: white;
-    }
-
-    .table-card .card-header {
-      flex-shrink: 0;
-    }
-
-    .table-container {
-      flex: 1;
-      overflow: auto;
-      min-height: 0;
     }
 
     /* Card styling */
@@ -86,6 +68,7 @@
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
       border: none;
       background: white;
+      margin-bottom: 0;
     }
 
     .card-header {
@@ -106,7 +89,7 @@
       padding: 8px 12px;
     }
 
-    /* Form cực nhỏ */
+    /* Form */
     .form-label {
       font-weight: 600;
       color: #1e2a3a;
@@ -131,13 +114,13 @@
 
     .btn {
       border-radius: 5px;
-      padding: 3px 10px;
+      padding: 4px 10px;
       font-size: 10px;
       font-weight: 500;
     }
 
     .btn i {
-      margin-right: 3px;
+      margin-right: 4px;
     }
 
     .btn-primary {
@@ -158,58 +141,60 @@
       background: linear-gradient(105deg, #27ae60, #219a52);
     }
 
+    .btn-danger {
+      background: linear-gradient(105deg, #e74c3c, #c0392b);
+      border: none;
+      color: white;
+    }
+    .btn-danger:hover {
+      background: linear-gradient(105deg, #c0392b, #a93226);
+    }
+
     .btn-secondary {
       background: #5a6c7e;
       border: none;
       color: white;
     }
-    .btn-secondary:hover {
-      background: #3e4d5e;
-    }
 
     hr {
-      margin: 4px 0;
+      margin: 6px 0;
       opacity: 0.3;
     }
 
-    /* GitHub toggle button */
-    .github-toggle-btn {
-      background: transparent;
-      border: 1px solid rgba(0, 102, 204, 0.3);
-      color: #0066cc;
-      border-radius: 30px;
-      padding: 2px 8px;
-      font-size: 9px;
-      cursor: pointer;
-      transition: 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .github-toggle-btn:hover {
-      background: #0066cc;
-      color: white;
-      border-color: #0066cc;
+    /* Result area */
+    .result-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+      margin-top: 4px;
     }
 
-    .notification {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      padding: 6px 14px;
-      border-radius: 30px;
-      color: white;
-      display: none;
-      z-index: 2000;
-      font-size: 11px;
-      font-weight: 500;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    .result-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      background: white;
     }
-    .notification.success { background: linear-gradient(105deg, #2ecc71, #27ae60); }
-    .notification.error { background: linear-gradient(105deg, #e74c3c, #c0392b); }
-    .notification.info { background: linear-gradient(105deg, #3498db, #2980b9); }
 
-    /* Table */
+    .result-card .card-header {
+      background: linear-gradient(105deg, #0066cc 0%, #004d99 100%);
+      color: white;
+      font-weight: 600;
+      font-size: 10px;
+      padding: 6px 12px;
+    }
+
+    .result-container {
+      flex: 1;
+      overflow: auto;
+      min-height: 0;
+    }
+
     .table {
       margin-bottom: 0;
     }
@@ -235,16 +220,6 @@
       border-bottom: 1px solid #edf2f7;
     }
 
-    /* Filter input trong header */
-    .column-filter {
-      width: 100%;
-      padding: 2px 4px;
-      font-size: 9px;
-      border: 1px solid #dce3ec;
-      border-radius: 4px;
-      margin-top: 3px;
-    }
-
     .badge-info {
       background: #e6f0ff;
       color: #0066cc;
@@ -256,33 +231,108 @@
 
     .no-data {
       text-align: center;
-      padding: 30px;
+      padding: 20px;
       color: #9aa0a6;
       font-size: 11px;
     }
 
-    /* Scrollbar */
-    .table-container::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
+    .notification {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      padding: 6px 14px;
+      border-radius: 30px;
+      color: white;
+      display: none;
+      z-index: 2000;
+      font-size: 11px;
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      animation: slideIn 0.3s ease;
     }
-    .table-container::-webkit-scrollbar-track {
-      background: #e2e8f0;
-      border-radius: 10px;
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
-    .table-container::-webkit-scrollbar-thumb {
-      background: #94a3b8;
-      border-radius: 10px;
+    .notification.success { background: linear-gradient(105deg, #2ecc71, #27ae60); }
+    .notification.error { background: linear-gradient(105deg, #e74c3c, #c0392b); }
+    .notification.info { background: linear-gradient(105deg, #3498db, #2980b9); }
+    .notification.warning { background: linear-gradient(105deg, #f39c12, #e67e22); }
+
+    .github-toggle-btn {
+      background: transparent;
+      border: 1px solid rgba(0, 102, 204, 0.3);
+      color: #0066cc;
+      border-radius: 30px;
+      padding: 2px 8px;
+      font-size: 9px;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .github-toggle-btn:hover {
+      background: #0066cc;
+      color: white;
+      border-color: #0066cc;
     }
 
     .row.g-1 {
       --bs-gutter-y: 0.2rem;
     }
 
+    .delete-stats {
+      background: #fff5f5;
+      padding: 6px 8px;
+      border-radius: 6px;
+      margin-top: 8px;
+      font-size: 9px;
+      border-left: 3px solid #e74c3c;
+    }
+
+    .search-stats {
+      background: #f0f7ff;
+      padding: 6px 8px;
+      border-radius: 6px;
+      margin-top: 8px;
+      font-size: 9px;
+      border-left: 3px solid #0066cc;
+    }
+
+    .date-group {
+      display: flex;
+      gap: 6px;
+    }
+    .date-group .form-control {
+      flex: 1;
+    }
+
     .action-buttons {
+      margin-top: 10px;
       display: flex;
       gap: 8px;
-      margin-top: 8px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-row .form-select, .filter-row .form-control {
+      flex: 1;
+      min-width: 100px;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 10px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 10px;
     }
   </style>
 </head>
@@ -321,88 +371,121 @@
     </div>
   </div>
 
-  <!-- Form tìm kiếm - CỐ ĐỊNH -->
-  <div class="card form-fixed">
-    <div class="card-header py-0"><i class="fa-solid fa-search"></i> Tra cứu công văn</div>
-    <div class="card-body py-1">
-      <div class="row g-1">
-        <div class="col-md-3">
-          <label class="form-label">Loại công văn</label>
-          <select id="loai-cong-van" class="form-select">
-            <option value="di">Công văn đi</option>
-            <option value="den">Công văn đến</option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Năm</label>
-          <select id="nam" class="form-select">
-            <option value="">Tất cả năm</option>
-          </select>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Tìm kiếm chung</label>
-          <input type="text" id="tim-kiem" class="form-control" placeholder="Nhập từ khóa...">
+  <!-- 2 cột chính -->
+  <div class="two-columns">
+    <!-- Cột 1: Tra cứu công văn -->
+    <div class="col-search">
+      <div class="card">
+        <div class="card-header py-0"><i class="fa-solid fa-search"></i> Tra cứu công văn</div>
+        <div class="card-body py-1">
+          <div class="row g-1">
+            <div class="col-md-12">
+              <label class="form-label">Loại công văn</label>
+              <select id="search-loai" class="form-select">
+                <option value="di">Công văn đi</option>
+                <option value="den">Công văn đến</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Năm</label>
+              <select id="search-nam" class="form-select">
+                <option value="">Tất cả</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Tháng</label>
+              <select id="search-thang" class="form-select">
+                <option value="">Tất cả</option>
+                <option value="1">Tháng 1</option><option value="2">Tháng 2</option><option value="3">Tháng 3</option>
+                <option value="4">Tháng 4</option><option value="5">Tháng 5</option><option value="6">Tháng 6</option>
+                <option value="7">Tháng 7</option><option value="8">Tháng 8</option><option value="9">Tháng 9</option>
+                <option value="10">Tháng 10</option><option value="11">Tháng 11</option><option value="12">Tháng 12</option>
+              </select>
+            </div>
+            <div class="col-md-12">
+              <label class="form-label">Khoảng thời gian</label>
+              <div class="date-group">
+                <input type="text" id="search-tu-ngay" class="form-control date-picker" placeholder="Từ ngày (dd/mm/yyyy)">
+                <input type="text" id="search-den-ngay" class="form-control date-picker" placeholder="Đến ngày (dd/mm/yyyy)">
+              </div>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-primary" id="search-btn"><i class="fa-solid fa-magnifying-glass"></i> Tra cứu</button>
+            <button class="btn btn-secondary" id="reset-search-btn"><i class="fa-solid fa-rotate"></i> Làm mới</button>
+            <button class="btn btn-success" id="export-result-btn"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
+          </div>
+          <div id="search-stats" class="search-stats" style="display: none;"></div>
         </div>
       </div>
-      <div class="action-buttons">
-        <button class="btn btn-primary" id="hien-tat-ca-btn"><i class="fa-solid fa-eye"></i> Hiện tất cả</button>
-        <button class="btn btn-success" id="xuat-excel-btn"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
+      <!-- Kết quả tra cứu -->
+      <div class="result-wrapper">
+        <div class="result-card">
+          <div class="card-header py-0"><i class="fa-solid fa-list"></i> Kết quả tra cứu <span id="result-count" class="badge bg-light text-dark ms-1">0</span></div>
+          <div class="result-container" id="search-result-container">
+            <div id="loading-search" class="text-center py-3" style="display: none;">
+              <i class="fa-solid fa-spinner fa-spin"></i> Đang tải...
+            </div>
+            <div id="search-result-body"></div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Kết quả tra cứu - CUỘN ĐƯỢC -->
-  <div class="table-wrapper">
-    <div class="table-card">
-      <div class="card-header py-0"><i class="fa-solid fa-list"></i> Kết quả tra cứu</div>
-      <div class="table-container">
-        <div id="loading" class="text-center py-3" style="display: none;">
-          <i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...
+    <!-- Cột 2: Xóa công văn -->
+    <div class="col-delete">
+      <div class="card">
+        <div class="card-header py-0"><i class="fa-solid fa-trash-can"></i> Xóa công văn</div>
+        <div class="card-body py-1">
+          <div class="row g-1">
+            <div class="col-md-12">
+              <label class="form-label">Loại công văn</label>
+              <select id="delete-loai" class="form-select">
+                <option value="di">Công văn đi</option>
+                <option value="den">Công văn đến</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Năm</label>
+              <select id="delete-nam" class="form-select">
+                <option value="">Tất cả</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Tháng</label>
+              <select id="delete-thang" class="form-select">
+                <option value="">Tất cả</option>
+                <option value="1">Tháng 1</option><option value="2">Tháng 2</option><option value="3">Tháng 3</option>
+                <option value="4">Tháng 4</option><option value="5">Tháng 5</option><option value="6">Tháng 6</option>
+                <option value="7">Tháng 7</option><option value="8">Tháng 8</option><option value="9">Tháng 9</option>
+                <option value="10">Tháng 10</option><option value="11">Tháng 11</option><option value="12">Tháng 12</option>
+              </select>
+            </div>
+            <div class="col-md-12">
+              <label class="form-label">Khoảng thời gian</label>
+              <div class="date-group">
+                <input type="text" id="delete-tu-ngay" class="form-control date-picker" placeholder="Từ ngày (dd/mm/yyyy)">
+                <input type="text" id="delete-den-ngay" class="form-control date-picker" placeholder="Đến ngày (dd/mm/yyyy)">
+              </div>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-danger" id="delete-preview-btn"><i class="fa-solid fa-eye"></i> Xem trước</button>
+            <button class="btn btn-danger" id="delete-all-btn" style="background: #c0392b;"><i class="fa-solid fa-trash-can"></i> Xóa tất cả</button>
+          </div>
+          <div id="delete-stats" class="delete-stats" style="display: none;"></div>
         </div>
-        
-        <!-- Bảng công văn đi -->
-        <div id="wrapper-cong-van-di">
-          <table class="table table-hover mb-0">
-            <thead>
-              <tr>
-                <th width="4%">STT</th>
-                <th width="8%">Năm <input type="text" class="column-filter" data-column="1" data-type="di" placeholder="Lọc"></th>
-                <th width="10%">Số VB <input type="text" class="column-filter" data-column="2" data-type="di" placeholder="Lọc"></th>
-                <th width="15%">Tên VB <input type="text" class="column-filter" data-column="3" data-type="di" placeholder="Lọc"></th>
-                <th width="10%">Ngày ký <input type="text" class="column-filter" data-column="4" data-type="di" placeholder="Lọc"></th>
-                <th width="12%">Người ký <input type="text" class="column-filter" data-column="5" data-type="di" placeholder="Lọc"></th>
-                <th width="15%">Nơi BH <input type="text" class="column-filter" data-column="6" data-type="di" placeholder="Lọc"></th>
-                <th width="26%">Nội dung <input type="text" class="column-filter" data-column="7" data-type="di" placeholder="Lọc"></th>
-              </tr>
-            </thead>
-            <tbody id="body-cong-van-di">
-              <tr><td colspan="8" class="no-data">Chưa có dữ liệu</td></tr>
-            </tbody>
-          </table>
-        </div>
-        
-        <!-- Bảng công văn đến -->
-        <div id="wrapper-cong-van-den" style="display: none;">
-          <table class="table table-hover mb-0">
-            <thead>
-              <tr>
-                <th width="4%">STT</th>
-                <th width="7%">Năm <input type="text" class="column-filter" data-column="1" data-type="den" placeholder="Lọc"></th>
-                <th width="8%">Số đến <input type="text" class="column-filter" data-column="2" data-type="den" placeholder="Lọc"></th>
-                <th width="10%">Người nhận <input type="text" class="column-filter" data-column="3" data-type="den" placeholder="Lọc"></th>
-                <th width="9%">Ngày nhận <input type="text" class="column-filter" data-column="4" data-type="den" placeholder="Lọc"></th>
-                <th width="8%">Số CV <input type="text" class="column-filter" data-column="5" data-type="den" placeholder="Lọc"></th>
-                <th width="15%">Tên VB <input type="text" class="column-filter" data-column="6" data-type="den" placeholder="Lọc"></th>
-                <th width="9%">Ngày ký <input type="text" class="column-filter" data-column="7" data-type="den" placeholder="Lọc"></th>
-                <th width="12%">Người ký <input type="text" class="column-filter" data-column="8" data-type="den" placeholder="Lọc"></th>
-                <th width="12%">Nơi BH <input type="text" class="column-filter" data-column="9" data-type="den" placeholder="Lọc"></th>
-                <th width="6%">Số tờ <input type="text" class="column-filter" data-column="10" data-type="den" placeholder="Lọc"></th>
-              </tr>
-            </thead>
-            <tbody id="body-cong-van-den">
-              <tr><td colspan="11" class="no-data">Chưa có dữ liệu</td></tr>
-            </tbody>
-          </table>
+      </div>
+      <!-- Danh sách sẽ xóa -->
+      <div class="result-wrapper">
+        <div class="result-card">
+          <div class="card-header py-0"><i class="fa-solid fa-list"></i> Danh sách sẽ xóa <span id="delete-count" class="badge bg-light text-dark ms-1">0</span></div>
+          <div class="result-container" id="delete-result-container">
+            <div id="loading-delete" class="text-center py-3" style="display: none;">
+              <i class="fa-solid fa-spinner fa-spin"></i> Đang tải...
+            </div>
+            <div id="delete-result-body"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -412,11 +495,12 @@
 <div id="successNotification" class="notification success"></div>
 <div id="errorNotification" class="notification error"></div>
 <div id="infoNotification" class="notification info"></div>
+<div id="warningNotification" class="notification warning"></div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+  import { getDatabase, ref, get, remove, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBWKTyXVK1y2dqxWUWprIxd5CCHMzSMc_o",
@@ -435,11 +519,77 @@
   let currentUser = null, currentUid = null;
   let allCongVanDi = [], allCongVanDen = [], allYears = new Set();
   let githubConfig = { token: '', owner: '', repo: '' };
+  let currentPreviewList = [];
 
-  function showNotification(message, isSuccess = true, isInfo = false) {
-    const notifId = isInfo ? 'infoNotification' : (isSuccess ? 'successNotification' : 'errorNotification');
+  function showNotification(message, type = 'info') {
+    const notifId = type === 'success' ? 'successNotification' : type === 'error' ? 'errorNotification' : type === 'warning' ? 'warningNotification' : 'infoNotification';
     const notification = document.getElementById(notifId);
-    if (notification) { notification.textContent = message; notification.style.display = 'block'; setTimeout(() => { notification.style.display = 'none'; }, 2000); }
+    if (notification) { notification.textContent = message; notification.style.display = 'block'; setTimeout(() => { notification.style.display = 'none'; }, 2500); }
+  }
+
+  function convertToISODate(dateStr) {
+    if (!dateStr) return '';
+    const parts = dateStr.split('/');
+    if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    return dateStr;
+  }
+
+  function convertToDisplayDate(dateStr) {
+    if (!dateStr) return '';
+    if (dateStr.includes('/')) return dateStr;
+    const parts = dateStr.split('-');
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return dateStr;
+  }
+
+  function getMonthFromDate(dateStr) {
+    if (!dateStr) return null;
+    const iso = convertToISODate(dateStr);
+    if (iso && iso.length >= 7) return parseInt(iso.substring(5, 7));
+    return null;
+  }
+
+  function getYearFromDate(dateStr) {
+    if (!dateStr) return null;
+    const iso = convertToISODate(dateStr);
+    if (iso && iso.length >= 4) return parseInt(iso.substring(0, 4));
+    return null;
+  }
+
+  function filterDataByConditions(data, conditions) {
+    let filtered = [...data];
+    
+    if (conditions.nam) {
+      filtered = filtered.filter(item => item.year === conditions.nam);
+    }
+    
+    if (conditions.thang) {
+      filtered = filtered.filter(item => {
+        const ngayField = conditions.loai === 'di' ? item.signDate : item.ngayNhan;
+        const month = getMonthFromDate(ngayField);
+        return month === parseInt(conditions.thang);
+      });
+    }
+    
+    if (conditions.tuNgay) {
+      const tuNgayISO = convertToISODate(conditions.tuNgay);
+      filtered = filtered.filter(item => {
+        const ngayField = conditions.loai === 'di' ? item.signDate : item.ngayNhan;
+        const ngayISO = convertToISODate(ngayField);
+        return ngayISO >= tuNgayISO;
+      });
+    }
+    
+    if (conditions.denNgay) {
+      const denNgayISO = convertToISODate(conditions.denNgay);
+      filtered = filtered.filter(item => {
+        const ngayField = conditions.loai === 'di' ? item.signDate : item.ngayNhan;
+        const ngayISO = convertToISODate(ngayField);
+        return ngayISO <= denNgayISO;
+      });
+    }
+    
+    return filtered;
   }
 
   async function loadGithubConfig() {
@@ -464,8 +614,8 @@
     try {
       await set(ref(database, 'system/githubConfig'), githubConfig);
       updateGithubStatus();
-      showNotification('Đã lưu cấu hình GitHub!', true);
-    } catch (error) { showNotification('Lỗi: ' + error.message, false); }
+      showNotification('Đã lưu cấu hình GitHub!', 'success');
+    } catch (error) { showNotification('Lỗi: ' + error.message, 'error'); }
   }
 
   function updateGithubStatus() {
@@ -478,137 +628,82 @@
 
   function getUserPath(path) { return `users/${currentUid}/${path}`; }
 
-  function filterData(data, searchTerm) {
-    if (!searchTerm) return data;
-    const term = searchTerm.toLowerCase();
-    return data.filter(item => Object.values(item).some(v => v && v.toString().toLowerCase().includes(term)));
-  }
-
-  function filterByColumn(data, columnIndex, filterValue, loaiCongVan) {
-    if (!filterValue) return data;
-    const term = filterValue.toLowerCase();
-    return data.filter(item => {
-      let value;
-      if (loaiCongVan === 'di') {
-        const map = { 1: item.year, 2: item.documentNumber, 3: item.documentName, 4: item.signDate, 5: item.signer, 6: item.issuingPlace, 7: item.content };
-        value = map[columnIndex];
-      } else {
-        const map = { 1: item.year, 2: item.soDen, 3: item.nguoiNhan, 4: item.ngayNhan, 5: item.soCongVan, 6: item.tenVanBan, 7: item.ngayKy, 8: item.nguoiKy, 9: item.noiBanHanh, 10: item.soTo };
-        value = map[columnIndex];
-      }
-      return value && value.toString().toLowerCase().includes(term);
-    });
-  }
-
   function updateYearOptions() {
-    const yearSelect = document.getElementById('nam');
-    const currentValue = yearSelect.value;
     const years = Array.from(allYears).sort((a, b) => b - a);
-    yearSelect.innerHTML = '<option value="">Tất cả năm</option>';
-    years.forEach(year => {
-      const opt = document.createElement('option');
-      opt.value = year;
-      opt.textContent = year;
-      if (currentValue === year) opt.selected = true;
-      yearSelect.appendChild(opt);
+    ['search-nam', 'delete-nam'].forEach(selectId => {
+      const select = document.getElementById(selectId);
+      const currentValue = select.value;
+      select.innerHTML = '<option value="">Tất cả</option>';
+      years.forEach(year => {
+        const opt = document.createElement('option');
+        opt.value = year;
+        opt.textContent = year;
+        if (currentValue === year) opt.selected = true;
+        select.appendChild(opt);
+      });
     });
   }
 
-  function displayCongVanDi(data) {
-    const tbody = document.getElementById('body-cong-van-di');
-    tbody.innerHTML = '';
-    if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="no-data">Không có dữ liệu</td></tr>'; return; }
-    data.forEach((item, i) => {
-      tbody.innerHTML += `<tr>
-        <td class="text-center">${i+1}</td>
-        <td><span class="badge-info">${item.year || ''}</span></td>
-        <td><strong>${item.documentNumber || ''}</strong></td>
-        <td>${item.documentName || ''}</td>
-        <td>${item.signDate || ''}</td>
-        <td>${item.signer || ''}</td>
-        <td>${item.issuingPlace || ''}</td>
-        <td style="max-width:250px; white-space:normal">${item.content || ''}</td>
-      </tr>`;
-    });
-  }
-
-  function displayCongVanDen(data) {
-    const tbody = document.getElementById('body-cong-van-den');
-    tbody.innerHTML = '';
-    if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="11" class="no-data">Không có dữ liệu</td></tr>'; return; }
-    data.forEach((item, i) => {
-      tbody.innerHTML += `<tr>
-        <td class="text-center">${i+1}</td>
-        <td><span class="badge-info">${item.year || ''}</span></td>
-        <td><strong>${item.soDen || ''}</strong></td>
-        <td>${item.nguoiNhan || ''}</td>
-        <td>${item.ngayNhan || ''}</td>
-        <td>${item.soCongVan || ''}</td>
-        <td>${item.tenVanBan || ''}</td>
-        <td>${item.ngayKy || ''}</td>
-        <td>${item.nguoiKy || ''}</td>
-        <td>${item.noiBanHanh || ''}</td>
-        <td>${item.soTo || ''}</td>
-      </tr>`;
-    });
-  }
-
-  function handleSearchAndFilter() {
-    const loaiCongVan = document.getElementById('loai-cong-van').value;
-    const nam = document.getElementById('nam').value;
-    const searchTerm = document.getElementById('tim-kiem').value;
-    
-    let data = loaiCongVan === 'di' ? [...allCongVanDi] : [...allCongVanDen];
-    if (nam) data = data.filter(item => item.year === nam);
-    if (searchTerm) data = filterData(data, searchTerm);
-    
-    document.querySelectorAll('.column-filter').forEach(input => {
-      const col = parseInt(input.dataset.column);
-      const type = input.dataset.type;
-      const val = input.value;
-      if (val && type === loaiCongVan) data = filterByColumn(data, col, val, loaiCongVan);
-    });
-    
-    if (loaiCongVan === 'di') displayCongVanDi(data);
-    else displayCongVanDen(data);
-  }
-
-  function exportToExcel() {
-    const loaiCongVan = document.getElementById('loai-cong-van').value;
-    const nam = document.getElementById('nam').value;
-    const searchTerm = document.getElementById('tim-kiem').value;
-    
-    let data = loaiCongVan === 'di' ? [...allCongVanDi] : [...allCongVanDen];
-    if (nam) data = data.filter(item => item.year === nam);
-    if (searchTerm) data = filterData(data, searchTerm);
-    
-    document.querySelectorAll('.column-filter').forEach(input => {
-      const col = parseInt(input.dataset.column);
-      const type = input.dataset.type;
-      const val = input.value;
-      if (val && type === loaiCongVan) data = filterByColumn(data, col, val, loaiCongVan);
-    });
-    
-    let ws_data, fileName;
-    if (loaiCongVan === 'di') {
-      ws_data = [['STT', 'Năm', 'Số VB', 'Tên VB', 'Ngày ký', 'Người ký', 'Nơi ban hành', 'Nội dung']];
-      data.forEach((item, i) => ws_data.push([i+1, item.year, item.documentNumber, item.documentName, item.signDate, item.signer, item.issuingPlace, item.content]));
-      fileName = `Cong_van_di_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`;
-    } else {
-      ws_data = [['STT', 'Năm', 'Số đến', 'Người nhận', 'Ngày nhận', 'Số CV', 'Tên VB', 'Ngày ký', 'Người ký', 'Nơi ban hành', 'Số tờ']];
-      data.forEach((item, i) => ws_data.push([i+1, item.year, item.soDen, item.nguoiNhan, item.ngayNhan, item.soCongVan, item.tenVanBan, item.ngayKy, item.nguoiKy, item.noiBanHanh, item.soTo]));
-      fileName = `Cong_van_den_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`;
+  function displayCongVanDi(data, containerId) {
+    const container = document.getElementById(containerId);
+    if (data.length === 0) {
+      container.innerHTML = '<div class="no-data"><i class="fa-regular fa-folder-open"></i> Không có dữ liệu</div>';
+      return;
     }
-    const ws = XLSX.utils.aoa_to_sheet(ws_data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, loaiCongVan === 'di' ? "Công văn đi" : "Công văn đến");
-    XLSX.writeFile(wb, fileName);
-    showNotification(`Xuất thành công! (${data.length} dòng)`, true);
+    let html = `<table class="table table-hover mb-0"><thead><tr>
+      <th width="5%">STT</th><th width="8%">Năm</th><th width="12%">Số VB</th><th width="20%">Tên VB</th><th width="10%">Ngày ký</th>
+      <th width="12%">Người ký</th><th width="15%">Nơi BH</th><th width="18%">Nội dung</th>
+    </tr></thead><tbody>`;
+    data.forEach((item, i) => {
+      html += `<tr>
+        <td class="text-center">${i+1}</td>
+        <td class="text-center"><span class="badge-info">${item.year || ''}</span></td>
+        <td><strong>${escapeHtml(item.documentNumber || '')}</strong></td>
+        <td>${escapeHtml(item.documentName || '')}</td>
+        <td class="text-center">${convertToDisplayDate(item.signDate) || ''}</td>
+        <td>${escapeHtml(item.signer || '')}</td>
+        <td>${escapeHtml(item.issuingPlace || '')}</td>
+        <td style="max-width:200px; white-space:normal">${escapeHtml((item.content || '').substring(0, 100))}${(item.content || '').length > 100 ? '...' : ''}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
   }
+
+  function displayCongVanDen(data, containerId) {
+    const container = document.getElementById(containerId);
+    if (data.length === 0) {
+      container.innerHTML = '<div class="no-data"><i class="fa-regular fa-folder-open"></i> Không có dữ liệu</div>';
+      return;
+    }
+    let html = `<table class="table table-hover mb-0"><thead><tr>
+      <th width="4%">STT</th><th width="7%">Năm</th><th width="8%">Số đến</th><th width="10%">Người nhận</th><th width="9%">Ngày nhận</th>
+      <th width="8%">Số CV</th><th width="12%">Tên VB</th><th width="9%">Ngày ký</th><th width="10%">Người ký</th><th width="10%">Nơi BH</th><th width="5%">Tờ</th>
+    </tr></thead><tbody>`;
+    data.forEach((item, i) => {
+      html += `<tr>
+        <td class="text-center">${i+1}</td>
+        <td class="text-center"><span class="badge-info">${item.year || ''}</span></td>
+        <td><strong>${escapeHtml(item.soDen || '')}</strong></td>
+        <td>${escapeHtml(item.nguoiNhan || '')}</td>
+        <td class="text-center">${convertToDisplayDate(item.ngayNhan) || ''}</td>
+        <td>${escapeHtml(item.soCongVan || '')}</td>
+        <td>${escapeHtml(item.tenVanBan || '')}</td>
+        <td class="text-center">${convertToDisplayDate(item.ngayKy) || ''}</td>
+        <td>${escapeHtml(item.nguoiKy || '')}</td>
+        <td>${escapeHtml(item.noiBanHanh || '')}</td>
+        <td class="text-center">${item.soTo || ''}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  }
+
+  function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ''; }
 
   async function loadData() {
     if (!currentUid) return;
-    document.getElementById('loading').style.display = 'block';
+    document.getElementById('loading-search').style.display = 'block';
     allYears.clear();
     
     try {
@@ -620,14 +715,162 @@
       allCongVanDen = denSnap.exists() ? Object.values(denSnap.val()) : [];
       allCongVanDen.forEach(item => { if (item.year) allYears.add(item.year); });
       
-      document.getElementById('loading').style.display = 'none';
+      document.getElementById('loading-search').style.display = 'none';
       updateYearOptions();
-      displayCongVanDi(allCongVanDi);
-      showNotification(`Đã tải: ${allCongVanDi.length} đi, ${allCongVanDen.length} đến`, true, true);
+      showNotification(`Đã tải: ${allCongVanDi.length} đi, ${allCongVanDen.length} đến`, 'success');
     } catch (error) {
-      document.getElementById('loading').style.display = 'none';
-      showNotification('Lỗi tải dữ liệu', false);
+      document.getElementById('loading-search').style.display = 'none';
+      showNotification('Lỗi tải dữ liệu', 'error');
     }
+  }
+
+  function performSearch() {
+    const loai = document.getElementById('search-loai').value;
+    const nam = document.getElementById('search-nam').value;
+    const thang = document.getElementById('search-thang').value;
+    const tuNgay = document.getElementById('search-tu-ngay').value;
+    const denNgay = document.getElementById('search-den-ngay').value;
+    
+    let data = loai === 'di' ? [...allCongVanDi] : [...allCongVanDen];
+    const conditions = { loai, nam, thang, tuNgay, denNgay };
+    const filtered = filterDataByConditions(data, conditions);
+    
+    if (loai === 'di') displayCongVanDi(filtered, 'search-result-body');
+    else displayCongVanDen(filtered, 'search-result-body');
+    
+    const countSpan = document.getElementById('result-count');
+    countSpan.textContent = filtered.length;
+    
+    const statsDiv = document.getElementById('search-stats');
+    if (filtered.length > 0) {
+      statsDiv.style.display = 'block';
+      statsDiv.innerHTML = `<i class="fa-solid fa-chart-simple"></i> Tìm thấy <strong>${filtered.length}</strong> văn bản`;
+    } else {
+      statsDiv.style.display = 'block';
+      statsDiv.innerHTML = `<i class="fa-solid fa-circle-info"></i> Không tìm thấy văn bản nào`;
+    }
+    showNotification(`Tìm thấy ${filtered.length} kết quả`, 'info');
+  }
+
+  function performPreview() {
+    const loai = document.getElementById('delete-loai').value;
+    const nam = document.getElementById('delete-nam').value;
+    const thang = document.getElementById('delete-thang').value;
+    const tuNgay = document.getElementById('delete-tu-ngay').value;
+    const denNgay = document.getElementById('delete-den-ngay').value;
+    
+    let data = loai === 'di' ? [...allCongVanDi] : [...allCongVanDen];
+    const conditions = { loai, nam, thang, tuNgay, denNgay };
+    const filtered = filterDataByConditions(data, conditions);
+    currentPreviewList = filtered;
+    
+    if (loai === 'di') displayCongVanDi(filtered, 'delete-result-body');
+    else displayCongVanDen(filtered, 'delete-result-body');
+    
+    const countSpan = document.getElementById('delete-count');
+    countSpan.textContent = filtered.length;
+    
+    const statsDiv = document.getElementById('delete-stats');
+    if (filtered.length > 0) {
+      statsDiv.style.display = 'block';
+      statsDiv.innerHTML = `<i class="fa-solid fa-trash-can"></i> Sẽ xóa <strong>${filtered.length}</strong> văn bản. Vui lòng kiểm tra kỹ trước khi xóa!`;
+    } else {
+      statsDiv.style.display = 'block';
+      statsDiv.innerHTML = `<i class="fa-solid fa-circle-info"></i> Không có văn bản nào thỏa mãn điều kiện`;
+    }
+    showNotification(`Tìm thấy ${filtered.length} văn bản sẽ xóa`, 'warning');
+  }
+
+  async function performDelete() {
+    if (currentPreviewList.length === 0) {
+      showNotification('Không có văn bản nào để xóa!', 'warning');
+      return;
+    }
+    
+    const loai = document.getElementById('delete-loai').value;
+    const nam = document.getElementById('delete-nam').value || 'tất cả các năm';
+    const thang = document.getElementById('delete-thang').value;
+    const thangText = thang ? `tháng ${thang}` : 'tất cả các tháng';
+    const tuNgay = document.getElementById('delete-tu-ngay').value || 'không giới hạn';
+    const denNgay = document.getElementById('delete-den-ngay').value || 'không giới hạn';
+    
+    const confirmMsg = `⚠️ XÓA VĨNH VIỄN ⚠️\n\nLoại: ${loai === 'di' ? 'Công văn đi' : 'Công văn đến'}\nNăm: ${nam}\nTháng: ${thangText}\nTừ ngày: ${tuNgay}\nĐến ngày: ${denNgay}\n\nSố lượng: ${currentPreviewList.length} văn bản\n\nHành động này KHÔNG THỂ KHÔI PHỤC!\n\nBạn có chắc chắn muốn xóa?`;
+    
+    if (!confirm(confirmMsg)) return;
+    
+    const deleteBtn = document.getElementById('delete-all-btn');
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xóa...';
+    
+    let successCount = 0, failCount = 0;
+    const path = loai === 'di' ? 'congVanDi' : 'congVanDen';
+    
+    for (const item of currentPreviewList) {
+      if (!item.id) continue;
+      try {
+        await remove(ref(database, getUserPath(`${path}/${item.id}`)));
+        successCount++;
+      } catch (error) {
+        console.error('Xóa lỗi:', error);
+        failCount++;
+      }
+    }
+    
+    showNotification(`Đã xóa ${successCount} văn bản${failCount > 0 ? `, thất bại: ${failCount}` : ''}`, successCount > 0 ? 'success' : 'error');
+    
+    deleteBtn.disabled = false;
+    deleteBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Xóa tất cả';
+    
+    await loadData();
+    performPreview();
+    performSearch();
+  }
+
+  function resetSearch() {
+    document.getElementById('search-nam').value = '';
+    document.getElementById('search-thang').value = '';
+    document.getElementById('search-tu-ngay').value = '';
+    document.getElementById('search-den-ngay').value = '';
+    performSearch();
+    showNotification('Đã làm mới bộ lọc', 'info');
+  }
+
+  function exportResult() {
+    const loai = document.getElementById('search-loai').value;
+    const resultDiv = document.getElementById('search-result-body');
+    const table = resultDiv.querySelector('table');
+    if (!table) {
+      showNotification('Không có dữ liệu để xuất!', 'warning');
+      return;
+    }
+    
+    const wsData = [];
+    const headers = [];
+    const thead = table.querySelector('thead');
+    if (thead) {
+      thead.querySelectorAll('th').forEach(th => {
+        let text = th.innerText.trim();
+        if (text !== 'STT') headers.push(text);
+      });
+    }
+    wsData.push(headers);
+    
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach((row, idx) => {
+      const rowData = [];
+      const cells = row.querySelectorAll('td');
+      for (let i = 1; i < cells.length; i++) {
+        rowData.push(cells[i]?.innerText.trim() || '');
+      }
+      wsData.push(rowData);
+    });
+    
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    const fileName = `ket_qua_tra_cuu_${loai === 'di' ? 'cong_van_di' : 'cong_van_den'}_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`;
+    XLSX.utils.book_append_sheet(wb, ws, 'Kết quả tra cứu');
+    XLSX.writeFile(wb, fileName);
+    showNotification(`Xuất Excel thành công! (${rows.length} dòng)`, 'success');
   }
 
   const toggleBtn = document.getElementById('toggleGithubBtn');
@@ -641,27 +884,29 @@
   }
 
   document.addEventListener('DOMContentLoaded', function() {
+    flatpickr(".date-picker", { dateFormat: "d/m/Y", locale: "vn", allowInput: true });
+    
     document.getElementById('save-github-config').onclick = saveGithubConfig;
-    document.getElementById('loai-cong-van').addEventListener('change', function() {
-      const isDi = this.value === 'di';
-      document.getElementById('wrapper-cong-van-di').style.display = isDi ? 'block' : 'none';
-      document.getElementById('wrapper-cong-van-den').style.display = isDi ? 'none' : 'block';
-      handleSearchAndFilter();
-    });
-    document.getElementById('tim-kiem').addEventListener('input', handleSearchAndFilter);
-    document.getElementById('nam').addEventListener('change', handleSearchAndFilter);
-    document.getElementById('hien-tat-ca-btn').addEventListener('click', () => {
-      document.getElementById('tim-kiem').value = '';
-      document.getElementById('nam').value = '';
-      document.querySelectorAll('.column-filter').forEach(i => i.value = '');
-      handleSearchAndFilter();
-      showNotification('Đã hiển thị tất cả', true, true);
-    });
-    document.getElementById('xuat-excel-btn').addEventListener('click', exportToExcel);
-    document.addEventListener('input', e => { if (e.target.classList.contains('column-filter')) handleSearchAndFilter(); });
+    document.getElementById('search-btn').onclick = performSearch;
+    document.getElementById('reset-search-btn').onclick = resetSearch;
+    document.getElementById('export-result-btn').onclick = exportResult;
+    document.getElementById('delete-preview-btn').onclick = performPreview;
+    document.getElementById('delete-all-btn').onclick = performDelete;
+    
+    document.getElementById('search-loai').addEventListener('change', performSearch);
+    document.getElementById('search-nam').addEventListener('change', performSearch);
+    document.getElementById('search-thang').addEventListener('change', performSearch);
+    document.getElementById('search-tu-ngay').addEventListener('change', performSearch);
+    document.getElementById('search-den-ngay').addEventListener('change', performSearch);
+    
+    document.getElementById('delete-loai').addEventListener('change', performPreview);
+    document.getElementById('delete-nam').addEventListener('change', performPreview);
+    document.getElementById('delete-thang').addEventListener('change', performPreview);
+    document.getElementById('delete-tu-ngay').addEventListener('change', performPreview);
+    document.getElementById('delete-den-ngay').addEventListener('change', performPreview);
     
     onAuthStateChanged(auth, async (user) => {
-      if (user) { currentUser = user; currentUid = user.uid; await loadGithubConfig(); loadData(); }
+      if (user) { currentUser = user; currentUid = user.uid; await loadGithubConfig(); await loadData(); performSearch(); }
       else { window.location.href = 'index.html'; }
     });
   });
