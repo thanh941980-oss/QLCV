@@ -45,7 +45,7 @@
       margin-bottom: 4px;
     }
 
-    /* Form tìm kiếm - cố định */
+    /* Form tìm kiếm - nâng cao */
     .form-fixed {
       flex-shrink: 0;
     }
@@ -103,15 +103,15 @@
     }
 
     .card-body {
-      padding: 8px 12px;
+      padding: 10px 12px;
     }
 
-    /* Form cực nhỏ */
+    /* Form nhỏ gọn */
     .form-label {
       font-weight: 600;
       color: #1e2a3a;
-      margin-bottom: 1px;
-      font-size: 9px;
+      margin-bottom: 2px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
     }
@@ -119,7 +119,7 @@
     .form-control, .form-select {
       border-radius: 5px;
       border: 1px solid #dce3ec;
-      padding: 3px 6px;
+      padding: 4px 8px;
       font-size: 11px;
       transition: 0.2s;
     }
@@ -130,14 +130,14 @@
     }
 
     .btn {
-      border-radius: 5px;
-      padding: 3px 10px;
+      border-radius: 6px;
+      padding: 4px 12px;
       font-size: 10px;
       font-weight: 500;
     }
 
     .btn i {
-      margin-right: 3px;
+      margin-right: 4px;
     }
 
     .btn-primary {
@@ -156,6 +156,15 @@
     }
     .btn-success:hover {
       background: linear-gradient(105deg, #27ae60, #219a52);
+    }
+
+    .btn-danger {
+      background: linear-gradient(105deg, #e74c3c, #c0392b);
+      border: none;
+      color: white;
+    }
+    .btn-danger:hover {
+      background: linear-gradient(105deg, #c0392b, #a93226);
     }
 
     .btn-secondary {
@@ -196,7 +205,7 @@
       position: fixed;
       top: 15px;
       right: 15px;
-      padding: 6px 14px;
+      padding: 8px 16px;
       border-radius: 30px;
       color: white;
       display: none;
@@ -208,6 +217,7 @@
     .notification.success { background: linear-gradient(105deg, #2ecc71, #27ae60); }
     .notification.error { background: linear-gradient(105deg, #e74c3c, #c0392b); }
     .notification.info { background: linear-gradient(105deg, #3498db, #2980b9); }
+    .notification.warning { background: linear-gradient(105deg, #f39c12, #e67e22); }
 
     /* Table */
     .table {
@@ -275,14 +285,44 @@
       border-radius: 10px;
     }
 
-    .row.g-1 {
-      --bs-gutter-y: 0.2rem;
+    .row.g-2 {
+      --bs-gutter-y: 0.3rem;
     }
 
     .action-buttons {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-group {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 6px 8px;
+      margin-bottom: 4px;
+    }
+    
+    .delete-section {
+      border-top: 1px solid #e9ecef;
+      margin-top: 6px;
+      padding-top: 6px;
+    }
+    
+    .btn-sm-custom {
+      padding: 2px 8px;
+      font-size: 9px;
+    }
+    
+    .modal-backdrop {
+      z-index: 1040;
+    }
+    
+    /* Compact layout */
+    @media (max-width: 768px) {
+      .action-buttons {
+        justify-content: space-between;
+      }
     }
   </style>
 </head>
@@ -321,32 +361,53 @@
     </div>
   </div>
 
-  <!-- Form tìm kiếm - CỐ ĐỊNH -->
+  <!-- Form tìm kiếm nâng cao - CỐ ĐỊNH -->
   <div class="card form-fixed">
-    <div class="card-header py-0"><i class="fa-solid fa-search"></i> Tra cứu công văn</div>
+    <div class="card-header py-0"><i class="fa-solid fa-search"></i> Tra cứu & Quản lý công văn</div>
     <div class="card-body py-1">
-      <div class="row g-1">
-        <div class="col-md-3">
+      <div class="row g-2">
+        <div class="col-md-2">
           <label class="form-label">Loại công văn</label>
           <select id="loai-cong-van" class="form-select">
             <option value="di">Công văn đi</option>
             <option value="den">Công văn đến</option>
           </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
           <label class="form-label">Năm</label>
           <select id="nam" class="form-select">
             <option value="">Tất cả năm</option>
           </select>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-2">
+          <label class="form-label">Tháng</label>
+          <select id="thang" class="form-select">
+            <option value="">Tất cả</option>
+            <option value="1">Tháng 1</option><option value="2">Tháng 2</option><option value="3">Tháng 3</option>
+            <option value="4">Tháng 4</option><option value="5">Tháng 5</option><option value="6">Tháng 6</option>
+            <option value="7">Tháng 7</option><option value="8">Tháng 8</option><option value="9">Tháng 9</option>
+            <option value="10">Tháng 10</option><option value="11">Tháng 11</option><option value="12">Tháng 12</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Từ ngày</label>
+          <input type="date" id="tu-ngay" class="form-control">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Đến ngày</label>
+          <input type="date" id="den-ngay" class="form-control">
+        </div>
+      </div>
+      <div class="row g-2 mt-1">
+        <div class="col-md-12">
           <label class="form-label">Tìm kiếm chung</label>
-          <input type="text" id="tim-kiem" class="form-control" placeholder="Nhập từ khóa...">
+          <input type="text" id="tim-kiem" class="form-control" placeholder="Nhập từ khóa (số, tên văn bản, nội dung...)">
         </div>
       </div>
       <div class="action-buttons">
         <button class="btn btn-primary" id="hien-tat-ca-btn"><i class="fa-solid fa-eye"></i> Hiện tất cả</button>
         <button class="btn btn-success" id="xuat-excel-btn"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
+        <button class="btn btn-danger" id="xoa-du-lieu-btn"><i class="fa-solid fa-trash-can"></i> Xóa dữ liệu đang lọc</button>
       </div>
     </div>
   </div>
@@ -378,7 +439,7 @@
             <tbody id="body-cong-van-di">
               <tr><td colspan="8" class="no-data">Chưa có dữ liệu</td></tr>
             </tbody>
-          </table>
+           </table>
         </div>
         
         <!-- Bảng công văn đến -->
@@ -409,14 +470,36 @@
   </div>
 </div>
 
+<!-- Modal xác nhận xóa -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h6 class="modal-title" id="deleteModalLabel"><i class="fa-solid fa-triangle-exclamation"></i> Xác nhận xóa dữ liệu</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Bạn có cần xuất ra file Excel trước rồi xóa không?</strong></p>
+        <p class="text-danger small">Cảnh báo: Hành động này sẽ xóa vĩnh viễn <span id="deleteCount">0</span> bản ghi hiện đang được lọc và KHÔNG THỂ PHỤC HỒI.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa-solid fa-times"></i> Hủy</button>
+        <button type="button" class="btn btn-success" id="confirmExportThenDelete"><i class="fa-solid fa-file-excel"></i> Xuất Excel & Xóa</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteOnly"><i class="fa-solid fa-trash-can"></i> Xóa ngay (không xuất)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="successNotification" class="notification success"></div>
 <div id="errorNotification" class="notification error"></div>
 <div id="infoNotification" class="notification info"></div>
+<div id="warningNotification" class="notification warning"></div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+  import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBWKTyXVK1y2dqxWUWprIxd5CCHMzSMc_o",
@@ -432,14 +515,19 @@
   const auth = getAuth(app);
   const database = getDatabase(app);
 
-  let currentUser = null, currentUid = null;
+  let currentUid = null;
   let allCongVanDi = [], allCongVanDen = [], allYears = new Set();
   let githubConfig = { token: '', owner: '', repo: '' };
+  let currentFilteredDi = [], currentFilteredDen = [];
 
-  function showNotification(message, isSuccess = true, isInfo = false) {
-    const notifId = isInfo ? 'infoNotification' : (isSuccess ? 'successNotification' : 'errorNotification');
+  function showNotification(message, isSuccess = true, isInfo = false, isWarning = false) {
+    let notifId = 'infoNotification';
+    if (isWarning) notifId = 'warningNotification';
+    else if (!isSuccess) notifId = 'errorNotification';
+    else if (isInfo) notifId = 'infoNotification';
+    else notifId = 'successNotification';
     const notification = document.getElementById(notifId);
-    if (notification) { notification.textContent = message; notification.style.display = 'block'; setTimeout(() => { notification.style.display = 'none'; }, 2000); }
+    if (notification) { notification.textContent = message; notification.style.display = 'block'; setTimeout(() => { notification.style.display = 'none'; }, 2500); }
   }
 
   async function loadGithubConfig() {
@@ -478,40 +566,76 @@
 
   function getUserPath(path) { return `users/${currentUid}/${path}`; }
 
-  function filterData(data, searchTerm) {
-    if (!searchTerm) return data;
-    const term = searchTerm.toLowerCase();
-    return data.filter(item => Object.values(item).some(v => v && v.toString().toLowerCase().includes(term)));
-  }
-
-  function filterByColumn(data, columnIndex, filterValue, loaiCongVan) {
-    if (!filterValue) return data;
-    const term = filterValue.toLowerCase();
+  function filterByDateRange(data, tuNgay, denNgay) {
+    if (!tuNgay && !denNgay) return data;
     return data.filter(item => {
-      let value;
-      if (loaiCongVan === 'di') {
-        const map = { 1: item.year, 2: item.documentNumber, 3: item.documentName, 4: item.signDate, 5: item.signer, 6: item.issuingPlace, 7: item.content };
-        value = map[columnIndex];
-      } else {
-        const map = { 1: item.year, 2: item.soDen, 3: item.nguoiNhan, 4: item.ngayNhan, 5: item.soCongVan, 6: item.tenVanBan, 7: item.ngayKy, 8: item.nguoiKy, 9: item.noiBanHanh, 10: item.soTo };
-        value = map[columnIndex];
-      }
-      return value && value.toString().toLowerCase().includes(term);
+      let ngayKy = item.signDate || item.ngayKy || item.ngayNhan || '';
+      if (!ngayKy) return false;
+      const ngayStr = ngayKy.split('T')[0];
+      if (tuNgay && ngayStr < tuNgay) return false;
+      if (denNgay && ngayStr > denNgay) return false;
+      return true;
     });
   }
 
-  function updateYearOptions() {
-    const yearSelect = document.getElementById('nam');
-    const currentValue = yearSelect.value;
-    const years = Array.from(allYears).sort((a, b) => b - a);
-    yearSelect.innerHTML = '<option value="">Tất cả năm</option>';
-    years.forEach(year => {
-      const opt = document.createElement('option');
-      opt.value = year;
-      opt.textContent = year;
-      if (currentValue === year) opt.selected = true;
-      yearSelect.appendChild(opt);
+  function filterByMonth(data, thang) {
+    if (!thang) return data;
+    return data.filter(item => {
+      let ngayKy = item.signDate || item.ngayKy || item.ngayNhan || '';
+      if (!ngayKy) return false;
+      const month = parseInt(ngayKy.split('-')[1]);
+      return month === parseInt(thang);
     });
+  }
+
+  function filterDataAdvanced(data, loaiCV) {
+    const nam = document.getElementById('nam').value;
+    const thang = document.getElementById('thang').value;
+    const tuNgay = document.getElementById('tu-ngay').value;
+    const denNgay = document.getElementById('den-ngay').value;
+    const searchTerm = document.getElementById('tim-kiem').value;
+    
+    let filtered = [...data];
+    if (nam) filtered = filtered.filter(item => item.year === nam);
+    if (thang) filtered = filterByMonth(filtered, thang);
+    if (tuNgay || denNgay) filtered = filterByDateRange(filtered, tuNgay, denNgay);
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(item => Object.values(item).some(v => v && v.toString().toLowerCase().includes(term)));
+    }
+    // column filters
+    document.querySelectorAll('.column-filter').forEach(input => {
+      const col = parseInt(input.dataset.column);
+      const type = input.dataset.type;
+      const val = input.value;
+      if (val && type === loaiCV) {
+        filtered = filtered.filter(item => {
+          let value;
+          if (loaiCV === 'di') {
+            const map = { 1: item.year, 2: item.documentNumber, 3: item.documentName, 4: item.signDate, 5: item.signer, 6: item.issuingPlace, 7: item.content };
+            value = map[col];
+          } else {
+            const map = { 1: item.year, 2: item.soDen, 3: item.nguoiNhan, 4: item.ngayNhan, 5: item.soCongVan, 6: item.tenVanBan, 7: item.ngayKy, 8: item.nguoiKy, 9: item.noiBanHanh, 10: item.soTo };
+            value = map[col];
+          }
+          return value && value.toString().toLowerCase().includes(val.toLowerCase());
+        });
+      }
+    });
+    return filtered;
+  }
+
+  function handleSearchAndFilter() {
+    const loaiCongVan = document.getElementById('loai-cong-van').value;
+    const sourceData = loaiCongVan === 'di' ? allCongVanDi : allCongVanDen;
+    const filtered = filterDataAdvanced(sourceData, loaiCongVan);
+    if (loaiCongVan === 'di') {
+      currentFilteredDi = filtered;
+      displayCongVanDi(filtered);
+    } else {
+      currentFilteredDen = filtered;
+      displayCongVanDen(filtered);
+    }
   }
 
   function displayCongVanDi(data) {
@@ -553,44 +677,11 @@
     });
   }
 
-  function handleSearchAndFilter() {
-    const loaiCongVan = document.getElementById('loai-cong-van').value;
-    const nam = document.getElementById('nam').value;
-    const searchTerm = document.getElementById('tim-kiem').value;
-    
-    let data = loaiCongVan === 'di' ? [...allCongVanDi] : [...allCongVanDen];
-    if (nam) data = data.filter(item => item.year === nam);
-    if (searchTerm) data = filterData(data, searchTerm);
-    
-    document.querySelectorAll('.column-filter').forEach(input => {
-      const col = parseInt(input.dataset.column);
-      const type = input.dataset.type;
-      const val = input.value;
-      if (val && type === loaiCongVan) data = filterByColumn(data, col, val, loaiCongVan);
-    });
-    
-    if (loaiCongVan === 'di') displayCongVanDi(data);
-    else displayCongVanDen(data);
-  }
-
-  function exportToExcel() {
-    const loaiCongVan = document.getElementById('loai-cong-van').value;
-    const nam = document.getElementById('nam').value;
-    const searchTerm = document.getElementById('tim-kiem').value;
-    
-    let data = loaiCongVan === 'di' ? [...allCongVanDi] : [...allCongVanDen];
-    if (nam) data = data.filter(item => item.year === nam);
-    if (searchTerm) data = filterData(data, searchTerm);
-    
-    document.querySelectorAll('.column-filter').forEach(input => {
-      const col = parseInt(input.dataset.column);
-      const type = input.dataset.type;
-      const val = input.value;
-      if (val && type === loaiCongVan) data = filterByColumn(data, col, val, loaiCongVan);
-    });
-    
+  function exportCurrentData() {
+    const loai = document.getElementById('loai-cong-van').value;
+    const data = loai === 'di' ? [...currentFilteredDi] : [...currentFilteredDen];
     let ws_data, fileName;
-    if (loaiCongVan === 'di') {
+    if (loai === 'di') {
       ws_data = [['STT', 'Năm', 'Số VB', 'Tên VB', 'Ngày ký', 'Người ký', 'Nơi ban hành', 'Nội dung']];
       data.forEach((item, i) => ws_data.push([i+1, item.year, item.documentNumber, item.documentName, item.signDate, item.signer, item.issuingPlace, item.content]));
       fileName = `Cong_van_di_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`;
@@ -601,69 +692,135 @@
     }
     const ws = XLSX.utils.aoa_to_sheet(ws_data);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, loaiCongVan === 'di' ? "Công văn đi" : "Công văn đến");
+    XLSX.utils.book_append_sheet(wb, ws, loai === 'di' ? "Công văn đi" : "Công văn đến");
     XLSX.writeFile(wb, fileName);
-    showNotification(`Xuất thành công! (${data.length} dòng)`, true);
+    return data.length;
+  }
+
+  async function performDelete(exportFirst) {
+    const loai = document.getElementById('loai-cong-van').value;
+    let dataToDelete = loai === 'di' ? [...currentFilteredDi] : [...currentFilteredDen];
+    if (dataToDelete.length === 0) {
+      showNotification('Không có dữ liệu nào để xóa!', false);
+      return false;
+    }
+    if (exportFirst) {
+      const count = exportCurrentData();
+      showNotification(`Đã xuất ${count} dòng ra Excel. Tiến hành xóa...`, true, true);
+    }
+    // Xóa từ Firebase
+    const path = loai === 'di' ? getUserPath('congVanDi') : getUserPath('congVanDen');
+    const snapshot = await get(ref(database, path));
+    if (snapshot.exists()) {
+      const allItems = snapshot.val();
+      const keysToDelete = [];
+      for (let [key, value] of Object.entries(allItems)) {
+        if (dataToDelete.some(d => JSON.stringify(d) === JSON.stringify(value))) {
+          keysToDelete.push(key);
+        }
+      }
+      for (let key of keysToDelete) {
+        await remove(ref(database, `${path}/${key}`));
+      }
+      showNotification(`Đã xóa thành công ${keysToDelete.length} bản ghi!`, true);
+      await loadData(); // reload lại toàn bộ
+      handleSearchAndFilter();
+      return true;
+    }
+    return false;
   }
 
   async function loadData() {
     if (!currentUid) return;
     document.getElementById('loading').style.display = 'block';
     allYears.clear();
-    
     try {
       const diSnap = await get(ref(database, getUserPath('congVanDi')));
       allCongVanDi = diSnap.exists() ? Object.values(diSnap.val()) : [];
       allCongVanDi.forEach(item => { if (item.year) allYears.add(item.year); });
-      
       const denSnap = await get(ref(database, getUserPath('congVanDen')));
       allCongVanDen = denSnap.exists() ? Object.values(denSnap.val()) : [];
       allCongVanDen.forEach(item => { if (item.year) allYears.add(item.year); });
-      
       document.getElementById('loading').style.display = 'none';
       updateYearOptions();
-      displayCongVanDi(allCongVanDi);
-      showNotification(`Đã tải: ${allCongVanDi.length} đi, ${allCongVanDen.length} đến`, true, true);
+      handleSearchAndFilter();
     } catch (error) {
       document.getElementById('loading').style.display = 'none';
       showNotification('Lỗi tải dữ liệu', false);
     }
   }
 
-  const toggleBtn = document.getElementById('toggleGithubBtn');
-  const githubCard = document.getElementById('githubConfigCard');
-  const toggleIcon = document.getElementById('toggleIcon');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      if (githubCard.style.display === 'none') { githubCard.style.display = 'block'; toggleIcon.className = 'fa-solid fa-chevron-up'; }
-      else { githubCard.style.display = 'none'; toggleIcon.className = 'fa-solid fa-chevron-down'; }
+  function updateYearOptions() {
+    const yearSelect = document.getElementById('nam');
+    const currentValue = yearSelect.value;
+    const years = Array.from(allYears).sort((a, b) => b - a);
+    yearSelect.innerHTML = '<option value="">Tất cả năm</option>';
+    years.forEach(year => {
+      const opt = document.createElement('option');
+      opt.value = year;
+      opt.textContent = year;
+      if (currentValue === year) opt.selected = true;
+      yearSelect.appendChild(opt);
     });
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('save-github-config').onclick = saveGithubConfig;
-    document.getElementById('loai-cong-van').addEventListener('change', function() {
-      const isDi = this.value === 'di';
-      document.getElementById('wrapper-cong-van-di').style.display = isDi ? 'block' : 'none';
-      document.getElementById('wrapper-cong-van-den').style.display = isDi ? 'none' : 'block';
-      handleSearchAndFilter();
-    });
-    document.getElementById('tim-kiem').addEventListener('input', handleSearchAndFilter);
-    document.getElementById('nam').addEventListener('change', handleSearchAndFilter);
-    document.getElementById('hien-tat-ca-btn').addEventListener('click', () => {
-      document.getElementById('tim-kiem').value = '';
-      document.getElementById('nam').value = '';
-      document.querySelectorAll('.column-filter').forEach(i => i.value = '');
-      handleSearchAndFilter();
-      showNotification('Đã hiển thị tất cả', true, true);
-    });
-    document.getElementById('xuat-excel-btn').addEventListener('click', exportToExcel);
-    document.addEventListener('input', e => { if (e.target.classList.contains('column-filter')) handleSearchAndFilter(); });
-    
-    onAuthStateChanged(auth, async (user) => {
-      if (user) { currentUser = user; currentUid = user.uid; await loadGithubConfig(); loadData(); }
-      else { window.location.href = 'index.html'; }
-    });
+  // Event listeners
+  document.getElementById('toggleGithubBtn').addEventListener('click', () => {
+    const card = document.getElementById('githubConfigCard');
+    const icon = document.getElementById('toggleIcon');
+    if (card.style.display === 'none') { card.style.display = 'block'; icon.className = 'fa-solid fa-chevron-up'; }
+    else { card.style.display = 'none'; icon.className = 'fa-solid fa-chevron-down'; }
+  });
+  document.getElementById('save-github-config').onclick = saveGithubConfig;
+  document.getElementById('loai-cong-van').addEventListener('change', () => {
+    const isDi = document.getElementById('loai-cong-van').value === 'di';
+    document.getElementById('wrapper-cong-van-di').style.display = isDi ? 'block' : 'none';
+    document.getElementById('wrapper-cong-van-den').style.display = isDi ? 'none' : 'block';
+    handleSearchAndFilter();
+  });
+  document.getElementById('tim-kiem').addEventListener('input', handleSearchAndFilter);
+  document.getElementById('nam').addEventListener('change', handleSearchAndFilter);
+  document.getElementById('thang').addEventListener('change', handleSearchAndFilter);
+  document.getElementById('tu-ngay').addEventListener('change', handleSearchAndFilter);
+  document.getElementById('den-ngay').addEventListener('change', handleSearchAndFilter);
+  document.getElementById('hien-tat-ca-btn').addEventListener('click', () => {
+    document.getElementById('tim-kiem').value = '';
+    document.getElementById('nam').value = '';
+    document.getElementById('thang').value = '';
+    document.getElementById('tu-ngay').value = '';
+    document.getElementById('den-ngay').value = '';
+    document.querySelectorAll('.column-filter').forEach(i => i.value = '');
+    handleSearchAndFilter();
+    showNotification('Đã hiển thị tất cả', true, true);
+  });
+  document.getElementById('xuat-excel-btn').addEventListener('click', () => {
+    const count = exportCurrentData();
+    showNotification(`Xuất thành công ${count} dòng!`, true);
+  });
+  document.getElementById('xoa-du-lieu-btn').addEventListener('click', () => {
+    const loai = document.getElementById('loai-cong-van').value;
+    const dataCount = loai === 'di' ? currentFilteredDi.length : currentFilteredDen.length;
+    if (dataCount === 0) {
+      showNotification('Không có dữ liệu nào đang được lọc để xóa!', false);
+      return;
+    }
+    document.getElementById('deleteCount').innerText = dataCount;
+    const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+    modal.show();
+  });
+  document.getElementById('confirmExportThenDelete').addEventListener('click', async () => {
+    await performDelete(true);
+    bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal')).hide();
+  });
+  document.getElementById('confirmDeleteOnly').addEventListener('click', async () => {
+    await performDelete(false);
+    bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal')).hide();
+  });
+  document.addEventListener('input', e => { if (e.target.classList.contains('column-filter')) handleSearchAndFilter(); });
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) { currentUid = user.uid; await loadGithubConfig(); loadData(); }
+    else { window.location.href = 'index.html'; }
   });
 </script>
 </body>
