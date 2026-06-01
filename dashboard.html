@@ -368,6 +368,60 @@
       border-radius: 10px;
     }
 
+    /* Modal đổi mật khẩu - custom */
+    .change-password-modal .modal-content {
+      border-radius: 20px;
+      border: none;
+      box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
+    }
+    .change-password-modal .modal-header {
+      background: linear-gradient(105deg, #0d2b3e, #071826);
+      color: white;
+      border-radius: 20px 20px 0 0;
+      border-bottom: none;
+      padding: 16px 24px;
+    }
+    .change-password-modal .modal-header .btn-close {
+      filter: brightness(0) invert(1);
+    }
+    .change-password-modal .modal-body {
+      padding: 24px;
+    }
+    .change-password-modal .form-label {
+      font-weight: 600;
+      font-size: 12px;
+      color: #1e4663;
+      margin-bottom: 6px;
+    }
+    .change-password-modal .form-control {
+      border-radius: 12px;
+      border: 1px solid #dce3ec;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+    .change-password-modal .form-control:focus {
+      border-color: #1e6f9f;
+      box-shadow: 0 0 0 3px rgba(30,111,159,0.1);
+    }
+    .btn-change-password-submit {
+      background: linear-gradient(105deg, #1e6f9f, #0d5a84);
+      border: none;
+      padding: 10px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 13px;
+      transition: 0.2s;
+    }
+    .btn-change-password-submit:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(105deg, #0d5a84, #094a6e);
+    }
+    .password-requirement {
+      font-size: 10px;
+      color: #6c757d;
+      margin-top: 5px;
+    }
+
     /* Responsive nhỏ */
     @media (max-width: 640px) {
       .sidebar {
@@ -418,6 +472,10 @@
       <div class="nav-item" data-module="summary">
         <i class="fa-solid fa-chart-simple"></i><span>Tổng hợp</span>
       </div>
+      <!-- Mục Đổi mật khẩu mới -->
+      <div class="nav-item" id="changePasswordNavItem" data-module="changepassword">
+        <i class="fa-solid fa-key"></i><span>Đổi mật khẩu</span>
+      </div>
     </div>
     <div class="user-section">
       <div class="user-email" id="userEmail">
@@ -444,9 +502,43 @@
   </div>
 </div>
 
+<!-- Modal Đổi mật khẩu -->
+<div class="modal fade change-password-modal" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fa-solid fa-key me-2"></i>Đổi mật khẩu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="changePasswordForm">
+          <div class="mb-3">
+            <label class="form-label">Mật khẩu hiện tại</label>
+            <input type="password" class="form-control" id="currentPassword" required placeholder="Nhập mật khẩu hiện tại">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Mật khẩu mới</label>
+            <input type="password" class="form-control" id="newPassword" required placeholder="Ít nhất 6 ký tự">
+            <div class="password-requirement">Mật khẩu phải có ít nhất 6 ký tự</div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Xác nhận mật khẩu mới</label>
+            <input type="password" class="form-control" id="confirmNewPassword" required placeholder="Nhập lại mật khẩu mới">
+          </div>
+          <div id="passwordErrorMsg" class="alert alert-danger d-none" style="font-size: 12px; padding: 8px 12px;"></div>
+          <button type="submit" class="btn btn-change-password-submit w-100 text-white">
+            <i class="fa-solid fa-check-circle me-1"></i> Cập nhật mật khẩu
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-  import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { getAuth, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBWKTyXVK1y2dqxWUWprIxd5CCHMzSMc_o",
@@ -475,6 +567,9 @@
   const showSidebarBtn = document.getElementById('showSidebarBtn');
   const contentFrame = document.getElementById('contentFrame');
   const pageTitle = document.getElementById('pageTitle');
+  const changePasswordNavItem = document.getElementById('changePasswordNavItem');
+  
+  let currentUserEmail = '';
 
   // Toggle sidebar collapse
   function toggleSidebar(collapse) {
@@ -497,7 +592,6 @@
 
   // Lưu trạng thái sidebar (mặc định là collapsed)
   function loadSidebarState() {
-    // Mặc định là collapsed (true) khi đăng nhập
     const isCollapsed = localStorage.getItem('sidebarCollapsed') !== 'false';
     if (isCollapsed) {
       sidebar.classList.add('collapsed');
@@ -549,12 +643,22 @@
   // Active menu & chuyển iframe
   function setActiveModule(moduleKey) {
     document.querySelectorAll('.nav-item').forEach(el => {
-      if (el.getAttribute('data-module') === moduleKey) {
+      const mod = el.getAttribute('data-module');
+      if (mod === moduleKey) {
         el.classList.add('active');
       } else {
         el.classList.remove('active');
       }
     });
+    
+    // Nếu chọn mục đổi mật khẩu -> mở modal, không load iframe
+    if (moduleKey === 'changepassword') {
+      const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+      modal.show();
+      // Giữ lại title và iframe như cũ, không thay đổi
+      return;
+    }
+    
     const m = modules[moduleKey];
     if (m) {
       contentFrame.src = m.url;
@@ -563,11 +667,11 @@
     localStorage.setItem('currentModule', moduleKey);
   }
 
-  // Gán sự kiện cho menu
+  // Gán sự kiện cho menu (bao gồm cả đổi mật khẩu)
   document.querySelectorAll('.nav-item').forEach(el => {
     el.addEventListener('click', () => {
       const moduleKey = el.getAttribute('data-module');
-      if (moduleKey && modules[moduleKey]) {
+      if (moduleKey) {
         setActiveModule(moduleKey);
         if (window.innerWidth <= 640) {
           toggleSidebar(true);
@@ -576,18 +680,142 @@
     });
   });
 
+  // Xử lý riêng cho nút đổi mật khẩu trong modal
+  const modalElement = document.getElementById('changePasswordModal');
+  let passwordModal = null;
+  
+  function initModal() {
+    passwordModal = new bootstrap.Modal(modalElement, {
+      backdrop: 'static',
+      keyboard: false
+    });
+  }
+  
+  // Hàm hiển thị thông báo lỗi/ thành công tạm thời
+  function showPasswordMessage(message, isError = true) {
+    const errorDiv = document.getElementById('passwordErrorMsg');
+    if (errorDiv) {
+      errorDiv.textContent = message;
+      errorDiv.classList.remove('d-none');
+      if (!isError) {
+        errorDiv.classList.remove('alert-danger');
+        errorDiv.classList.add('alert-success');
+      } else {
+        errorDiv.classList.remove('alert-success');
+        errorDiv.classList.add('alert-danger');
+      }
+      setTimeout(() => {
+        errorDiv.classList.add('d-none');
+      }, 4000);
+    }
+  }
+  
+  // Xử lý đổi mật khẩu
+  const changePasswordForm = document.getElementById('changePasswordForm');
+  if (changePasswordForm) {
+    changePasswordForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmNewPassword').value;
+      
+      // Validate
+      if (!currentPassword || !newPassword || !confirmPassword) {
+        showPasswordMessage('Vui lòng điền đầy đủ thông tin!', true);
+        return;
+      }
+      if (newPassword.length < 6) {
+        showPasswordMessage('Mật khẩu mới phải có ít nhất 6 ký tự!', true);
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        showPasswordMessage('Mật khẩu xác nhận không khớp!', true);
+        return;
+      }
+      
+      const user = auth.currentUser;
+      if (!user || !user.email) {
+        showPasswordMessage('Không tìm thấy thông tin người dùng! Vui lòng đăng nhập lại.', true);
+        return;
+      }
+      
+      // Re-authenticate
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      try {
+        // Hiệu ứng loading trên nút
+        const submitBtn = changePasswordForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang xử lý...';
+        
+        await reauthenticateWithCredential(user, credential);
+        await updatePassword(user, newPassword);
+        
+        // Thành công
+        showPasswordMessage('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.', false);
+        setTimeout(() => {
+          if (passwordModal) passwordModal.hide();
+          // Reset form
+          changePasswordForm.reset();
+          // Đăng xuất và về trang login
+          signOut(auth).then(() => {
+            window.location.href = 'index.html';
+          });
+        }, 1500);
+      } catch (error) {
+        console.error(error);
+        let errorMsg = 'Đổi mật khẩu thất bại. ';
+        if (error.code === 'auth/wrong-password') {
+          errorMsg += 'Mật khẩu hiện tại không đúng.';
+        } else if (error.code === 'auth/weak-password') {
+          errorMsg += 'Mật khẩu mới quá yếu.';
+        } else {
+          errorMsg += error.message;
+        }
+        showPasswordMessage(errorMsg, true);
+        // Reset nút
+        const submitBtn = changePasswordForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-check-circle me-1"></i> Cập nhật mật khẩu';
+      }
+    });
+  }
+  
+  // Reset form khi modal đóng
+  if (modalElement) {
+    modalElement.addEventListener('hidden.bs.modal', () => {
+      const errorDiv = document.getElementById('passwordErrorMsg');
+      if (errorDiv) errorDiv.classList.add('d-none');
+      const form = document.getElementById('changePasswordForm');
+      if (form) form.reset();
+      // active lại module cũ (không làm mất trạng thái)
+      const savedModule = localStorage.getItem('currentModule');
+      if (savedModule && modules[savedModule]) {
+        document.querySelectorAll('.nav-item').forEach(el => {
+          if (el.getAttribute('data-module') === savedModule) {
+            el.classList.add('active');
+          } else {
+            el.classList.remove('active');
+          }
+        });
+      }
+    });
+  }
+
   // Cập nhật tooltip email
   function updateEmailTooltip(email) {
     const userEmailSpan = document.getElementById('userEmail');
     const userEmailTooltip = document.getElementById('userEmailTooltip');
     if (userEmailSpan) userEmailSpan.innerText = email;
     if (userEmailTooltip) userEmailTooltip.innerText = email;
+    currentUserEmail = email;
   }
 
   // Firebase auth
   onAuthStateChanged(auth, (user) => {
     if (user) {
       updateEmailTooltip(user.email);
+      initModal();
     } else {
       window.location.href = 'index.html';
     }
@@ -609,6 +837,17 @@
     setActiveModule(savedModule);
   } else {
     setActiveModule('outgoing');
+  }
+  
+  // Đảm bảo rằng khi click vào "Đổi mật khẩu" không ảnh hưởng đến iframe
+  if (changePasswordNavItem) {
+    changePasswordNavItem.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Đã xử lý trong setActiveModule, nhưng cần đảm bảo active class
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      changePasswordNavItem.classList.add('active');
+      // Không thay đổi iframe, không lưu module
+    });
   }
 </script>
 </body>
