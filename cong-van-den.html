@@ -291,6 +291,7 @@
     }
     .notification.success { background: linear-gradient(105deg, #2ecc71, #27ae60); }
     .notification.error { background: linear-gradient(105deg, #e74c3c, #c0392b); }
+    .notification.warning { background: linear-gradient(105deg, #f39c12, #e67e22); }
 
     .upload-progress {
       position: fixed;
@@ -371,6 +372,13 @@
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+    
+    /* Số đến tự động - style readonly */
+    #so-den {
+      background-color: #f8f9fa;
+      font-weight: 600;
+      color: #0066cc;
+    }
   </style>
 </head>
 <body>
@@ -421,8 +429,8 @@
           </div>
         </div>
         <div class="col-md-2">
-          <label class="form-label">Số đến *</label>
-          <input type="text" id="so-den" class="form-control" placeholder="Số đến" required>
+          <label class="form-label">Số đến <span class="text-success">(auto)</span> *</label>
+          <input type="text" id="so-den" class="form-control" readonly placeholder="Tự động tăng" required>
         </div>
         <div class="col-md-2">
           <label class="form-label">Người nhận *</label>
@@ -495,6 +503,7 @@
     <div class="table-card">
       <div class="card-header py-0 d-flex align-items-center gap-2 flex-wrap">
         <div><i class="fa-solid fa-list"></i> Danh sách văn bản đến <span id="totalCount" class="badge bg-light text-dark ms-1">0</span></div>
+        <div class="ms-auto"><small class="text-muted">Số đến: tự động tăng, không giảm khi xóa</small></div>
       </div>
       <div class="table-container">
         <div id="loading" class="text-center py-3" style="display: none;">
@@ -558,8 +567,18 @@
 
   let currentUser = null, currentUid = null, editingId = null, currentFileData = null, documentsDataGlobal = {};
   let githubConfig = { token: '', owner: '', repo: '' };
+  let currentMaxSoDen = 0;
 
-  function showNotification(message, isSuccess = true) {
+  function showNotification(message, isSuccess = true, isWarning = false) {
+    if (isWarning) {
+      const warningDiv = document.createElement('div');
+      warningDiv.className = 'notification warning';
+      warningDiv.textContent = message;
+      warningDiv.style.display = 'block';
+      document.body.appendChild(warningDiv);
+      setTimeout(() => warningDiv.remove(), 2500);
+      return;
+    }
     const notification = document.getElementById(isSuccess ? 'successNotification' : 'errorNotification');
     if (notification) { notification.textContent = message; notification.style.display = 'block'; setTimeout(() => { notification.style.display = 'none'; }, 2000); }
   }
@@ -570,6 +589,29 @@
     const msgDiv = progressDiv ? progressDiv.querySelector('div:first-child') : null;
     if (show) { if (msgDiv) msgDiv.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${message}`; if (progressDiv) progressDiv.style.display = 'block'; if (progressBar) progressBar.style.width = percent + '%'; }
     else { if (progressDiv) progressDiv.style.display = 'none'; if (progressBar) progressBar.style.width = '0%'; }
+  }
+
+  // Lấy số đến lớn nhất hiện tại
+  async function getMaxSoDen() {
+    const snapshot = await get(ref(database, getDbPath('congVanDen')));
+    let maxSoDen = 0;
+    if (snapshot.exists()) {
+      const docs = snapshot.val();
+      for (const id in docs) {
+        const soDen = parseInt(docs[id].soDen);
+        if (!isNaN(soDen) && soDen > maxSoDen) {
+          maxSoDen = soDen;
+        }
+      }
+    }
+    currentMaxSoDen = maxSoDen;
+    return maxSoDen;
+  }
+
+  // Cập nhật số đến tiếp theo (max + 1)
+  async function updateSoDenField() {
+    const maxSoDen = await getMaxSoDen();
+    document.getElementById('so-den').value = maxSoDen + 1;
   }
 
   async function loadGithubConfig() {
@@ -631,13 +673,23 @@
   function getDbPath(path) { return `users/${currentUid}/${path}`; }
 
   function refreshForm() {
-    document.getElementById('nam').value = ''; document.getElementById('so-den').value = ''; document.getElementById('nguoi-nhan').value = '';
-    document.getElementById('ngay-nhan').valueAsDate = new Date(); document.getElementById('so-cong-van').value = ''; document.getElementById('ten-van-ban').value = '';
-    document.getElementById('ngay-ky').valueAsDate = new Date(); document.getElementById('nguoi-ky').value = ''; document.getElementById('noi-ban-hanh').value = '';
-    document.getElementById('so-to').value = ''; document.getElementById('noi-dung').value = ''; document.getElementById('file-dinh-kem').value = '';
+    document.getElementById('nam').value = ''; 
+    document.getElementById('so-den').value = ''; 
+    document.getElementById('nguoi-nhan').value = '';
+    document.getElementById('ngay-nhan').valueAsDate = new Date(); 
+    document.getElementById('so-cong-van').value = ''; 
+    document.getElementById('ten-van-ban').value = '';
+    document.getElementById('ngay-ky').valueAsDate = new Date(); 
+    document.getElementById('nguoi-ky').value = ''; 
+    document.getElementById('noi-ban-hanh').value = '';
+    document.getElementById('so-to').value = ''; 
+    document.getElementById('noi-dung').value = ''; 
+    document.getElementById('file-dinh-kem').value = '';
     document.getElementById('current-file-info').style.display = 'none';
     editingId = null; currentFileData = null;
-    document.getElementById('update-cvden-btn').style.display = 'none'; document.getElementById('save-cvden-btn').style.display = 'inline-block';
+    document.getElementById('update-cvden-btn').style.display = 'none'; 
+    document.getElementById('save-cvden-btn').style.display = 'inline-block';
+    updateSoDenField();
   }
 
   async function addDocument() {
@@ -645,10 +697,18 @@
     saveBtn.classList.add('btn-loading');
     saveBtn.disabled = true;
     try {
-      const year = document.getElementById('nam').value, soDen = document.getElementById('so-den').value, nguoiNhan = document.getElementById('nguoi-nhan').value;
-      const ngayNhan = document.getElementById('ngay-nhan').value, soCongVan = document.getElementById('so-cong-van').value, tenVanBan = document.getElementById('ten-van-ban').value;
-      const ngayKy = document.getElementById('ngay-ky').value, nguoiKy = document.getElementById('nguoi-ky').value, noiBanHanh = document.getElementById('noi-ban-hanh').value;
-      const soTo = document.getElementById('so-to').value, content = document.getElementById('noi-dung').value, file = document.getElementById('file-dinh-kem').files[0];
+      const year = document.getElementById('nam').value;
+      let soDen = document.getElementById('so-den').value;
+      const nguoiNhan = document.getElementById('nguoi-nhan').value;
+      const ngayNhan = document.getElementById('ngay-nhan').value;
+      const soCongVan = document.getElementById('so-cong-van').value;
+      const tenVanBan = document.getElementById('ten-van-ban').value;
+      const ngayKy = document.getElementById('ngay-ky').value;
+      const nguoiKy = document.getElementById('nguoi-ky').value;
+      const noiBanHanh = document.getElementById('noi-ban-hanh').value;
+      const soTo = document.getElementById('so-to').value;
+      const content = document.getElementById('noi-dung').value;
+      const file = document.getElementById('file-dinh-kem').files[0];
       
       if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) { 
         showNotification('Vui lòng điền đầy đủ!', false); 
@@ -662,8 +722,16 @@
         try { fileData = await uploadToGitHub(file, newId); } 
         catch (uploadError) { showNotification('Upload thất bại: ' + uploadError.message, false); return; } 
       }
-      await set(newDocRef, { year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, noiBanHanh, soTo, content, fileData, hasFile: !!fileData, createdAt: new Date().toISOString(), createdBy: currentUid });
-      showNotification('Thêm thành công!'); refreshForm();
+      
+      await set(newDocRef, { 
+        year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, 
+        noiBanHanh, soTo, content, fileData, hasFile: !!fileData, 
+        createdAt: new Date().toISOString(), createdBy: currentUid 
+      });
+      
+      showNotification('Thêm thành công! Số đến: ' + soDen, true); 
+      refreshForm();
+      
     } catch (error) { showNotification('Lỗi: ' + error.message, false); }
     finally { saveBtn.classList.remove('btn-loading'); saveBtn.disabled = false; }
   }
@@ -674,41 +742,79 @@
     updateBtn.classList.add('btn-loading');
     updateBtn.disabled = true;
     try {
-      const year = document.getElementById('nam').value, soDen = document.getElementById('so-den').value, nguoiNhan = document.getElementById('nguoi-nhan').value;
-      const ngayNhan = document.getElementById('ngay-nhan').value, soCongVan = document.getElementById('so-cong-van').value, tenVanBan = document.getElementById('ten-van-ban').value;
-      const ngayKy = document.getElementById('ngay-ky').value, nguoiKy = document.getElementById('nguoi-ky').value, noiBanHanh = document.getElementById('noi-ban-hanh').value;
-      const soTo = document.getElementById('so-to').value, content = document.getElementById('noi-dung').value, newFile = document.getElementById('file-dinh-kem').files[0];
-      if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) { showNotification('Điền đầy đủ!', false); return; }
+      const year = document.getElementById('nam').value;
+      const soDen = document.getElementById('so-den').value;
+      const nguoiNhan = document.getElementById('nguoi-nhan').value;
+      const ngayNhan = document.getElementById('ngay-nhan').value;
+      const soCongVan = document.getElementById('so-cong-van').value;
+      const tenVanBan = document.getElementById('ten-van-ban').value;
+      const ngayKy = document.getElementById('ngay-ky').value;
+      const nguoiKy = document.getElementById('nguoi-ky').value;
+      const noiBanHanh = document.getElementById('noi-ban-hanh').value;
+      const soTo = document.getElementById('so-to').value;
+      const content = document.getElementById('noi-dung').value;
+      const newFile = document.getElementById('file-dinh-kem').files[0];
+      
+      if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) { 
+        showNotification('Điền đầy đủ!', false); 
+        return; 
+      }
+      
       let fileData = currentFileData;
-      if (newFile) { if (currentFileData?.path && currentFileData?.sha) await deleteFromGitHub(currentFileData.path, currentFileData.sha); fileData = await uploadToGitHub(newFile, editingId); }
-      await update(ref(database, getDbPath(`congVanDen/${editingId}`)), { year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, noiBanHanh, soTo, content, fileData: fileData || null, hasFile: !!fileData, updatedAt: new Date().toISOString(), updatedBy: currentUid });
-      showNotification('Cập nhật thành công!'); refreshForm();
+      if (newFile) { 
+        if (currentFileData?.path && currentFileData?.sha) await deleteFromGitHub(currentFileData.path, currentFileData.sha); 
+        fileData = await uploadToGitHub(newFile, editingId); 
+      }
+      
+      await update(ref(database, getDbPath(`congVanDen/${editingId}`)), { 
+        year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, 
+        noiBanHanh, soTo, content, fileData: fileData || null, hasFile: !!fileData, 
+        updatedAt: new Date().toISOString(), updatedBy: currentUid 
+      });
+      
+      showNotification('Cập nhật thành công!'); 
+      refreshForm();
+      
     } catch (error) { showNotification('Cập nhật thất bại: ' + error.message, false); }
     finally { updateBtn.classList.remove('btn-loading'); updateBtn.disabled = false; }
   }
 
   async function deleteDocument(id) {
-    if (!confirm('Xóa công văn này?')) return;
+    if (!confirm('Xóa công văn này?\nLưu ý: Số đến sẽ không được đánh lại!')) return;
     const doc = documentsDataGlobal[id];
-    try { if (doc?.fileData?.path && doc?.fileData?.sha) await deleteFromGitHub(doc.fileData.path, doc.fileData.sha); await remove(ref(database, getDbPath(`congVanDen/${id}`))); showNotification('Xóa thành công!'); } catch (error) { showNotification('Xóa thất bại: ' + error.message, false); }
+    try { 
+      if (doc?.fileData?.path && doc?.fileData?.sha) await deleteFromGitHub(doc.fileData.path, doc.fileData.sha); 
+      await remove(ref(database, getDbPath(`congVanDen/${id}`)));
+      showNotification('Xóa thành công! Số đến không thay đổi.', true); 
+    } catch (error) { showNotification('Xóa thất bại: ' + error.message, false); }
   }
 
   function editDocument(id, data) {
-    document.getElementById('nam').value = data.year || ''; document.getElementById('so-den').value = data.soDen || ''; document.getElementById('nguoi-nhan').value = data.nguoiNhan || '';
-    document.getElementById('ngay-nhan').value = data.ngayNhan || ''; document.getElementById('so-cong-van').value = data.soCongVan || ''; document.getElementById('ten-van-ban').value = data.tenVanBan || '';
-    document.getElementById('ngay-ky').value = data.ngayKy || ''; document.getElementById('nguoi-ky').value = data.nguoiKy || ''; document.getElementById('noi-ban-hanh').value = data.noiBanHanh || '';
-    document.getElementById('so-to').value = data.soTo || ''; document.getElementById('noi-dung').value = data.content || ''; currentFileData = data.fileData || null; editingId = id;
+    document.getElementById('nam').value = data.year || ''; 
+    document.getElementById('so-den').value = data.soDen || ''; 
+    document.getElementById('nguoi-nhan').value = data.nguoiNhan || '';
+    document.getElementById('ngay-nhan').value = data.ngayNhan || ''; 
+    document.getElementById('so-cong-van').value = data.soCongVan || ''; 
+    document.getElementById('ten-van-ban').value = data.tenVanBan || '';
+    document.getElementById('ngay-ky').value = data.ngayKy || ''; 
+    document.getElementById('nguoi-ky').value = data.nguoiKy || ''; 
+    document.getElementById('noi-ban-hanh').value = data.noiBanHanh || '';
+    document.getElementById('so-to').value = data.soTo || ''; 
+    document.getElementById('noi-dung').value = data.content || ''; 
+    currentFileData = data.fileData || null; 
+    editingId = id;
     const div = document.getElementById('current-file-info');
     if (currentFileData?.url) { div.style.display = 'block'; div.innerHTML = `<i class="fa-solid fa-paperclip"></i> ${currentFileData.name} <button class="btn btn-sm btn-outline-primary" onclick='window.openCurrentFile()'><i class="fa-solid fa-eye"></i></button>`; }
     else { div.style.display = 'block'; div.innerHTML = `<i class="fa-regular fa-file"></i> Chưa có file`; }
-    document.getElementById('update-cvden-btn').style.display = 'inline-block'; document.getElementById('save-cvden-btn').style.display = 'none';
+    document.getElementById('update-cvden-btn').style.display = 'inline-block'; 
+    document.getElementById('save-cvden-btn').style.display = 'none';
   }
 
   function openFile(fileData) { if (!fileData?.url) return; const modal = new bootstrap.Modal(document.getElementById('filePreviewModal')); document.getElementById('previewFileName').textContent = fileData.name; document.getElementById('downloadFileBtn').href = fileData.url; const ext = fileData.name.split('.').pop().toLowerCase(); const preview = document.getElementById('filePreviewContent'); if (['jpg','jpeg','png','gif'].includes(ext)) preview.innerHTML = `<img src="${fileData.url}" class="img-fluid">`; else if (ext === 'pdf') preview.innerHTML = `<iframe src="${fileData.url}" width="100%" height="550px"></iframe>`; else preview.innerHTML = `<div class="text-center p-4"><i class="fa-solid fa-file fa-3x"></i><p><a href="${fileData.url}" target="_blank">Tải file</a></p></div>`; modal.show(); }
   function viewFullContent(content) { if (!content?.trim()) return; const modal = new bootstrap.Modal(document.getElementById('contentModal')); document.getElementById('contentModalBody').innerHTML = `<div style="white-space: pre-wrap;">${escapeHtml(content)}</div>`; modal.show(); }
   function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ''; }
 
-  // Hàm xuất Excel - xuất TOÀN BỘ nội dung
+  // Hàm xuất Excel
   function exportToExcel() {
     const rows = document.querySelectorAll('#documentsBody tr');
     const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
@@ -719,21 +825,16 @@
     }
 
     const excelData = [];
-    
-    // 3 dòng trống phía trên
     excelData.push(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
     excelData.push(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
     excelData.push(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
     
-    // Tiêu đề cột (hàng thứ 4)
     const headers = ['STT', 'Năm', 'Số đến', 'Người nhận', 'Ngày nhận', 'Số CV', 'Tên VB', 'Ngày ký', 'Người ký', 'Nơi BH', 'Số tờ', 'Nội dung', 'File', 'Thao tác'];
     excelData.push(headers);
     
-    // Duyệt từng dòng hiển thị
     visibleRows.forEach((row, idx) => {
       const cells = row.querySelectorAll('td');
       if (cells.length >= 13) {
-        // Lấy ID của document từ nút sửa/xóa
         let fullContent = '';
         const editBtn = cells[13]?.querySelector('.action-btn.edit');
         if (editBtn && editBtn.getAttribute('onclick')) {
@@ -756,22 +857,22 @@
         }
         
         const rowData = [];
-        rowData.push(idx + 1);                                          // STT
-        rowData.push(cells[1]?.innerText.trim() || '');                 // Năm
-        rowData.push(cells[2]?.innerText.trim() || '');                 // Số đến
-        rowData.push(cells[3]?.innerText.trim() || '');                 // Người nhận
-        rowData.push(cells[4]?.innerText.trim() || '');                 // Ngày nhận
-        rowData.push(cells[5]?.innerText.trim() || '');                 // Số CV
-        rowData.push(cells[6]?.innerText.trim() || '');                 // Tên VB
-        rowData.push(cells[7]?.innerText.trim() || '');                 // Ngày ký
-        rowData.push(cells[8]?.innerText.trim() || '');                 // Người ký
-        rowData.push(cells[9]?.innerText.trim() || '');                 // Nơi BH
-        rowData.push(cells[10]?.innerText.trim() || '');                // Số tờ
-        rowData.push(fullContent);                                       // Nội dung (toàn bộ)
+        rowData.push(idx + 1);
+        rowData.push(cells[1]?.innerText.trim() || '');
+        rowData.push(cells[2]?.innerText.trim() || '');
+        rowData.push(cells[3]?.innerText.trim() || '');
+        rowData.push(cells[4]?.innerText.trim() || '');
+        rowData.push(cells[5]?.innerText.trim() || '');
+        rowData.push(cells[6]?.innerText.trim() || '');
+        rowData.push(cells[7]?.innerText.trim() || '');
+        rowData.push(cells[8]?.innerText.trim() || '');
+        rowData.push(cells[9]?.innerText.trim() || '');
+        rowData.push(cells[10]?.innerText.trim() || '');
+        rowData.push(fullContent);
         
         const fileBtn = cells[12]?.querySelector('.file-link');
-        rowData.push(fileBtn?.innerText.trim() || '—');                  // File
-        rowData.push('');                                                 // Thao tác (để trống)
+        rowData.push(fileBtn?.innerText.trim() || '—');
+        rowData.push('');
         
         excelData.push(rowData);
       }
@@ -787,11 +888,48 @@
     showNotification(`Xuất Excel thành công! (${visibleRows.length} dòng dữ liệu)`, true);
   }
 
+  // Hàm kiểm tra khi tìm kiếm số đến
+  function checkDeletedSoDen() {
+    const searchInputs = document.querySelectorAll('.column-search');
+    const soDenInput = searchInputs[2];
+    if (soDenInput && soDenInput.value.trim()) {
+      const searchValue = soDenInput.value.trim();
+      const exists = Object.values(documentsDataGlobal).some(doc => doc.soDen === searchValue);
+      if (!exists && searchValue !== '') {
+        showNotification(`⚠️ Số đến "${searchValue}" đã bị xóa hoặc không tồn tại!`, false, true);
+      }
+    }
+  }
+
   function displayDocuments(snapshot) {
-    const tbody = document.getElementById('documentsBody'); const totalSpan = document.getElementById('totalCount'); tbody.innerHTML = '';
-    if (!snapshot.exists()) { tbody.innerHTML = '<tr><td colspan="14" class="text-center py-3">Chưa có công văn nào</td></tr>'; totalSpan.textContent = '0'; return; }
-    const docs = snapshot.val(); documentsDataGlobal = docs; let stt = 1, total = 0;
-    for (const id in docs) { const doc = docs[id]; total++; const hasFile = doc.hasFile && doc.fileData; const contentText = doc.content || ''; const contentPreview = contentText.length > 40 ? contentText.substring(0,40)+'...' : contentText; const fileNameDisplay = hasFile ? (doc.fileData.name.length > 10 ? doc.fileData.name.substring(0,10)+'...' : doc.fileData.name) : '';
+    const tbody = document.getElementById('documentsBody'); 
+    const totalSpan = document.getElementById('totalCount'); 
+    tbody.innerHTML = '';
+    
+    if (!snapshot.exists()) { 
+      tbody.innerHTML = '<tr><td colspan="14" class="text-center py-3">Chưa có công văn nào</td></tr>';
+      totalSpan.textContent = '0';
+      currentMaxSoDen = 0;
+      document.getElementById('so-den').value = '1';
+      return; 
+    }
+    
+    const docs = snapshot.val(); 
+    documentsDataGlobal = docs; 
+    
+    const docsArray = [];
+    for (const id in docs) {
+      docsArray.push({ id, ...docs[id] });
+    }
+    docsArray.sort((a, b) => parseInt(a.soDen) - parseInt(b.soDen));
+    
+    let stt = 1, total = docsArray.length;
+    for (const doc of docsArray) { 
+      const hasFile = doc.hasFile && doc.fileData; 
+      const contentText = doc.content || ''; 
+      const contentPreview = contentText.length > 40 ? contentText.substring(0,40)+'...' : contentText; 
+      const fileNameDisplay = hasFile ? (doc.fileData.name.length > 10 ? doc.fileData.name.substring(0,10)+'...' : doc.fileData.name) : '';
+      
       tbody.innerHTML += `<tr>
         <td class="text-center">${stt}</td>
         <td class="text-center"><span class="badge-info">${escapeHtml(doc.year||'')}</span></td>
@@ -805,17 +943,38 @@
         <td>${escapeHtml(doc.noiBanHanh||'')}</td>
         <td class="text-center">${doc.soTo||''}</td>
         <td><div class="content-preview" onclick='window.viewFullContentFromGlobal(${JSON.stringify(contentText)})'>${escapeHtml(contentPreview)||'Chưa có'}</div></td>
-        <td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileNameDisplay)}</button>` : '<span class="text-muted">—</span>'}</td>
-        <td><div class="action-buttons">${hasFile ? `<button class="action-btn view" onclick='window.openFileFromGlobal("${id}")'><i class="fa-solid fa-eye"></i></button>` : ''}<button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i></button></div></td>
+        <td>${hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${doc.id}")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileNameDisplay)}</button>` : '<span class="text-muted">—</span>'}</td>
+        <td><div class="action-buttons">${hasFile ? `<button class="action-btn view" onclick='window.openFileFromGlobal("${doc.id}")'><i class="fa-solid fa-eye"></i></button>` : ''}<button class="action-btn edit" onclick='window.editDocumentFromGlobal("${doc.id}")'><i class="fa-solid fa-pen"></i></button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${doc.id}")'><i class="fa-solid fa-trash"></i></button></div></td>
       </tr>`;
       stt++;
-    } totalSpan.textContent = total;
+    } 
+    totalSpan.textContent = total;
+    
+    // Cập nhật số đến tiếp theo (max + 1) - KHÔNG thay đổi khi xóa
+    if (docsArray.length > 0) {
+      const maxSoDen = Math.max(...docsArray.map(d => parseInt(d.soDen) || 0));
+      currentMaxSoDen = maxSoDen;
+      document.getElementById('so-den').value = maxSoDen + 1;
+    } else {
+      document.getElementById('so-den').value = '1';
+    }
   }
 
   document.addEventListener('input', function(e) {
     if (!e.target.classList.contains('column-search')) return;
-    const rows = document.querySelectorAll('#documentsBody tr'); const inputs = document.querySelectorAll('.column-search');
-    rows.forEach(row => { let visible = true; inputs.forEach(input => { const col = parseInt(input.dataset.column); const keyword = input.value.trim().toLowerCase(); if (keyword && row.children[col] && !row.children[col].innerText.toLowerCase().includes(keyword)) visible = false; }); row.style.display = visible ? '' : 'none'; });
+    const rows = document.querySelectorAll('#documentsBody tr'); 
+    const inputs = document.querySelectorAll('.column-search');
+    rows.forEach(row => { 
+      let visible = true; 
+      inputs.forEach(input => { 
+        const col = parseInt(input.dataset.column); 
+        const keyword = input.value.trim().toLowerCase(); 
+        if (keyword && row.children[col] && !row.children[col].innerText.toLowerCase().includes(keyword)) visible = false; 
+      }); 
+      row.style.display = visible ? '' : 'none'; 
+    });
+    // Kiểm tra số đến đã xóa khi tìm kiếm
+    checkDeletedSoDen();
   });
 
   window.openFileFromGlobal = (id) => { if (documentsDataGlobal[id]?.fileData) openFile(documentsDataGlobal[id].fileData); };
@@ -826,17 +985,35 @@
 
   async function themMoi(selectId, category) {
     const tenMoi = prompt('Nhập giá trị mới:');
-    if (tenMoi?.trim()) { const val = tenMoi.trim(); const select = document.getElementById(selectId); for(let i=0;i<select.options.length;i++) if(select.options[i].value===val) { showNotification('Đã tồn tại!', false); return; }
-      const newData = { name: val, createdAt: new Date().toISOString(), createdBy: currentUid }; const newRef = push(ref(database, getDbPath(`categories/${category}`))); await set(newRef, newData);
-      const opt = document.createElement('option'); opt.value = val; opt.textContent = val; select.appendChild(opt); select.value = val; showNotification('Thêm thành công!');
+    if (tenMoi?.trim()) { 
+      const val = tenMoi.trim(); 
+      const select = document.getElementById(selectId); 
+      for(let i=0;i<select.options.length;i++) if(select.options[i].value===val) { showNotification('Đã tồn tại!', false); return; }
+      const newData = { name: val, createdAt: new Date().toISOString(), createdBy: currentUid }; 
+      const newRef = push(ref(database, getDbPath(`categories/${category}`))); 
+      await set(newRef, newData);
+      const opt = document.createElement('option'); 
+      opt.value = val; 
+      opt.textContent = val; 
+      select.appendChild(opt); 
+      select.value = val; 
+      showNotification('Thêm thành công!');
     }
   }
 
   function loadCategories(selectId, category) {
     onValue(ref(database, getDbPath(`categories/${category}`)), (snapshot) => {
-      const select = document.getElementById(selectId); const def = select.value;
+      const select = document.getElementById(selectId); 
+      const def = select.value;
       select.innerHTML = `<option value="">${selectId==='nam'?'Chọn năm':'Chọn'}</option>`;
-      if (snapshot.exists()) { Object.values(snapshot.val()).map(v=>v.name).sort().forEach(name => { const opt = document.createElement('option'); opt.value = name; opt.textContent = name; select.appendChild(opt); }); }
+      if (snapshot.exists()) { 
+        Object.values(snapshot.val()).map(v=>v.name).sort().forEach(name => { 
+          const opt = document.createElement('option'); 
+          opt.value = name; 
+          opt.textContent = name; 
+          select.appendChild(opt); 
+        }); 
+      }
       if (def) select.value = def;
     });
   }
@@ -852,7 +1029,8 @@
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('ngay-nhan').valueAsDate = new Date(); document.getElementById('ngay-ky').valueAsDate = new Date();
+    document.getElementById('ngay-nhan').valueAsDate = new Date(); 
+    document.getElementById('ngay-ky').valueAsDate = new Date();
     document.getElementById('reset-cvden-btn').onclick = refreshForm;
     document.getElementById('save-cvden-btn').onclick = addDocument;
     document.getElementById('update-cvden-btn').onclick = updateDocument;
@@ -863,8 +1041,19 @@
     document.getElementById('them-ten-van-ban-btn').onclick = () => themMoi('ten-van-ban', 'documentTypes');
     document.getElementById('them-nguoi-ky-btn').onclick = () => themMoi('nguoi-ky', 'signers');
     document.getElementById('them-noi-ban-hanh-btn').onclick = () => themMoi('noi-ban-hanh', 'issuingPlaces');
+    
     onAuthStateChanged(auth, async (user) => {
-      if (user) { currentUser = user; currentUid = user.uid; await loadGithubConfig(); loadCategories('nam','years'); loadCategories('nguoi-nhan','receivers'); loadCategories('ten-van-ban','documentTypes'); loadCategories('nguoi-ky','signers'); loadCategories('noi-ban-hanh','issuingPlaces'); onValue(ref(database, getDbPath('congVanDen')), (snapshot) => displayDocuments(snapshot)); }
+      if (user) { 
+        currentUser = user; 
+        currentUid = user.uid; 
+        await loadGithubConfig(); 
+        loadCategories('nam','years'); 
+        loadCategories('nguoi-nhan','receivers'); 
+        loadCategories('ten-van-ban','documentTypes'); 
+        loadCategories('nguoi-ky','signers'); 
+        loadCategories('noi-ban-hanh','issuingPlaces'); 
+        onValue(ref(database, getDbPath('congVanDen')), (snapshot) => displayDocuments(snapshot));
+      }
       else { window.location.href = 'index.html'; }
     });
   });
