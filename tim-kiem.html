@@ -452,7 +452,7 @@
           </table>
         </div>
         
-        <!-- Bảng công văn đến -->
+        <!-- Bảng công văn đến - ĐÃ THU GỌN CỘT, thay NƠI BH = NỘI DUNG -->
         <div id="wrapper-cong-van-den" style="display: none;">
           <table class="table table-hover mb-0">
             <thead>
@@ -460,14 +460,14 @@
                 <th width="4%">STT</th>
                 <th width="7%">Năm <input type="text" class="column-filter" data-column="1" data-type="den" placeholder="Lọc"></th>
                 <th width="8%">Số đến <input type="text" class="column-filter" data-column="2" data-type="den" placeholder="Lọc"></th>
-                <th width="10%">Người nhận <input type="text" class="column-filter" data-column="3" data-type="den" placeholder="Lọc"></th>
+                <th width="9%">Người nhận <input type="text" class="column-filter" data-column="3" data-type="den" placeholder="Lọc"></th>
                 <th width="9%">Ngày nhận <input type="text" class="column-filter" data-column="4" data-type="den" placeholder="Lọc"></th>
                 <th width="8%">Số CV <input type="text" class="column-filter" data-column="5" data-type="den" placeholder="Lọc"></th>
-                <th width="15%">Tên VB <input type="text" class="column-filter" data-column="6" data-type="den" placeholder="Lọc"></th>
+                <th width="13%">Tên VB <input type="text" class="column-filter" data-column="6" data-type="den" placeholder="Lọc"></th>
                 <th width="9%">Ngày ký <input type="text" class="column-filter" data-column="7" data-type="den" placeholder="Lọc"></th>
-                <th width="12%">Người ký <input type="text" class="column-filter" data-column="8" data-type="den" placeholder="Lọc"></th>
-                <th width="12%">Nơi BH <input type="text" class="column-filter" data-column="9" data-type="den" placeholder="Lọc"></th>
-                <th width="6%">Số tờ <input type="text" class="column-filter" data-column="10" data-type="den" placeholder="Lọc"></th>
+                <th width="9%">Người ký <input type="text" class="column-filter" data-column="8" data-type="den" placeholder="Lọc"></th>
+                <th width="16%">Nội dung <input type="text" class="column-filter" data-column="9" data-type="den" placeholder="Lọc"></th>
+                <th width="8%">Số tờ <input type="text" class="column-filter" data-column="10" data-type="den" placeholder="Lọc"></th>
               </tr>
             </thead>
             <tbody id="body-cong-van-den">
@@ -644,7 +644,8 @@
             const map = { 1: item.year, 2: item.documentNumber, 3: item.documentName, 4: item.signDate, 5: item.signer, 6: item.issuingPlace, 7: item.content };
             value = map[col];
           } else {
-            const map = { 1: item.year, 2: item.soDen, 3: item.nguoiNhan, 4: item.ngayNhan, 5: item.soCongVan, 6: item.tenVanBan, 7: item.ngayKy, 8: item.nguoiKy, 9: item.noiBanHanh, 10: item.soTo };
+            // Cập nhật map cho bảng công văn đến: cột 9 là Nội dung (thay vì nơi BH)
+            const map = { 1: item.year, 2: item.soDen, 3: item.nguoiNhan, 4: item.ngayNhan, 5: item.soCongVan, 6: item.tenVanBan, 7: item.ngayKy, 8: item.nguoiKy, 9: item.content || item.noiDung || '', 10: item.soTo };
             value = map[col];
           }
           return value && value.toString().toLowerCase().includes(val.toLowerCase());
@@ -690,6 +691,8 @@
     tbody.innerHTML = '';
     if (data.length === 0) { tbody.innerHTML = '<tr><td colspan="11" class="no-data">Không có dữ liệu</td></tr>'; return; }
     data.forEach((item, i) => {
+      // Lấy nội dung: ưu tiên trường content hoặc noiDung
+      const noiDungText = item.content || item.noiDung || '';
       tbody.innerHTML += `<tr>
         <td class="text-center">${i+1}</td>
         <td><span class="badge-info">${item.year || ''}</span></td>
@@ -700,7 +703,7 @@
         <td>${item.tenVanBan || ''}</td>
         <td>${item.ngayKy || ''}</td>
         <td>${item.nguoiKy || ''}</td>
-        <td>${item.noiBanHanh || ''}</td>
+        <td style="max-width:200px; white-space:normal">${noiDungText}</td>
         <td>${item.soTo || ''}</td>
       </tr>`;
     });
@@ -715,8 +718,8 @@
       data.forEach((item, i) => ws_data.push([i+1, item.year, item.documentNumber, item.documentName, item.signDate, item.signer, item.issuingPlace, item.content]));
       fileName = `Cong_van_di_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`;
     } else {
-      ws_data = [['STT', 'Năm', 'Số đến', 'Người nhận', 'Ngày nhận', 'Số CV', 'Tên VB', 'Ngày ký', 'Người ký', 'Nơi ban hành', 'Số tờ']];
-      data.forEach((item, i) => ws_data.push([i+1, item.year, item.soDen, item.nguoiNhan, item.ngayNhan, item.soCongVan, item.tenVanBan, item.ngayKy, item.nguoiKy, item.noiBanHanh, item.soTo]));
+      ws_data = [['STT', 'Năm', 'Số đến', 'Người nhận', 'Ngày nhận', 'Số CV', 'Tên VB', 'Ngày ký', 'Người ký', 'Nội dung', 'Số tờ']];
+      data.forEach((item, i) => ws_data.push([i+1, item.year, item.soDen, item.nguoiNhan, item.ngayNhan, item.soCongVan, item.tenVanBan, item.ngayKy, item.nguoiKy, item.content || item.noiDung || '', item.soTo]));
       fileName = `Cong_van_den_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`;
     }
     const ws = XLSX.utils.aoa_to_sheet(ws_data);
