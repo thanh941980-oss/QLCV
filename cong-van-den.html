@@ -9,6 +9,10 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <!-- Thêm thư viện datepicker cho dd/mm/yyyy -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
 
   <style>
     * {
@@ -396,16 +400,25 @@
       color: #0066cc;
     }
     
-    /* Loading spinner cho tải file */
-    .download-spinner {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border: 2px solid #fff;
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spin 0.6s linear infinite;
-      margin-right: 4px;
+    /* Style cho date picker */
+    .flatpickr-input {
+      background-color: white !important;
+    }
+    .date-input-group {
+      position: relative;
+    }
+    .date-input-group .flatpickr-input {
+      padding-right: 25px;
+    }
+    .date-icon {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      color: #0066cc;
+      pointer-events: none;
+      z-index: 10;
     }
   </style>
 </head>
@@ -466,7 +479,10 @@
         </div>
         <div class="col-md-2">
           <label class="form-label">Ngày nhận *</label>
-          <input type="date" id="ngay-nhan" class="form-control" required>
+          <div class="date-input-group">
+            <input type="text" id="ngay-nhan" class="form-control date-picker" placeholder="dd/mm/yyyy" required>
+            <i class="fa-regular fa-calendar date-icon"></i>
+          </div>
         </div>
         <div class="col-md-2">
           <label class="form-label">Số CV *</label>
@@ -485,7 +501,10 @@
         </div>
         <div class="col-md-2">
           <label class="form-label">Ngày ký *</label>
-          <input type="date" id="ngay-ky" class="form-control" required>
+          <div class="date-input-group">
+            <input type="text" id="ngay-ky" class="form-control date-picker" placeholder="dd/mm/yyyy" required>
+            <i class="fa-regular fa-calendar date-icon"></i>
+          </div>
         </div>
         <div class="col-md-2">
           <label class="form-label">Người ký *</label>
@@ -592,10 +611,47 @@
   let githubConfig = { token: '', owner: '', repo: '' };
   let currentMaxSoDen = 0;
 
+  // Khởi tạo date picker cho dd/mm/yyyy
+  let ngayNhanPicker, ngayKyPicker;
+  
+  function initDatePickers() {
+    const dateConfig = {
+      dateFormat: "d/m/Y",
+      locale: "vn",
+      allowInput: true,
+      altInput: false,
+      defaultDate: new Date()
+    };
+    ngayNhanPicker = flatpickr("#ngay-nhan", dateConfig);
+    ngayKyPicker = flatpickr("#ngay-ky", dateConfig);
+  }
+
+  // Chuyển đổi dd/mm/yyyy sang yyyy-mm-dd để lưu
+  function convertToISODate(dateStr) {
+    if (!dateStr) return '';
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return dateStr;
+  }
+
+  // Chuyển đổi yyyy-mm-dd sang dd/mm/yyyy để hiển thị
+  function convertToDisplayDate(dateStr) {
+    if (!dateStr) return '';
+    if (dateStr.includes('/')) return dateStr;
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dateStr;
+  }
+
   function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
-    notification.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : type === 'warning' ? 'fa-triangle-exclamation' : 'fa-info-circle'}"></i> ${message}`;
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : type === 'warning' ? 'fa-triangle-exclamation' : 'fa-info-circle';
+    notification.innerHTML = `<i class="fa-solid ${icon}"></i> ${message}`;
     notification.style.display = 'block';
     document.body.appendChild(notification);
     setTimeout(() => notification.remove(), 2500);
@@ -687,13 +743,22 @@
   function getDbPath(path) { return `users/${currentUid}/${path}`; }
 
   function refreshForm() {
-    document.getElementById('nam').value = ''; document.getElementById('so-den').value = ''; document.getElementById('nguoi-nhan').value = '';
-    document.getElementById('ngay-nhan').valueAsDate = new Date(); document.getElementById('so-cong-van').value = ''; document.getElementById('ten-van-ban').value = '';
-    document.getElementById('ngay-ky').valueAsDate = new Date(); document.getElementById('nguoi-ky').value = ''; document.getElementById('noi-ban-hanh').value = '';
-    document.getElementById('so-to').value = ''; document.getElementById('noi-dung').value = ''; document.getElementById('file-dinh-kem').value = '';
+    document.getElementById('nam').value = ''; 
+    document.getElementById('so-den').value = ''; 
+    document.getElementById('nguoi-nhan').value = '';
+    if (ngayNhanPicker) ngayNhanPicker.setDate(new Date());
+    if (ngayKyPicker) ngayKyPicker.setDate(new Date());
+    document.getElementById('so-cong-van').value = ''; 
+    document.getElementById('ten-van-ban').value = '';
+    document.getElementById('nguoi-ky').value = ''; 
+    document.getElementById('noi-ban-hanh').value = '';
+    document.getElementById('so-to').value = ''; 
+    document.getElementById('noi-dung').value = ''; 
+    document.getElementById('file-dinh-kem').value = '';
     document.getElementById('current-file-info').style.display = 'none';
     editingId = null; currentFileData = null;
-    document.getElementById('update-cvden-btn').style.display = 'none'; document.getElementById('save-cvden-btn').style.display = 'inline-block';
+    document.getElementById('update-cvden-btn').style.display = 'none'; 
+    document.getElementById('save-cvden-btn').style.display = 'inline-block';
     updateSoDenField();
   }
 
@@ -705,10 +770,12 @@
       const year = document.getElementById('nam').value;
       let soDen = document.getElementById('so-den').value;
       const nguoiNhan = document.getElementById('nguoi-nhan').value;
-      const ngayNhan = document.getElementById('ngay-nhan').value;
+      const ngayNhanDisplay = document.getElementById('ngay-nhan').value;
+      const ngayNhan = convertToISODate(ngayNhanDisplay);
       const soCongVan = document.getElementById('so-cong-van').value;
       const tenVanBan = document.getElementById('ten-van-ban').value;
-      const ngayKy = document.getElementById('ngay-ky').value;
+      const ngayKyDisplay = document.getElementById('ngay-ky').value;
+      const ngayKy = convertToISODate(ngayKyDisplay);
       const nguoiKy = document.getElementById('nguoi-ky').value;
       const noiBanHanh = document.getElementById('noi-ban-hanh').value;
       const soTo = document.getElementById('so-to').value;
@@ -728,9 +795,15 @@
         catch (uploadError) { showNotification('Upload thất bại: ' + uploadError.message, 'error'); return; } 
       }
       
-      await set(newDocRef, { year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, noiBanHanh, soTo, content, fileData, hasFile: !!fileData, createdAt: new Date().toISOString(), createdBy: currentUid });
+      await set(newDocRef, { 
+        year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, 
+        noiBanHanh, soTo, content, fileData, hasFile: !!fileData, 
+        createdAt: new Date().toISOString(), createdBy: currentUid 
+      });
+      
       showNotification('Thêm thành công! Số đến: ' + soDen, 'success'); 
       refreshForm();
+      
     } catch (error) { showNotification('Lỗi: ' + error.message, 'error'); }
     finally { saveBtn.classList.remove('btn-loading'); saveBtn.disabled = false; }
   }
@@ -741,15 +814,41 @@
     updateBtn.classList.add('btn-loading');
     updateBtn.disabled = true;
     try {
-      const year = document.getElementById('nam').value, soDen = document.getElementById('so-den').value, nguoiNhan = document.getElementById('nguoi-nhan').value;
-      const ngayNhan = document.getElementById('ngay-nhan').value, soCongVan = document.getElementById('so-cong-van').value, tenVanBan = document.getElementById('ten-van-ban').value;
-      const ngayKy = document.getElementById('ngay-ky').value, nguoiKy = document.getElementById('nguoi-ky').value, noiBanHanh = document.getElementById('noi-ban-hanh').value;
-      const soTo = document.getElementById('so-to').value, content = document.getElementById('noi-dung').value, newFile = document.getElementById('file-dinh-kem').files[0];
-      if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) { showNotification('Điền đầy đủ!', 'error'); return; }
+      const year = document.getElementById('nam').value;
+      const soDen = document.getElementById('so-den').value;
+      const nguoiNhan = document.getElementById('nguoi-nhan').value;
+      const ngayNhanDisplay = document.getElementById('ngay-nhan').value;
+      const ngayNhan = convertToISODate(ngayNhanDisplay);
+      const soCongVan = document.getElementById('so-cong-van').value;
+      const tenVanBan = document.getElementById('ten-van-ban').value;
+      const ngayKyDisplay = document.getElementById('ngay-ky').value;
+      const ngayKy = convertToISODate(ngayKyDisplay);
+      const nguoiKy = document.getElementById('nguoi-ky').value;
+      const noiBanHanh = document.getElementById('noi-ban-hanh').value;
+      const soTo = document.getElementById('so-to').value;
+      const content = document.getElementById('noi-dung').value;
+      const newFile = document.getElementById('file-dinh-kem').files[0];
+      
+      if (!year || !soDen || !nguoiNhan || !ngayNhan || !soCongVan || !tenVanBan || !ngayKy || !nguoiKy || !noiBanHanh || !content) { 
+        showNotification('Điền đầy đủ!', 'error'); 
+        return; 
+      }
+      
       let fileData = currentFileData;
-      if (newFile) { if (currentFileData?.path && currentFileData?.sha) await deleteFromGitHub(currentFileData.path, currentFileData.sha); fileData = await uploadToGitHub(newFile, editingId); }
-      await update(ref(database, getDbPath(`congVanDen/${editingId}`)), { year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, noiBanHanh, soTo, content, fileData: fileData || null, hasFile: !!fileData, updatedAt: new Date().toISOString(), updatedBy: currentUid });
-      showNotification('Cập nhật thành công!', 'success'); refreshForm();
+      if (newFile) { 
+        if (currentFileData?.path && currentFileData?.sha) await deleteFromGitHub(currentFileData.path, currentFileData.sha); 
+        fileData = await uploadToGitHub(newFile, editingId); 
+      }
+      
+      await update(ref(database, getDbPath(`congVanDen/${editingId}`)), { 
+        year, soDen, nguoiNhan, ngayNhan, soCongVan, tenVanBan, ngayKy, nguoiKy, 
+        noiBanHanh, soTo, content, fileData: fileData || null, hasFile: !!fileData, 
+        updatedAt: new Date().toISOString(), updatedBy: currentUid 
+      });
+      
+      showNotification('Cập nhật thành công!', 'success'); 
+      refreshForm();
+      
     } catch (error) { showNotification('Cập nhật thất bại: ' + error.message, 'error'); }
     finally { updateBtn.classList.remove('btn-loading'); updateBtn.disabled = false; }
   }
@@ -765,41 +864,45 @@
   }
 
   function editDocument(id, data) {
-    document.getElementById('nam').value = data.year || ''; document.getElementById('so-den').value = data.soDen || ''; document.getElementById('nguoi-nhan').value = data.nguoiNhan || '';
-    document.getElementById('ngay-nhan').value = data.ngayNhan || ''; document.getElementById('so-cong-van').value = data.soCongVan || ''; document.getElementById('ten-van-ban').value = data.tenVanBan || '';
-    document.getElementById('ngay-ky').value = data.ngayKy || ''; document.getElementById('nguoi-ky').value = data.nguoiKy || ''; document.getElementById('noi-ban-hanh').value = data.noiBanHanh || '';
-    document.getElementById('so-to').value = data.soTo || ''; document.getElementById('noi-dung').value = data.content || ''; currentFileData = data.fileData || null; editingId = id;
+    document.getElementById('nam').value = data.year || ''; 
+    document.getElementById('so-den').value = data.soDen || ''; 
+    document.getElementById('nguoi-nhan').value = data.nguoiNhan || '';
+    if (ngayNhanPicker) ngayNhanPicker.setDate(convertToDisplayDate(data.ngayNhan) || new Date());
+    document.getElementById('so-cong-van').value = data.soCongVan || ''; 
+    document.getElementById('ten-van-ban').value = data.tenVanBan || '';
+    if (ngayKyPicker) ngayKyPicker.setDate(convertToDisplayDate(data.ngayKy) || new Date());
+    document.getElementById('nguoi-ky').value = data.nguoiKy || ''; 
+    document.getElementById('noi-ban-hanh').value = data.noiBanHanh || '';
+    document.getElementById('so-to').value = data.soTo || ''; 
+    document.getElementById('noi-dung').value = data.content || ''; 
+    currentFileData = data.fileData || null; 
+    editingId = id;
     const div = document.getElementById('current-file-info');
     if (currentFileData?.url) { div.style.display = 'block'; div.innerHTML = `<i class="fa-solid fa-paperclip"></i> ${currentFileData.name} <button class="btn btn-sm btn-outline-primary" onclick='window.downloadCurrentFile()'><i class="fa-solid fa-download"></i> Tải</button>`; }
     else { div.style.display = 'block'; div.innerHTML = `<i class="fa-regular fa-file"></i> Chưa có file`; }
-    document.getElementById('update-cvden-btn').style.display = 'inline-block'; document.getElementById('save-cvden-btn').style.display = 'none';
+    document.getElementById('update-cvden-btn').style.display = 'inline-block'; 
+    document.getElementById('save-cvden-btn').style.display = 'none';
   }
 
-  // Hàm tải file trực tiếp (chuyên nghiệp, có thông báo)
   async function downloadFile(fileData, fileName) {
     if (!fileData?.url) {
       showNotification('Không có file để tải!', 'warning');
       return;
     }
-    
-    const notificationId = showNotification('Đang tải file...', 'info');
-    
+    showNotification('Đang tải file...', 'info');
     try {
-      // Tạo thẻ a để tải
       const link = document.createElement('a');
       link.href = fileData.url;
       link.download = fileName || fileData.name || 'download';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
       showNotification(`Đã tải xong: ${fileData.name}`, 'success');
     } catch (error) {
       showNotification('Tải file thất bại!', 'error');
     }
   }
 
-  // Hàm xem trước file (giữ nguyên nhưng tối ưu)
   function previewFile(fileData) {
     if (!fileData?.url) {
       showNotification('Không có file để xem!', 'warning');
@@ -814,7 +917,7 @@
     if (['jpg','jpeg','png','gif'].includes(ext)) {
       preview.innerHTML = `<img src="${fileData.url}" class="img-fluid" onerror="this.innerHTML='<div class=\'text-center p-4\'><i class=\'fa-solid fa-file fa-3x\'></i><p>Không thể hiển thị ảnh</p></div>'">`;
     } else if (ext === 'pdf') {
-      preview.innerHTML = `<iframe src="${fileData.url}" width="100%" height="550px" onerror="this.innerHTML='<div class=\'text-center p-4\'><i class=\'fa-solid fa-file fa-3x\'></i><p>Không thể hiển thị PDF</p></div>'"></iframe>`;
+      preview.innerHTML = `<iframe src="${fileData.url}" width="100%" height="550px"></iframe>`;
     } else {
       preview.innerHTML = `<div class="text-center p-4">
         <i class="fa-solid fa-file fa-3x mb-2"></i>
@@ -882,7 +985,7 @@
 
   function displayDocuments(snapshot) {
     const tbody = document.getElementById('documentsBody'); const totalSpan = document.getElementById('totalCount'); tbody.innerHTML = '';
-    if (!snapshot.exists()) { tbody.innerHTML = '<table><td colspan="14" class="text-center py-3">Chưa có công văn nào</td></tr>'; totalSpan.textContent = '0'; document.getElementById('so-den').value = '1'; return; }
+    if (!snapshot.exists()) { tbody.innerHTML = '<tr><td colspan="14" class="text-center py-3">Chưa có công văn nào</td></tr>'; totalSpan.textContent = '0'; document.getElementById('so-den').value = '1'; return; }
     const docs = snapshot.val(); documentsDataGlobal = docs; 
     const docsArray = Object.keys(docs).map(id => ({ id, ...docs[id] })).sort((a,b) => parseInt(a.soDen) - parseInt(b.soDen));
     let stt = 1;
@@ -891,15 +994,17 @@
       const contentText = doc.content || ''; 
       const contentPreview = contentText.length > 40 ? contentText.substring(0,40)+'...' : contentText; 
       const fileNameDisplay = hasFile ? (doc.fileData.name.length > 10 ? doc.fileData.name.substring(0,10)+'...' : doc.fileData.name) : '';
+      const ngayNhanDisplay = convertToDisplayDate(doc.ngayNhan || '');
+      const ngayKyDisplay = convertToDisplayDate(doc.ngayKy || '');
       tbody.innerHTML += `<tr>
         <td class="text-center">${stt}</td>
         <td class="text-center"><span class="badge-info">${escapeHtml(doc.year||'')}</span></td>
         <td><strong>${escapeHtml(doc.soDen||'')}</strong></td>
         <td>${escapeHtml(doc.nguoiNhan||'')}</td>
-        <td class="text-center">${doc.ngayNhan||''}</td>
+        <td class="text-center">${ngayNhanDisplay}</td>
         <td>${escapeHtml(doc.soCongVan||'')}</td>
         <td>${escapeHtml(doc.tenVanBan||'')}</td>
-        <td class="text-center">${doc.ngayKy||''}</td>
+        <td class="text-center">${ngayKyDisplay}</td>
         <td>${escapeHtml(doc.nguoiKy||'')}</td>
         <td>${escapeHtml(doc.noiBanHanh||'')}</td>
         <td class="text-center">${doc.soTo||''}</td>
@@ -960,7 +1065,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('ngay-nhan').valueAsDate = new Date(); document.getElementById('ngay-ky').valueAsDate = new Date();
+    initDatePickers();
     document.getElementById('reset-cvden-btn').onclick = refreshForm;
     document.getElementById('save-cvden-btn').onclick = addDocument;
     document.getElementById('update-cvden-btn').onclick = updateDocument;
