@@ -461,7 +461,7 @@
         </div>
         <div class="col-md-2">
           <label class="form-label">Ngày ký *</label>
-          <input type="date" id="ngay-ky" class="form-control" required>
+          <input type="text" id="ngay-ky" class="form-control" placeholder="dd/mm/yyyy" required>
         </div>
         <div class="col-md-2">
           <label class="form-label">Tên VB *</label>
@@ -603,6 +603,14 @@
   let currentCategoryItems = {}; // Lưu list items { id: { name, ... } }
   let currentCategorySelectId = null;
 
+  function formatDateToDDMMYYYY(date) {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+  
   function showNotification(message, isSuccess = true) {
     const notification = document.getElementById(isSuccess ? 'successNotification' : 'errorNotification');
     if (notification) { notification.textContent = message; notification.style.display = 'block'; setTimeout(() => { notification.style.display = 'none'; }, 2000); }
@@ -665,7 +673,7 @@
 
   function refreshForm() {
     document.getElementById('nam').value = ''; document.getElementById('so-vb').value = ''; document.getElementById('ten-vb').value = '';
-    document.getElementById('ngay-ky').valueAsDate = new Date(); document.getElementById('nguoi-ky').value = ''; document.getElementById('noi-ban-hanh').value = '';
+    document.getElementById('ngay-ky').value = formatDateToDDMMYYYY(new Date()); document.getElementById('nguoi-ky').value = ''; document.getElementById('noi-ban-hanh').value = '';
     document.getElementById('noi-dung').value = ''; document.getElementById('file-dinh-kem').value = ''; document.getElementById('current-file-info').style.display = 'none';
     editingId = null; currentFileData = null;
     document.getElementById('update-cvdi-btn').style.display = 'none'; document.getElementById('save-cvdi-btn').style.display = 'inline-block';
@@ -678,6 +686,10 @@
     try {
       const year = document.getElementById('nam').value, documentNumber = document.getElementById('so-vb').value, documentName = document.getElementById('ten-vb').value;
       const signDate = document.getElementById('ngay-ky').value, signer = document.getElementById('nguoi-ky').value, issuingPlace = document.getElementById('noi-ban-hanh').value;
+      if (!/^\d{2}\/\d{2}\/\d{4}$/.test(signDate)) {
+  showNotification('Ngày ký phải có định dạng dd/mm/yyyy!', false);
+  return;
+}
       const content = document.getElementById('noi-dung').value, file = document.getElementById('file-dinh-kem').files[0];
       
       if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { 
@@ -710,6 +722,10 @@
     try {
       const year = document.getElementById('nam').value, documentNumber = document.getElementById('so-vb').value, documentName = document.getElementById('ten-vb').value;
       const signDate = document.getElementById('ngay-ky').value, signer = document.getElementById('nguoi-ky').value, issuingPlace = document.getElementById('noi-ban-hanh').value;
+      if (!/^\d{2}\/\d{2}\/\d{4}$/.test(signDate)) {
+  showNotification('Ngày ký phải có định dạng dd/mm/yyyy!', false);
+  return;
+}
       const content = document.getElementById('noi-dung').value, newFile = document.getElementById('file-dinh-kem').files[0];
       if (!year || !documentNumber || !documentName || !signDate || !signer || !issuingPlace || !content) { showNotification('Điền đầy đủ thông tin!', false); return; }
       let fileData = currentFileData;
@@ -1094,7 +1110,7 @@
   document.getElementById('them-noi-ban-hanh-btn').onclick = () => themMoiWithModal('noi-ban-hanh', 'issuingPlaces', 'Nơi ban hành');
   
   document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('ngay-ky').valueAsDate = new Date();
+    document.getElementById('ngay-ky').value = formatDateToDDMMYYYY(new Date());
     document.getElementById('reset-cvdi-btn').onclick = refreshForm;
     document.getElementById('save-cvdi-btn').onclick = addDocument;
     document.getElementById('update-cvdi-btn').onclick = updateDocument;
