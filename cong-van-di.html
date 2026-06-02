@@ -386,6 +386,29 @@
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+    
+    /* Modal quản lý danh mục */
+    .category-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      border-bottom: 1px solid #edf2f7;
+      font-size: 12px;
+    }
+    .category-item:last-child { border-bottom: none; }
+    .category-actions .btn-sm {
+      padding: 2px 6px;
+      font-size: 10px;
+      margin-left: 4px;
+    }
+    .category-list-container {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      background: #fafbfc;
+    }
   </style>
 </head>
 <body>
@@ -525,10 +548,38 @@
 <div id="successNotification" class="notification success"></div>
 <div id="errorNotification" class="notification error"></div>
 
+<!-- Modal quản lý danh mục (Thêm/Sửa/Xóa) -->
+<div class="modal fade" id="categoryManagerModal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header py-2">
+        <h6 class="modal-title" id="categoryModalTitle"><i class="fa-solid fa-list-ul"></i> Quản lý danh mục</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Thêm mới</label>
+          <div class="input-group">
+            <input type="text" id="newCategoryValue" class="form-control" placeholder="Nhập giá trị mới">
+            <button class="btn btn-primary" id="addCategoryBtn"><i class="fa-solid fa-plus"></i> Thêm</button>
+          </div>
+        </div>
+        <div class="form-label">Danh sách hiện có</div>
+        <div id="categoryListContainer" class="category-list-container">
+          <div class="text-center p-3 text-muted">Đang tải...</div>
+        </div>
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import { getDatabase, ref, push, set, get, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+  import { getDatabase, ref, push, set, get, onValue, remove, update, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBWKTyXVK1y2dqxWUWprIxd5CCHMzSMc_o",
@@ -546,6 +597,11 @@
 
   let currentUser = null, currentUid = null, editingId = null, currentFileData = null, documentsDataGlobal = {};
   let githubConfig = { token: '', owner: '', repo: '' };
+  
+  // Biến lưu context cho modal quản lý danh mục
+  let currentCategoryContext = null; // 'documentTypes', 'signers', 'issuingPlaces'
+  let currentCategoryItems = {}; // Lưu list items { id: { name, ... } }
+  let currentCategorySelectId = null;
 
   function showNotification(message, isSuccess = true) {
     const notification = document.getElementById(isSuccess ? 'successNotification' : 'errorNotification');
@@ -709,9 +765,7 @@
     visibleRows.forEach((row, idx) => {
       const cells = row.querySelectorAll('td');
       if (cells.length >= 9) {
-        // Lấy ID của document từ nút sửa/xóa (có onclick chứa id)
         let fullContent = '';
-        // Tìm nội dung đầy đủ từ biến toàn cục documentsDataGlobal
         const editBtn = cells[9]?.querySelector('.action-btn.edit');
         if (editBtn && editBtn.getAttribute('onclick')) {
           const match = editBtn.getAttribute('onclick').match(/editDocumentFromGlobal\("([^"]+)"\)/);
@@ -719,8 +773,6 @@
             fullContent = documentsDataGlobal[match[1]].content || '';
           }
         }
-        
-        // Nếu không tìm thấy qua editBtn, thử tìm qua deleteBtn
         if (!fullContent) {
           const deleteBtn = cells[9]?.querySelector('.action-btn.delete');
           if (deleteBtn && deleteBtn.getAttribute('onclick')) {
@@ -730,12 +782,9 @@
             }
           }
         }
-        
-        // Nếu vẫn chưa có, thử lấy từ text trong ô nội dung (có thể đã bị cắt)
         if (!fullContent) {
           const contentDiv = cells[7]?.querySelector('.content-preview');
           if (contentDiv && contentDiv.getAttribute('onclick')) {
-            // Trường hợp này có thể lấy được content từ onclick
             const match = contentDiv.getAttribute('onclick').match(/viewFullContentFromGlobal\((".*")\)/);
             if (match && match[1]) {
               try {
@@ -824,22 +873,210 @@
   window.editDocumentFromGlobal = (id) => { if (documentsDataGlobal[id]) editDocument(id, documentsDataGlobal[id]); };
   window.deleteDocumentFromGlobal = (id) => deleteDocument(id);
 
-  async function themMoi(selectId, category) {
-    const tenMoi = prompt('Nhập giá trị mới:');
-    if (tenMoi?.trim()) { const val = tenMoi.trim(); const select = document.getElementById(selectId); for(let i=0;i<select.options.length;i++) if(select.options[i].value===val) { showNotification('Đã tồn tại!', false); return; }
-      const newData = { name: val, createdAt: new Date().toISOString(), createdBy: currentUid }; const newRef = push(ref(database, getDbPath(`categories/${category}`))); await set(newRef, newData);
-      const opt = document.createElement('option'); opt.value = val; opt.textContent = val; select.appendChild(opt); select.value = val; showNotification('Thêm thành công!');
+  // ==================== QUẢN LÝ DANH MỤC (THÊM/SỬA/XÓA) ====================
+  
+  // Mở modal quản lý danh mục
+  async function openCategoryManager(selectId, categoryKey, title) {
+    currentCategorySelectId = selectId;
+    currentCategoryContext = categoryKey;
+    document.getElementById('categoryModalTitle').innerHTML = `<i class="fa-solid fa-list-ul"></i> Quản lý: ${title}`;
+    document.getElementById('newCategoryValue').value = '';
+    
+    // Hiển thị modal
+    const modal = new bootstrap.Modal(document.getElementById('categoryManagerModal'));
+    modal.show();
+    
+    // Tải danh sách
+    await loadCategoryList(categoryKey);
+  }
+  
+  // Tải danh sách các mục trong danh mục
+  async function loadCategoryList(categoryKey) {
+    const container = document.getElementById('categoryListContainer');
+    container.innerHTML = '<div class="text-center p-3 text-muted"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</div>';
+    
+    try {
+      const snapshot = await get(ref(database, getDbPath(`categories/${categoryKey}`)));
+      const items = snapshot.val() || {};
+      currentCategoryItems = items;
+      
+      if (Object.keys(items).length === 0) {
+        container.innerHTML = '<div class="text-center p-3 text-muted">Chưa có dữ liệu. Hãy thêm mới.</div>';
+        return;
+      }
+      
+      // Chuyển đổi thành mảng và sắp xếp theo tên
+      const itemsArray = Object.entries(items).map(([id, data]) => ({ id, name: data.name, createdAt: data.createdAt }));
+      itemsArray.sort((a, b) => a.name.localeCompare(b.name));
+      
+      let html = '';
+      itemsArray.forEach(item => {
+        html += `
+          <div class="category-item" data-id="${item.id}">
+            <span><i class="fa-regular fa-file-lines"></i> ${escapeHtml(item.name)}</span>
+            <div class="category-actions">
+              <button class="btn btn-sm btn-outline-primary edit-category-btn" data-id="${item.id}" data-name="${escapeHtml(item.name)}"><i class="fa-solid fa-pen"></i> Sửa</button>
+              <button class="btn btn-sm btn-outline-danger delete-category-btn" data-id="${item.id}" data-name="${escapeHtml(item.name)}"><i class="fa-solid fa-trash"></i> Xóa</button>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+      
+      // Gắn sự kiện cho các nút sửa/xóa
+      document.querySelectorAll('.edit-category-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          const currentName = btn.dataset.name;
+          editCategoryItem(id, currentName);
+        });
+      });
+      
+      document.querySelectorAll('.delete-category-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          const name = btn.dataset.name;
+          deleteCategoryItem(id, name);
+        });
+      });
+      
+    } catch (error) {
+      console.error(error);
+      container.innerHTML = '<div class="text-center p-3 text-danger">Lỗi tải dữ liệu</div>';
     }
   }
-
-  function loadCategories(selectId, category) {
-    onValue(ref(database, getDbPath(`categories/${category}`)), (snapshot) => {
-      const select = document.getElementById(selectId); const def = select.value;
-      select.innerHTML = `<option value="">${selectId==='nam'?'Chọn năm':'Chọn'}</option>`;
-      if (snapshot.exists()) { Object.values(snapshot.val()).map(v=>v.name).sort().forEach(name => { const opt = document.createElement('option'); opt.value = name; opt.textContent = name; select.appendChild(opt); }); }
-      if (def) select.value = def;
-    });
+  
+  // Thêm mới một mục
+  async function addNewCategoryItem() {
+    const newValue = document.getElementById('newCategoryValue').value.trim();
+    if (!newValue) {
+      showNotification('Vui lòng nhập giá trị!', false);
+      return;
+    }
+    
+    // Kiểm tra trùng
+    const exists = Object.values(currentCategoryItems).some(item => item.name === newValue);
+    if (exists) {
+      showNotification('Giá trị này đã tồn tại!', false);
+      return;
+    }
+    
+    try {
+      const newRef = push(ref(database, getDbPath(`categories/${currentCategoryContext}`)));
+      await set(newRef, {
+        name: newValue,
+        createdAt: new Date().toISOString(),
+        createdBy: currentUid
+      });
+      showNotification('Thêm thành công!', true);
+      document.getElementById('newCategoryValue').value = '';
+      await loadCategoryList(currentCategoryContext);
+      // Cập nhật dropdown trên form chính
+      await refreshDropdown(currentCategorySelectId, currentCategoryContext);
+    } catch (error) {
+      showNotification('Lỗi: ' + error.message, false);
+    }
   }
+  
+  // Sửa một mục
+  async function editCategoryItem(id, currentName) {
+    const newName = prompt('Nhập tên mới:', currentName);
+    if (!newName || newName === currentName) return;
+    
+    // Kiểm tra trùng
+    const exists = Object.values(currentCategoryItems).some(item => item.id !== id && item.name === newName);
+    if (exists) {
+      showNotification('Giá trị này đã tồn tại!', false);
+      return;
+    }
+    
+    try {
+      await update(ref(database, getDbPath(`categories/${currentCategoryContext}/${id}`)), {
+        name: newName,
+        updatedAt: new Date().toISOString()
+      });
+      showNotification('Cập nhật thành công!', true);
+      await loadCategoryList(currentCategoryContext);
+      await refreshDropdown(currentCategorySelectId, currentCategoryContext);
+      
+      // Nếu đang sử dụng giá trị cũ trong form chính thì cập nhật
+      const selectEl = document.getElementById(currentCategorySelectId);
+      if (selectEl.value === currentName) {
+        selectEl.value = newName;
+      }
+    } catch (error) {
+      showNotification('Lỗi: ' + error.message, false);
+    }
+  }
+  
+  // Xóa một mục
+  async function deleteCategoryItem(id, name) {
+    if (!confirm(`Bạn có chắc chắn muốn xóa "${name}"?`)) return;
+    
+    // Kiểm tra xem giá trị này có đang được sử dụng trong các công văn không
+    const docsSnapshot = await get(ref(database, getDbPath('congVanDi')));
+    const docs = docsSnapshot.val() || {};
+    let isUsed = false;
+    
+    let fieldToCheck = '';
+    if (currentCategoryContext === 'documentTypes') fieldToCheck = 'documentName';
+    else if (currentCategoryContext === 'signers') fieldToCheck = 'signer';
+    else if (currentCategoryContext === 'issuingPlaces') fieldToCheck = 'issuingPlace';
+    
+    for (const docId in docs) {
+      if (docs[docId][fieldToCheck] === name) {
+        isUsed = true;
+        break;
+      }
+    }
+    
+    if (isUsed) {
+      showNotification(`Không thể xóa "${name}" vì đang được sử dụng trong công văn!`, false);
+      return;
+    }
+    
+    try {
+      await remove(ref(database, getDbPath(`categories/${currentCategoryContext}/${id}`)));
+      showNotification('Xóa thành công!', true);
+      await loadCategoryList(currentCategoryContext);
+      await refreshDropdown(currentCategorySelectId, currentCategoryContext);
+      
+      // Nếu đang chọn giá trị bị xóa thì reset select
+      const selectEl = document.getElementById(currentCategorySelectId);
+      if (selectEl.value === name) {
+        selectEl.value = '';
+      }
+    } catch (error) {
+      showNotification('Lỗi: ' + error.message, false);
+    }
+  }
+  
+  // Refresh dropdown từ Firebase
+  async function refreshDropdown(selectId, categoryKey) {
+    const snapshot = await get(ref(database, getDbPath(`categories/${categoryKey}`)));
+    const select = document.getElementById(selectId);
+    const currentValue = select.value;
+    const items = snapshot.val() || {};
+    const names = Object.values(items).map(v => v.name).sort();
+    
+    let options = `<option value="">${selectId === 'nam' ? 'Chọn năm' : 'Chọn'}</option>`;
+    names.forEach(name => {
+      options += `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`;
+    });
+    select.innerHTML = options;
+    if (currentValue && names.includes(currentValue)) {
+      select.value = currentValue;
+    }
+  }
+  
+  // Hàm thêm mới đơn giản cũ (giữ để tương thích, nhưng sẽ gọi modal thay vì prompt)
+  async function themMoiWithModal(selectId, categoryKey, title) {
+    openCategoryManager(selectId, categoryKey, title);
+  }
+
+  // ==================== KẾT THÚC QUẢN LÝ DANH MỤC ====================
 
   const toggleBtn = document.getElementById('toggleGithubBtn');
   const githubCard = document.getElementById('githubConfigCard');
@@ -850,7 +1087,12 @@
       else { githubCard.style.display = 'none'; toggleIcon.className = 'fa-solid fa-chevron-down'; }
     });
   }
-
+  
+  document.getElementById('them-nam-btn').onclick = () => themMoiWithModal('nam', 'years', 'Năm');
+  document.getElementById('them-ten-vb-btn').onclick = () => themMoiWithModal('ten-vb', 'documentTypes', 'Tên văn bản');
+  document.getElementById('them-nguoi-ky-btn').onclick = () => themMoiWithModal('nguoi-ky', 'signers', 'Người ký');
+  document.getElementById('them-noi-ban-hanh-btn').onclick = () => themMoiWithModal('noi-ban-hanh', 'issuingPlaces', 'Nơi ban hành');
+  
   document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('ngay-ky').valueAsDate = new Date();
     document.getElementById('reset-cvdi-btn').onclick = refreshForm;
@@ -858,15 +1100,32 @@
     document.getElementById('update-cvdi-btn').onclick = updateDocument;
     document.getElementById('save-github-config').onclick = saveGithubConfig;
     document.getElementById('export-excel-btn').onclick = exportToExcel;
-    document.getElementById('them-nam-btn').onclick = () => themMoi('nam', 'years');
-    document.getElementById('them-ten-vb-btn').onclick = () => themMoi('ten-vb', 'documentTypes');
-    document.getElementById('them-nguoi-ky-btn').onclick = () => themMoi('nguoi-ky', 'signers');
-    document.getElementById('them-noi-ban-hanh-btn').onclick = () => themMoi('noi-ban-hanh', 'issuingPlaces');
+    
+    // Nút thêm trong modal
+    document.getElementById('addCategoryBtn').onclick = addNewCategoryItem;
+    // Cho phép nhấn Enter trong ô input
+    document.getElementById('newCategoryValue').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addNewCategoryItem();
+    });
+    
     onAuthStateChanged(auth, async (user) => {
-      if (user) { currentUser = user; currentUid = user.uid; await loadGithubConfig(); loadCategories('nam','years'); loadCategories('ten-vb','documentTypes'); loadCategories('nguoi-ky','signers'); loadCategories('noi-ban-hanh','issuingPlaces'); onValue(ref(database, getDbPath('congVanDi')), (snapshot) => displayDocuments(snapshot)); }
+      if (user) { currentUser = user; currentUid = user.uid; await loadGithubConfig(); 
+        loadCategories('nam','years'); loadCategories('ten-vb','documentTypes'); loadCategories('nguoi-ky','signers'); loadCategories('noi-ban-hanh','issuingPlaces'); 
+        onValue(ref(database, getDbPath('congVanDi')), (snapshot) => displayDocuments(snapshot)); }
       else { window.location.href = 'index.html'; }
     });
   });
+  
+  function loadCategories(selectId, category) {
+    onValue(ref(database, getDbPath(`categories/${category}`)), (snapshot) => {
+      const select = document.getElementById(selectId); const def = select.value;
+      select.innerHTML = `<option value="">${selectId==='nam'?'Chọn năm':'Chọn'}</option>`;
+      if (snapshot.exists()) { 
+        Object.values(snapshot.val()).map(v=>v.name).sort().forEach(name => { const opt = document.createElement('option'); opt.value = name; opt.textContent = name; select.appendChild(opt); }); 
+      }
+      if (def && Array.from(select.options).some(opt => opt.value === def)) select.value = def;
+    });
+  }
 </script>
 </body>
 </html>
