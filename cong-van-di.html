@@ -409,6 +409,116 @@
       border-radius: 6px;
       background: #fafbfc;
     }
+
+    /* Modal xem file chuyên nghiệp */
+    .file-view-modal .modal-content {
+      border-radius: 16px;
+      border: none;
+      box-shadow: 0 20px 35px -10px rgba(0,0,0,0.2);
+    }
+    .file-view-modal .modal-header {
+      background: linear-gradient(135deg, #0066cc 0%, #004d99 100%);
+      color: white;
+      border-radius: 16px 16px 0 0;
+      padding: 14px 20px;
+      border: none;
+    }
+    .file-view-modal .modal-header .btn-close {
+      filter: brightness(0) invert(1);
+      opacity: 0.8;
+    }
+    .file-view-modal .modal-body {
+      padding: 20px;
+      background: #f8fafc;
+    }
+    .file-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+      height: 100%;
+      border: 1px solid #e9ecef;
+    }
+    .file-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .file-icon {
+      font-size: 48px;
+      color: #0066cc;
+      margin-bottom: 12px;
+    }
+    .file-name {
+      font-weight: 600;
+      font-size: 13px;
+      color: #1e293b;
+      word-break: break-all;
+      margin-bottom: 12px;
+      background: #f1f5f9;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    .file-size {
+      font-size: 10px;
+      color: #64748b;
+      margin-bottom: 12px;
+    }
+    .download-btn {
+      background: linear-gradient(105deg, #2ecc71, #27ae60);
+      border: none;
+      padding: 6px 12px;
+      font-size: 11px;
+      border-radius: 8px;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    .download-btn:hover {
+      transform: scale(1.02);
+      background: linear-gradient(105deg, #27ae60, #1e8449);
+    }
+    .download-btn:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+    .loading-spinner-sm {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 6px;
+    }
+    .file-status {
+      font-size: 10px;
+      color: #94a3b8;
+      font-style: italic;
+      margin-top: 8px;
+    }
+    .no-file-placeholder {
+      background: #f1f5f9;
+      border-radius: 12px;
+      padding: 30px 16px;
+      text-align: center;
+      color: #94a3b8;
+      height: 100%;
+    }
+    .no-file-placeholder i {
+      font-size: 40px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+    .badge-file-type {
+      display: inline-block;
+      background: #e6f0ff;
+      color: #0066cc;
+      font-size: 9px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-bottom: 8px;
+    }
   </style>
 </head>
 <body>
@@ -549,12 +659,55 @@
 </div>
 
 <div id="uploadProgress" class="upload-progress"><div><i class="fa-solid fa-spinner fa-spin"></i> Đang upload...</div><div class="progress mt-1" style="height: 3px;"><div id="uploadProgressBar" class="progress-bar" style="width: 0%"></div></div></div>
-<div class="modal fade" id="filePreviewModal" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-centered"><div class="modal-content"><div class="modal-header py-1"><h6 class="modal-title"><i class="fa-solid fa-file"></i> <span id="previewFileName"></span></h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0" id="filePreviewContent"><div class="text-center p-4"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p>Đang tải...</p></div></div><div class="modal-footer py-1"><a href="#" id="downloadFileBtn" class="btn btn-primary btn-sm" download><i class="fa-solid fa-download"></i> Tải</a><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button></div></div></div></div>
+
+<!-- Modal xem file chuyên nghiệp với 2 cột -->
+<div class="modal fade file-view-modal" id="fileViewModal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title"><i class="fa-solid fa-eye"></i> Xem tài liệu đính kèm</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3" id="fileViewModalBody">
+          <div class="col-md-6">
+            <div class="file-card text-center">
+              <div class="file-icon"><i class="fa-solid fa-paperclip"></i></div>
+              <div class="badge-file-type">File đính kèm</div>
+              <div class="file-name" id="attachFileName">—</div>
+              <div class="file-size" id="attachFileSize"></div>
+              <button class="btn btn-success download-btn" id="downloadAttachBtn" onclick="window.downloadAttachFile()">
+                <i class="fa-solid fa-download"></i> Tải về
+              </button>
+              <div class="file-status" id="attachFileStatus"></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="file-card text-center">
+              <div class="file-icon"><i class="fa-solid fa-file-signature"></i></div>
+              <div class="badge-file-type">File có chữ ký</div>
+              <div class="file-name" id="signedFileName">—</div>
+              <div class="file-size" id="signedFileSize"></div>
+              <button class="btn btn-success download-btn" id="downloadSignedBtn" onclick="window.downloadSignedFile()">
+                <i class="fa-solid fa-download"></i> Tải về
+              </button>
+              <div class="file-status" id="signedFileStatus"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><i class="fa-solid fa-times"></i> Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="contentModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header py-1"><h6 class="modal-title"><i class="fa-solid fa-align-left"></i> Nội dung</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="contentModalBody"></div><div class="modal-footer py-1"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button></div></div></div></div>
 <div id="successNotification" class="notification success"></div>
 <div id="errorNotification" class="notification error"></div>
 
-<!-- Modal quản lý danh mục (Thêm/Sửa/Xóa) -->
+<!-- Modal quản lý danh mục -->
 <div class="modal fade" id="categoryManagerModal" tabindex="-1" data-bs-backdrop="static">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -585,7 +738,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  import { getDatabase, ref, push, set, get, onValue, remove, update, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+  import { getDatabase, ref, push, set, get, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBWKTyXVK1y2dqxWUWprIxd5CCHMzSMc_o",
@@ -603,6 +756,7 @@
 
   let currentUser = null, currentUid = null, editingId = null, currentFileData = null, currentSignedFileData = null, documentsDataGlobal = {};
   let githubConfig = { token: '', owner: '', repo: '' };
+  let currentViewDocId = null;
   
   let currentCategoryContext = null;
   let currentCategoryItems = {};
@@ -758,7 +912,87 @@
     document.getElementById('update-cvdi-btn').style.display = 'inline-block'; document.getElementById('save-cvdi-btn').style.display = 'none';
   }
 
-  function openFile(fileData) { if (!fileData?.url) return; const modal = new bootstrap.Modal(document.getElementById('filePreviewModal')); document.getElementById('previewFileName').textContent = fileData.name; document.getElementById('downloadFileBtn').href = fileData.url; const ext = fileData.name.split('.').pop().toLowerCase(); const preview = document.getElementById('filePreviewContent'); if (['jpg','jpeg','png','gif'].includes(ext)) preview.innerHTML = `<img src="${fileData.url}" class="img-fluid">`; else if (ext === 'pdf') preview.innerHTML = `<iframe src="${fileData.url}" width="100%" height="550px"></iframe>`; else preview.innerHTML = `<div class="text-center p-4"><i class="fa-solid fa-file fa-3x"></i><p><a href="${fileData.url}" target="_blank">Tải file</a></p></div>`; modal.show(); }
+  // Hàm mở modal xem file với 2 cột và hiệu ứng tải
+  function openFileViewModal(docId) {
+    const doc = documentsDataGlobal[docId];
+    if (!doc) return;
+    currentViewDocId = docId;
+    
+    const modal = new bootstrap.Modal(document.getElementById('fileViewModal'));
+    
+    // Reset UI về trạng thái đang tải
+    document.getElementById('attachFileName').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tải...';
+    document.getElementById('attachFileSize').innerHTML = '';
+    document.getElementById('attachFileStatus').innerHTML = '';
+    document.getElementById('signedFileName').innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tải...';
+    document.getElementById('signedFileSize').innerHTML = '';
+    document.getElementById('signedFileStatus').innerHTML = '';
+    
+    const attachBtn = document.getElementById('downloadAttachBtn');
+    const signedBtn = document.getElementById('downloadSignedBtn');
+    attachBtn.disabled = true;
+    signedBtn.disabled = true;
+    
+    modal.show();
+    
+    // Xử lý hiển thị file đính kèm thường
+    setTimeout(() => {
+      if (doc.hasFile && doc.fileData) {
+        const file = doc.fileData;
+        const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+        document.getElementById('attachFileName').innerHTML = `<i class="fa-regular fa-file"></i> ${escapeHtml(file.name)}`;
+        document.getElementById('attachFileSize').innerHTML = `${sizeMB} MB`;
+        document.getElementById('attachFileStatus').innerHTML = '<i class="fa-regular fa-circle-check"></i> Sẵn sàng tải';
+        attachBtn.disabled = false;
+        window.attachFileUrl = file.url;
+        window.attachFileName = file.name;
+      } else {
+        document.getElementById('attachFileName').innerHTML = '<i class="fa-regular fa-folder-open"></i> Không có file đính kèm';
+        document.getElementById('attachFileSize').innerHTML = '';
+        document.getElementById('attachFileStatus').innerHTML = '<i class="fa-regular fa-clock"></i> Chưa có file';
+        attachBtn.disabled = true;
+        window.attachFileUrl = null;
+      }
+      
+      if (doc.hasSignedFile && doc.signedFileData) {
+        const file = doc.signedFileData;
+        const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+        document.getElementById('signedFileName').innerHTML = `<i class="fa-regular fa-file-lines"></i> ${escapeHtml(file.name)}`;
+        document.getElementById('signedFileSize').innerHTML = `${sizeMB} MB`;
+        document.getElementById('signedFileStatus').innerHTML = '<i class="fa-regular fa-circle-check"></i> Sẵn sàng tải';
+        signedBtn.disabled = false;
+        window.signedFileUrl = file.url;
+        window.signedFileName = file.name;
+      } else {
+        document.getElementById('signedFileName').innerHTML = '<i class="fa-regular fa-folder-open"></i> Không có file chữ ký';
+        document.getElementById('signedFileSize').innerHTML = '';
+        document.getElementById('signedFileStatus').innerHTML = '<i class="fa-regular fa-clock"></i> Chưa có file';
+        signedBtn.disabled = true;
+        window.signedFileUrl = null;
+      }
+    }, 100);
+  }
+  
+  window.downloadAttachFile = function() {
+    if (window.attachFileUrl) {
+      const link = document.createElement('a');
+      link.href = window.attachFileUrl;
+      link.download = window.attachFileName || 'file_dinh_kem';
+      link.click();
+      showNotification('Đang tải file đính kèm...', true);
+    }
+  };
+  
+  window.downloadSignedFile = function() {
+    if (window.signedFileUrl) {
+      const link = document.createElement('a');
+      link.href = window.signedFileUrl;
+      link.download = window.signedFileName || 'file_co_ky';
+      link.click();
+      showNotification('Đang tải file có chữ ký...', true);
+    }
+  };
+
   function viewFullContent(content) { if (!content?.trim()) return; const modal = new bootstrap.Modal(document.getElementById('contentModal')); document.getElementById('contentModalBody').innerHTML = `<div style="white-space: pre-wrap;">${escapeHtml(content)}</div>`; modal.show(); }
   function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])) : ''; }
 
@@ -822,9 +1056,9 @@
         <td>${escapeHtml(doc.signer||'')}</td>
         <td>${escapeHtml(doc.issuingPlace||'')}</td>
         <td><div class="content-preview" onclick='window.viewFullContentFromGlobal(${JSON.stringify(contentText)})'>${escapeHtml(contentPreview)||'Chưa có'}</div></td>
-        <td>${doc.hasFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}","file")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileDisplay)}</button>` : '<span class="text-muted">—</span>'}</td>
-        <td>${doc.hasSignedFile ? `<button class="file-link" onclick='window.openFileFromGlobal("${id}","signed")'><i class="fa-solid fa-file-signature"></i> ${escapeHtml(signedDisplay)}</button>` : '<span class="text-muted">—</span>'}</td>
-        <td><div class="action-buttons">${doc.hasFile ? `<button class="action-btn view" onclick='window.openFileFromGlobal("${id}","file")'><i class="fa-solid fa-eye"></i></button>` : ''}<button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i></button></div></td>
+        <td>${doc.hasFile ? `<button class="file-link" onclick='window.openFileViewModal("${id}")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileDisplay)}</button>` : '<span class="text-muted">—</span>'}</td>
+        <td>${doc.hasSignedFile ? `<button class="file-link" onclick='window.openFileViewModal("${id}")'><i class="fa-solid fa-file-signature"></i> ${escapeHtml(signedDisplay)}</button>` : '<span class="text-muted">—</span>'}</td>
+        <td><div class="action-buttons"><button class="action-btn view" onclick='window.openFileViewModal("${id}")'><i class="fa-solid fa-eye"></i></button><button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i></button></div></td>
       </tr>`;
       stt++;
     } totalSpan.textContent = total;
@@ -852,12 +1086,9 @@
     rows.forEach(row => { let visible = true; inputs.forEach(input => { const col = parseInt(input.dataset.column); const keyword = input.value.trim().toLowerCase(); if (keyword && row.children[col] && !row.children[col].innerText.toLowerCase().includes(keyword)) visible = false; }); row.style.display = visible ? '' : 'none'; });
   });
 
-  window.openFileFromGlobal = (id, type) => { 
-    if (type === 'signed' && documentsDataGlobal[id]?.signedFileData) openFile(documentsDataGlobal[id].signedFileData);
-    else if (documentsDataGlobal[id]?.fileData) openFile(documentsDataGlobal[id].fileData);
-  };
-  window.openCurrentFile = () => { if (currentFileData?.url) openFile(currentFileData); };
-  window.openCurrentSignedFile = () => { if (currentSignedFileData?.url) openFile(currentSignedFileData); };
+  window.openFileViewModal = openFileViewModal;
+  window.openCurrentFile = () => { if (currentFileData?.url) openFileViewModal(editingId); };
+  window.openCurrentSignedFile = () => { if (currentSignedFileData?.url) openFileViewModal(editingId); };
   window.viewFullContentFromGlobal = (content) => viewFullContent(content);
   window.editDocumentFromGlobal = (id) => { if (documentsDataGlobal[id]) editDocument(id, documentsDataGlobal[id]); };
   window.deleteDocumentFromGlobal = (id) => deleteDocument(id);
@@ -880,7 +1111,7 @@
       const items = snapshot.val() || {};
       currentCategoryItems = items;
       if (Object.keys(items).length === 0) { container.innerHTML = '<div class="text-center p-3 text-muted">Chưa có dữ liệu. Hãy thêm mới.</div>'; return; }
-      const itemsArray = Object.entries(items).map(([id, data]) => ({ id, name: data.name, createdAt: data.createdAt }));
+      const itemsArray = Object.entries(items).map(([id, data]) => ({ id, name: data.name }));
       itemsArray.sort((a, b) => a.name.localeCompare(b.name));
       let html = '';
       itemsArray.forEach(item => { html += `<div class="category-item" data-id="${item.id}"><span><i class="fa-regular fa-file-lines"></i> ${escapeHtml(item.name)}</span><div class="category-actions"><button class="btn btn-sm btn-outline-primary edit-category-btn" data-id="${item.id}" data-name="${escapeHtml(item.name)}"><i class="fa-solid fa-pen"></i> Sửa</button><button class="btn btn-sm btn-outline-danger delete-category-btn" data-id="${item.id}" data-name="${escapeHtml(item.name)}"><i class="fa-solid fa-trash"></i> Xóa</button></div></div>`; });
