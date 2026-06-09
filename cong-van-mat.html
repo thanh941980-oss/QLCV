@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Văn Bản Mật | Quản lý văn bản</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-size: 11px; }
+    body { background: #f0f2f5; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; height: 100vh; overflow: hidden; }
+    .app-layout { display: flex; flex-direction: column; height: 100vh; padding: 6px 12px; gap: 4px; }
+    .github-row { flex-shrink: 0; margin-bottom: 0; }
+    .github-config-card { flex-shrink: 0; margin-bottom: 4px; }
+    .form-fixed { flex-shrink: 0; }
+    .table-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+    .table-card { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-radius: 10px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); background: white; }
+    .table-card .card-header { flex-shrink: 0; }
+    .table-container { flex: 1; overflow: auto; min-height: 0; }
+    .card { border-radius: 10px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); border: none; background: white; }
+    
+    /* Giao diện tông màu đỏ bảo mật chủ đạo */
+    .card-header { background: linear-gradient(105deg, #b91c1c 0%, #7f1d1d 100%); color: white; font-weight: 600; font-size: 12px; padding: 9px 12px; border-radius: 10px 10px 0 0 !important; border: none; }
+    .card-body { padding: 8px 12px; }
+    .form-label { font-weight: 600; color: #1e2a3a; margin-bottom: 1px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .form-control, .form-select { border-radius: 5px; border: 1px solid #dce3ec; padding: 3px 6px; font-size: 11px; transition: 0.2s; }
+    .form-control:focus, .form-select:focus { border-color: #b91c1c; box-shadow: 0 0 0 2px rgba(185, 28, 28, 0.1); }
+    textarea.form-control { padding: 3px 6px; min-height: 32px; }
+    .input-group .btn { padding: 3px 6px; }
+    .btn { border-radius: 5px; padding: 3px 10px; font-size: 10px; font-weight: 500; }
+    .btn-sm-custom { padding: 3px 6px; font-size: 10px; }
+    .btn i { margin-right: 3px; }
+    
+    .btn-primary { background: linear-gradient(105deg, #b91c1c, #991b1b); border: none; }
+    .btn-primary:hover { background: linear-gradient(105deg, #991b1b, #7f1d1d); }
+    .btn-warning { background: linear-gradient(105deg, #f39c12, #e67e22); border: none; color: white; }
+    .btn-secondary { background: #5a6c7e; border: none; }
+    .btn-success { background: linear-gradient(105deg, #2ecc71, #27ae60); border: none; color: white; }
+    
+    hr { margin: 4px 0; opacity: 0.3; }
+    .action-buttons { display: flex; gap: 3px; justify-content: center; }
+    .action-btn { padding: 2px 6px; border-radius: 14px; font-size: 9px; font-weight: 500; display: inline-flex; align-items: center; gap: 3px; cursor: pointer; border: none; transition: 0.2s; }
+    .action-btn.view { background: #fef2f2; color: #b91c1c; }
+    .action-btn.view:hover { background: #b91c1c; color: white; }
+    .action-btn.download { background: #e6f7e6; color: #27ae60; }
+    .action-btn.download:hover { background: #27ae60; color: white; }
+    .action-btn.edit { background: #fff3e6; color: #e67e22; }
+    .action-btn.edit:hover { background: #e67e22; color: white; }
+    .action-btn.delete { background: #fee2e2; color: #b91c1c; }
+    .action-btn.delete:hover { background: #b91c1c; color: white; }
+
+    .content-preview { max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; color: #b91c1c; font-weight: 500; font-size: 10px; }
+    .content-preview:hover { color: #7f1d1d; text-decoration: underline; }
+    .badge-info { background: #fef2f2; color: #b91c1c; padding: 1px 5px; border-radius: 12px; font-size: 9px; font-weight: 600; }
+    .file-link { background: #f1f5f9; padding: 2px 6px; border-radius: 14px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; color: #2c3e66; font-size: 9px; font-weight: 500; cursor: pointer; border: none; }
+    .github-toggle-btn { background: transparent; border: 1px solid rgba(185, 28, 28, 0.3); color: #b91c1c; border-radius: 30px; padding: 2px 8px; font-size: 9px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+    .github-toggle-btn:hover { background: #b91c1c; color: white; border-color: #b91c1c; }
+    .current-file-info { background: #f1f5f9; padding: 3px 8px; border-radius: 6px; margin-top: 3px; border-left: 2px solid #b91c1c; font-size: 9px; }
+
+    /* Định dạng Notifications */
+    .notification { position: fixed; top: 15px; right: 15px; padding: 6px 14px; border-radius: 30px; color: white; display: none; z-index: 2000; font-size: 11px; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.1); animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .notification.success { background: linear-gradient(105deg, #2ecc71, #27ae60); }
+    .notification.error { background: linear-gradient(105deg, #e74c3c, #c0392b); }
+
+    .table thead th { background: #f8fafc; font-weight: 700; font-size: 9px; text-transform: uppercase; letter-spacing: 0.3px; padding: 5px 3px; border-bottom: 1.5px solid #e2e8f0; color: #1e293b; position: sticky; top: 0; z-index: 10; }
+    .table tbody td { padding: 4px 3px; vertical-align: middle; font-size: 10px; border-bottom: 1px solid #edf2f7; }
+    .search-row input { font-size: 9px; padding: 2px 4px; border-radius: 4px; }
+    #so-mat { background-color: #f8f9fa; font-weight: 600; color: #b91c1c; }
+    .date-input-group { position: relative; }
+    .date-icon { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #b91c1c; pointer-events: none; z-index: 10; }
+    
+    /* Quy chuẩn bộ lọc Tìm kiếm đầu bảng */
+    .search-row th { padding: 3px !important; background: #f1f5f9 !important; }
+    .search-row input, .search-row select { width: 100%; font-size: 9px; padding: 2px 4px; border: 1px solid #cbd5e1; border-radius: 4px; height: 20px; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <div class="github-row d-flex justify-content-end">
+    <button class="github-toggle-btn" id="toggleGithubBtn">
+      <i class="fa-brands fa-github"></i> GitHub Config <i class="fa-solid fa-chevron-down" id="toggleIcon"></i>
+    </button>
+  </div>
+
+  <div class="github-config-card card" id="githubConfigCard" style="display: none;">
+    <div class="card-header py-1" style="font-size:11px;"><i class="fa-brands fa-github"></i> Đồng bộ sao lưu dữ liệu lên đám mây GitHub</div>
+    <div class="card-body py-1">
+      <div class="row g-1">
+        <div class="col-md-4"><label class="form-label">Personal Token</label><input type="password" id="github-token" class="form-control" placeholder="ghp_xxxxxx"></div>
+        <div class="col-md-3"><label class="form-label">Username / Owner</label><input type="text" id="github-owner" class="form-control" placeholder="Tên tài khoản GitHub"></div>
+        <div class="col-md-3"><label class="form-label">Repository Name</label><input type="text" id="github-repo" class="form-control" placeholder="Tên kho chứa"></div>
+        <div class="col-md-2 d-flex align-items-end"><button class="btn btn-primary w-100" id="save-github-config"><i class="fa-solid fa-save"></i> Lưu cấu hình</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card form-fixed">
+    <div class="card-header py-1"><i class="fa-solid fa-user-shield"></i> Tiếp nhận dữ liệu & Đăng ký văn bản mật</div>
+    <div class="card-body py-1">
+      <div class="row g-1">
+        <div class="col-md-2">
+          <label class="form-label">Năm dữ liệu *</label>
+          <div class="input-group">
+            <select id="nam" class="form-select" required><option value="">Chọn năm</option></select>
+            <button class="btn btn-outline-danger btn-sm-custom" id="them-nam-btn" type="button"><i class="fa fa-plus"></i></button>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Số mật <span class="text-success">(Tự động số)</span> *</label>
+          <input type="text" id="so-mat" class="form-control" readonly placeholder="Tự động tăng" required>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Người nhận *</label>
+          <div class="input-group">
+            <select id="nguoi-nhan" class="form-select" required><option value="">Chọn</option></select>
+            <button class="btn btn-outline-danger btn-sm-custom" id="them-nguoi-nhan-btn" type="button"><i class="fa fa-plus"></i></button>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Ngày đến / nhận *</label>
+          <div class="date-input-group">
+            <input type="text" id="ngay-nhan" class="form-control date-picker" placeholder="dd/mm/yyyy" required>
+            <i class="fa-regular fa-calendar date-icon"></i>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Số hiệu công văn *</label>
+          <input type="text" id="so-cong-van" class="form-control" placeholder="Nhập số/Ký hiệu" required>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Số lượng tờ</label>
+          <input type="text" id="so-to" class="form-control" placeholder="Số tờ">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Tên loại văn bản *</label>
+          <div class="input-group">
+            <select id="ten-van-ban" class="form-select" required><option value="">Chọn</option></select>
+            <button class="btn btn-outline-danger btn-sm-custom" id="them-ten-van-ban-btn" type="button"><i class="fa fa-plus"></i></button>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Ngày ký ban hành *</label>
+          <div class="date-input-group">
+            <input type="text" id="ngay-ky" class="form-control date-picker" placeholder="dd/mm/yyyy" required>
+            <i class="fa-regular fa-calendar date-icon"></i>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Người ký duyệt *</label>
+          <div class="input-group">
+            <select id="nguoi-ky" class="form-select" required><option value="">Chọn</option></select>
+            <button class="btn btn-outline-danger btn-sm-custom" id="them-nguoi-ky-btn" type="button"><i class="fa fa-plus"></i></button>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Nơi ban hành *</label>
+          <div class="input-group">
+            <select id="noi-ban-hanh" class="form-select" required><option value="">Chọn</option></select>
+            <button class="btn btn-outline-danger btn-sm-custom" id="them-noi-ban-hanh-btn" type="button"><i class="fa fa-plus"></i></button>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">File tài liệu (Mật)</label>
+          <input type="file" id="file-dinh-kem" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.rar">
+          <div id="current-file-info" class="current-file-info" style="display: none;"></div>
+        </div>
+        <div class="col-md-8">
+          <label class="form-label">Trích yếu nội dung văn bản mật *</label>
+          <textarea id="noi-dung" class="form-control" rows="1" placeholder="Tóm tắt thông tin tài liệu mang tính chất bảo mật..." required></textarea>
+        </div>
+        <div class="col-12">
+          <hr>
+          <div class="d-flex justify-content-end gap-1">
+            <button class="btn btn-secondary btn-sm" id="reset-cvmat-btn"><i class="fa fa-rotate"></i> Làm mới</button>
+            <button class="btn btn-success btn-sm" id="export-excel-btn"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
+            <button class="btn btn-primary btn-sm" id="save-cvmat-btn"><i class="fa fa-save"></i> Lưu văn bản</button>
+            <button class="btn btn-warning btn-sm" id="update-cvmat-btn" style="display: none;"><i class="fa fa-pen"></i> Xác nhận cập nhật</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <div class="table-card">
+      <div class="card-header py-1 d-flex align-items-center justify-content-between flex-wrap">
+        <div><i class="fa-solid fa-list"></i> Danh mục hồ sơ văn bản mật quốc gia <span id="totalCount" class="badge bg-light text-dark ms-1">0</span></div>
+      </div>
+      <div class="table-container">
+        <table class="table table-hover mb-0" id="data-table">
+          <thead>
+            <tr>
+              <th width="3%">STT</th>
+              <th width="5%">Năm</th>
+              <th width="6%">Số mật</th>
+              <th width="7%">Người nhận</th>
+              <th width="7%">Ngày nhận</th>
+              <th width="6%">Số CV</th>
+              <th width="9%">Tên VB</th>
+              <th width="7%">Ngày ký</th>
+              <th width="7%">Người ký</th>
+              <th width="8%">Nơi BH</th>
+              <th width="4%">Tờ</th>
+              <th width="14%">Nội dung trích yếu</th>
+              <th width="7%">Tệp đính kèm</th>
+              <th width="10%">Thao tác</th>
+            </tr>
+            <tr class="search-row">
+              <th></th>
+              <th><select id="search-nam"><option value="">Tất cả</option></select></th>
+              <th><input type="text" id="search-so-mat" placeholder="Lọc..."></th>
+              <th><input type="text" id="search-nguoi-nhan" placeholder="Lọc..."></th>
+              <th><input type="text" id="search-ngay-nhan" placeholder="Lọc..."></th>
+              <th><input type="text" id="search-so-cv" placeholder="Lọc..."></th>
+              <th><input type="text" id="search-ten-vb" placeholder="Lọc..."></th>
+              <th><input type="text" id="search-ngay-ky" placeholder="Lọc..."></th>
+              <th><input type="text" id="search-nguoi-ky" placeholder="Lọc..."></th>
+              <th><input type="text" id="search-noi-bh" placeholder="Lọc..."></th>
+              <th><input type="text" id="search-so-to" placeholder="Larch..."></th>
+              <th><input type="text" id="search-noi-dung" placeholder="Tìm kiếm nội dung..."></th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="documentsBody">
+            <tr><td colspan="14" class="text-center text-muted py-3"><i class="fa-solid fa-user-shield fa-2x mb-1 d-block"></i>Hệ thống đang tải cơ sở dữ liệu bảo mật...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="notification" class="notification"></div>
+
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header py-2" style="background:#b91c1c; color:white;">
+        <h6 class="modal-title" id="categoryModalLabel" style="font-size:12px;">Thêm danh mục</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body py-2">
+        <input type="text" id="newCategoryValue" class="form-control" placeholder="Nhập giá trị mới...">
+      </div>
+      <div class="modal-footer py-1">
+        <button type="button" class="btn btn-secondary btn-sm py-1" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary btn-sm py-1" id="addCategoryBtn">Thêm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="viewTextModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header py-2" style="background: #7f1d1d; color: white;">
+        <h6 class="modal-title" style="font-size: 12px;"><i class="fa-solid fa-eye"></i> Nội dung trích yếu đầy đủ</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="viewTextModalBody" style="font-size: 12px; white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow-y: auto;">
+      </div>
+      <div class="modal-footer py-1">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+  // Cấu hình đồng bộ tài nguyên cơ sở dữ liệu Firebase của bạn
+  const firebaseConfig = {
+    apiKey: "AIzaSyBWKTyXVK1y2dqxWUWprIxd5CCHMzSMc_o",
+    authDomain: "quan-ly-cong-van-dede3.firebaseapp.com",
+    databaseURL: "https://quan-ly-cong-van-dede3-default-rtdb.firebaseio.com",
+    projectId: "quan-ly-cong-van-dede3",
+    storageBucket: "quan-ly-cong-van-dede3.firebasestorage.app",
+    messagingSenderId: "1080528314069",
+    appId: "1:1080528314069:web:831f1b3c497ba082f80c5c"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const database = getDatabase(app);
+
+  let currentUser = null;
+  let currentUid = null;
+  let allDocuments = {}; // Bộ lưu trữ Cache gốc hỗ trợ tìm kiếm thời gian thực
+  let editingKey = null; // Trạng thái chỉnh sửa phần tử
+  let currentFileBase64 = null;
+  let currentFileName = null;
+  let githubConfig = { token: "", owner: "", repo: "" };
+  let currentActionCategory = ""; 
+  let currentActionSelectId = "";
+  let bootstrapCategoryModal = null;
+
+  function showToast(msg, isError = false) {
+    const toast = document.getElementById("notification");
+    toast.className = `notification ${isError ? 'error' : 'success'}`;
+    toast.innerText = msg;
+    toast.style.display = "block";
+    setTimeout(() => { toast.style.display = "none"; }, 3000);
+  }
+
+  function getDbPath(subPath) {
+    return `users/${currentUid}/${subPath}`;
+  }
+
+  // Khởi chạy ứng dụng
+  document.addEventListener("DOMContentLoaded", () => {
+    bootstrapCategoryModal = new bootstrap.Modal(document.getElementById('categoryModal'));
+    
+    flatpickr("#ngay-nhan", { dateFormat: "d/m/Y", locale: "vn", defaultDate: new Date() });
+    flatpickr("#ngay-ky", { dateFormat: "d/m/Y", locale: "vn", defaultDate: new Date() });
+
+    // Đăng ký tương tác UI
+    document.getElementById('toggleGithubBtn').onclick = toggleGithubPanel;
+    document.getElementById('save-github-config').onclick = saveGithubConfig;
+    document.getElementById('save-cvmat-btn').onclick = saveDocument;
+    document.getElementById('update-cvmat-btn').onclick = updateDocument;
+    document.getElementById('reset-cvmat-btn').onclick = resetForm;
+    document.getElementById('export-excel-btn').onclick = exportToExcel;
+    document.getElementById('nam').onchange = updateAutoId;
+
+    // Gán nút mở modal thêm nhanh phân loại
+    setupCategoryTrigger('them-nam-btn', 'nam', 'years');
+    setupCategoryTrigger('them-nguoi-nhan-btn', 'nguoi-nhan', 'receivers');
+    setupCategoryTrigger('them-ten-van-ban-btn', 'ten-van-ban', 'documentTypes');
+    setupCategoryTrigger('them-nguoi-ky-btn', 'nguoi-ky', 'signers');
+    setupCategoryTrigger('them-noi-ban-hanh-btn', 'noi-ban-hanh', 'issuingPlaces');
+
+    // Sự kiện xử lý File Mã hóa Base64
+    document.getElementById('file-dinh-kem').addEventListener('change', handleFileSelection);
+
+    // Kích hoạt lắng nghe tìm kiếm trực tiếp (Filter row)
+    const filters = ['search-nam', 'search-so-mat', 'search-nguoi-nhan', 'search-ngay-nhan', 'search-so-cv', 'search-ten-vb', 'search-ngay-ky', 'search-nguoi-ky', 'search-noi-bh', 'search-so-to', 'search-noi-dung'];
+    filters.forEach(id => document.getElementById(id).addEventListener('input', applyFilters));
+
+    // Thêm chức năng nhấn Enter khi thêm danh mục
+    document.getElementById('addCategoryBtn').onclick = addNewCategoryItem;
+    document.getElementById('newCategoryValue').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addNewCategoryItem();
+    });
+
+    // Theo dõi Authentication Firebase
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        currentUid = user.uid;
+        await loadGithubConfig();
+        
+        // Tải danh mục phân loại chung của người dùng để tránh tạo lại dữ liệu
+        loadCategories('nam', 'years');
+        loadCategories('nguoi-nhan', 'receivers');
+        loadCategories('ten-van-ban', 'documentTypes');
+        loadCategories('nguoi-ky', 'signers');
+        loadCategories('noi-ban-hanh', 'issuingPlaces');
+
+        // Lắng nghe dữ liệu Văn Bản Mật riêng biệt
+        onValue(ref(database, getDbPath('congVanMat')), (snapshot) => {
+          allDocuments = snapshot.exists() ? snapshot.val() : {};
+          applyFilters();
+        });
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+  });
+
+  // Xử lý bật tắt Panel cấu hình Github
+  function toggleGithubPanel() {
+    const panel = document.getElementById('githubConfigCard');
+    const icon = document.getElementById('toggleIcon');
+    if (panel.style.display === 'none') {
+      panel.style.display = 'block';
+      icon.className = 'fa-solid fa-chevron-up';
+    } else {
+      panel.style.display = 'none';
+      icon.className = 'fa-solid fa-chevron-down';
+    }
+  }
+
+  // Lưu trữ Token cấu hình Github lên Firebase
+  async function loadGithubConfig() {
+    onValue(ref(database, getDbPath('githubConfig')), (snapshot) => {
+      if(snapshot.exists()) {
+        githubConfig = snapshot.val();
+        document.getElementById('github-token').value = githubConfig.token || "";
+        document.getElementById('github-owner').value = githubConfig.owner || "";
+        document.getElementById('github-repo').value = githubConfig.repo || "";
+      }
+    });
+  }
+
+  async function saveGithubConfig() {
+    const config = {
+      token: document.getElementById('github-token').value.trim(),
+      owner: document.getElementById('github-owner').value.trim(),
+      repo: document.getElementById('github-repo').value.trim()
+    };
+    await set(ref(database, getDbPath('githubConfig')), config);
+    showToast("Đã lưu thông tin cấu hình GitHub!");
+    toggleGithubPanel();
+  }
+
+  // Tải danh mục phân loại đưa vào thẻ Select
+  function loadCategories(selectId, categoryKey) {
+    onValue(ref(database, getDbPath(`categories/${categoryKey}`)), (snapshot) => {
+      const select = document.getElementById(selectId);
+      const currentSelectedVal = select.value;
+      select.innerHTML = `<option value="">${selectId === 'nam' ? 'Chọn năm' : 'Chọn'}</option>`;
+      
+      if (snapshot.exists()) {
+        const items = Object.values(snapshot.val()).map(v => v.name).sort((a,b) => b.localeCompare(a, 'vi'));
+        items.forEach(name => {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          select.appendChild(opt);
+        });
+        
+        // Đồng bộ lên thanh tìm kiếm nếu là danh mục Năm
+        if(selectId === 'nam') {
+          const searchNam = document.getElementById('search-nam');
+          searchNam.innerHTML = '<option value="">Tất cả</option>';
+          items.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name; opt.textContent = name;
+            searchNam.appendChild(opt);
+          });
+        }
+      }
+      select.value = currentSelectedVal;
+      if(selectId === 'nam') updateAutoId();
+    });
+  }
+
+  function setupCategoryTrigger(btnId, selectId, categoryKey) {
+    document.getElementById(btnId).onclick = () => {
+      currentActionCategory = categoryKey;
+      currentActionSelectId = selectId;
+      document.getElementById('categoryModalLabel').innerText = `Thêm mới mục phân loại`;
+      document.getElementById('newCategoryValue').value = "";
+      bootstrapCategoryModal.show();
+    };
+  }
+
+  async function addNewCategoryItem() {
+    const value = document.getElementById('newCategoryValue').value.trim();
+    if (!value) return;
+    const itemRef = push(ref(database, getDbPath(`categories/${currentActionCategory}`)));
+    await set(itemRef, { name: value });
+    bootstrapCategoryModal.hide();
+    showToast("Thêm danh mục phân loại thành công!");
+    document.getElementById(currentActionSelectId).value = value;
+    if(currentActionSelectId === 'nam') updateAutoId();
+  }
+
+  // Tự động tính toán Số mật tăng tiến dựa vào năm chọn
+  function updateAutoId() {
+    if (editingKey) return; 
+    const namSelected = document.getElementById('nam').value;
+    if (!namSelected) {
+      document.getElementById('so-mat').value = "";
+      return;
+    }
+    let maxId = 0;
+    Object.values(allDocuments).forEach(doc => {
+      if (doc.nam === namSelected && doc.soMat) {
+        const numericPart = parseInt(doc.soMat);
+        if (!isNaN(numericPart) && numericPart > maxId) maxId = numericPart;
+      }
+    });
+    document.getElementById('so-mat').value = String(maxId + 1).padStart(3, '0');
+  }
+
+  // Xử lý tệp đính kèm mã hóa cục bộ
+  function handleFileSelection(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 25 * 1024 * 1024) {
+      showToast("Tệp tin vượt dung lượng giới hạn cho phép (Tối đa 25MB)!", true);
+      e.target.value = "";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      currentFileBase64 = evt.target.result;
+      currentFileName = file.name;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Lấy toàn bộ thông tin từ Input Form
+  function getFormData() {
+    return {
+      nam: document.getElementById('nam').value,
+      soMat: document.getElementById('so-mat').value,
+      nguoi-nhan': document.getElementById('nguoi-nhan').value,
+      ngayNhan: document.getElementById('ngay-nhan').value,
+      soCongVan: document.getElementById('so-cong-van').value.trim(),
+      soTo: document.getElementById('so-to').value.trim(),
+      tenVanBan: document.getElementById('ten-van-ban').value,
+      ngayKy: document.getElementById('ngay-ky').value,
+      nguoiKy: document.getElementById('nguoi-ky').value,
+      noiBanHanh: document.getElementById('noi-ban-hanh').value,
+      noiDung: document.getElementById('noi-dung').value.trim(),
+      timestamp: Date.now()
+    };
+  }
+
+  // Lưu Văn bản mật
+  async function saveDocument() {
+    const data = getFormData();
+    if (!data.nam || !data.soMat || !data.soCongVan || !data.noiDung) {
+      showToast("Vui lòng điền đầy đủ các thông tin có đánh dấu sao (*)", true);
+      return;
+    }
+    
+    // Kiểm tra trùng số mật trong cùng một năm
+    const isDuplicate = Object.values(allDocuments).some(d => d.nam === data.nam && d.soMat === data.soMat);
+    if(isDuplicate) {
+      showToast(`Số mật ${data.soMat} thuộc năm ${data.nam} đã tồn tại trong hồ sơ bảo mật!`, true);
+      return;
+    }
+
+    if (currentFileBase64) {
+      data.fileData = currentFileBase64;
+      data.fileName = currentFileName;
+    }
+
+    try {
+      const newRef = push(ref(database, getDbPath('congVanMat')));
+      await set(newRef, data);
+      showToast("Đã đăng ký và lưu trữ văn bản mật thành công!");
+      
+      // Thực hiện sao lưu backup tự động lên kho lưu trữ GitHub của bạn
+      if(githubConfig.token && githubConfig.owner && githubConfig.repo) {
+        syncToGithub();
+      }
+      resetForm();
+    } catch (err) {
+      showToast("Lỗi hệ thống Firebase: " + err.message, true);
+    }
+  }
+
+  // Chỉnh sửa văn bản mật
+  window.editDocument = function(key) {
+    const doc = allDocuments[key];
+    if(!doc) return;
+    editingKey = key;
+
+    document.getElementById('nam').value = doc.nam || "";
+    document.getElementById('so-mat').value = doc.soMat || "";
+    document.getElementById('nguoi-nhan').value = doc['nguoi-nhan'] || "";
+    document.getElementById('ngay-nhan').value = doc.ngayNhan || "";
+    document.getElementById('so-cong-van').value = doc.soCongVan || "";
+    document.getElementById('so-to').value = doc.soTo || "";
+    document.getElementById('ten-van-ban').value = doc.tenVanBan || "";
+    document.getElementById('ngay-ky').value = doc.ngayKy || "";
+    document.getElementById('nguoi-ky').value = doc.nguoiKy || "";
+    document.getElementById('noi-ban-hanh').value = doc.noiBanHanh || "";
+    document.getElementById('noi-dung').value = doc.noiDung || "";
+
+    const fileDiv = document.getElementById('current-file-info');
+    if (doc.fileName) {
+      fileDiv.style.display = "block";
+      fileDiv.innerText = `Tệp hiện tại: ${doc.fileName}`;
+      currentFileBase64 = doc.fileData || null;
+      currentFileName = doc.fileName || null;
+    } else {
+      fileDiv.style.display = "none";
+      currentFileBase64 = null;
+      currentFileName = null;
+    }
+
+    document.getElementById('save-cvmat-btn').style.display = "none";
+    document.getElementById('update-cvmat-btn').style.display = "inline-block";
+    showToast("Đã tải dữ liệu lên Form, sẵn sàng điều chỉnh văn bản.");
+  };
+
+  // Xác nhận cập nhật thay đổi
+  async function updateDocument() {
+    if(!editingKey) return;
+    const data = getFormData();
+    if (!data.nam || !data.soMat || !data.soCongVan || !data.noiDung) {
+      showToast("Vui lòng không để trống các trường dữ liệu quan trọng (*)", true);
+      return;
+    }
+
+    if (currentFileBase64) {
+      data.fileData = currentFileBase64;
+      data.fileName = currentFileName;
+    }
+
+    try {
+      await update(ref(database, getDbPath(`congVanMat/${editingKey}`)), data);
+      showToast("Cập nhật thông tin văn bản mật thành công!");
+      if(githubConfig.token && githubConfig.owner && githubConfig.repo) syncToGithub();
+      resetForm();
+    } catch (e) {
+      showToast("Có lỗi xảy ra: " + e.message, true);
+    }
+  }
+
+  // Xóa tài liệu mật khỏi hệ thống
+  window.deleteDocument = async function(key) {
+    if (confirm("Hành động này mang tính chất nghiêm trọng. Bạn có chắc chắn muốn xóa văn bản mật này khỏi hệ thống cơ sở dữ liệu?")) {
+      try {
+        await remove(ref(database, getDbPath(`congVanMat/${key}`)));
+        showToast("Đã xóa văn bản mật ra khỏi danh mục bảo mật.");
+        if(githubConfig.token && githubConfig.owner && githubConfig.repo) syncToGithub();
+      } catch (err) {
+        showToast("Xóa thất bại: " + err.message, true);
+      }
+    }
+  };
+
+  // Làm sạch dữ liệu trên Form nhập
+  function resetForm() {
+    editingKey = null;
+    document.getElementById('so-cong-van').value = "";
+    document.getElementById('so-to').value = "";
+    document.getElementById('noi-dung').value = "";
+    document.getElementById('file-dinh-kem').value = "";
+    document.getElementById('current-file-info').style.display = "none";
+    currentFileBase64 = null;
+    currentFileName = null;
+
+    document.getElementById('save-cvmat-btn').style.display = "inline-block";
+    document.getElementById('update-cvmat-btn').style.display = "none";
+    updateAutoId();
+  }
+
+  // Cơ chế áp dụng bộ lọc dòng đầu bảng (Live Filter Row)
+  function applyFilters() {
+    const fNam = document.getElementById('search-nam').value.toLowerCase();
+    const fSoMat = document.getElementById('search-so-mat').value.toLowerCase();
+    const fNguoiNhan = document.getElementById('search-nguoi-nhan').value.toLowerCase();
+    const fNgayNhan = document.getElementById('search-ngay-nhan').value.toLowerCase();
+    const fSoCv = document.getElementById('search-so-cv').value.toLowerCase();
+    const fTenVb = document.getElementById('search-ten-vb').value.toLowerCase();
+    const fNgayKy = document.getElementById('search-ngay-ky').value.toLowerCase();
+    const fNguoiKy = document.getElementById('search-nguoi-ky').value.toLowerCase();
+    const fNoiBh = document.getElementById('search-noi-bh').value.toLowerCase();
+    const fSoTo = document.getElementById('search-so-to').value.toLowerCase();
+    const fNoiDung = document.getElementById('search-noi-dung').value.toLowerCase();
+
+    const tbody = document.getElementById('documentsBody');
+    tbody.innerHTML = "";
+
+    const filteredDocs = Object.keys(allDocuments).map(k => ({ key: k, ...allDocuments[k] }))
+      .filter(d => {
+        return (!fNam || (d.nam && d.nam.toLowerCase().includes(fNam))) &&
+               (!fSoMat || (d.soMat && d.soMat.toLowerCase().includes(fSoMat))) &&
+               (!fNguoiNhan || (d['nguoi-nhan'] && d['nguoi-nhan'].toLowerCase().includes(fNguoiNhan))) &&
+               (!fNgayNhan || (d.ngayNhan && d.ngayNhan.toLowerCase().includes(fNgayNhan))) &&
+               (!fSoCv || (d.soCongVan && d.soCongVan.toLowerCase().includes(fSoCv))) &&
+               (!fTenVb || (d.tenVanBan && d.tenVanBan.toLowerCase().includes(fTenVb))) &&
+               (!fNgayKy || (d.ngayKy && d.ngayKy.toLowerCase().includes(fNgayKy))) &&
+               (!fNguoiKy || (d.nguoiKy && d.nguoiKy.toLowerCase().includes(fNguoiKy))) &&
+               (!fNoiBh || (d.noiBanHanh && d.noiBanHanh.toLowerCase().includes(fNoiBh))) &&
+               (!fSoTo || (d.soTo && d.soTo.toLowerCase().includes(fSoTo))) &&
+               (!fNoiDung || (d.noiDung && d.noiDung.toLowerCase().includes(fNoiDung)));
+      });
+
+    document.getElementById('totalCount').innerText = filteredDocs.length;
+
+    if (filteredDocs.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="14" class="text-center text-muted py-3">Không tìm thấy kết quả văn bản mật phù hợp</td></tr>`;
+      return;
+    }
+
+    // Sắp xếp theo Năm và Số mật giảm dần
+    filteredDocs.sort((a, b) => {
+      if (b.nam !== a.nam) return b.nam.localeCompare(a.nam);
+      return parseInt(b.soMat) - parseInt(a.soMat);
+    });
+
+    filteredDocs.forEach((doc, index) => {
+      const tr = document.createElement('tr');
+      
+      let fileCell = '<span class="text-muted">Không tệp</span>';
+      if (doc.fileName && doc.fileData) {
+        fileCell = `<button class="file-link" onclick="downloadAttachedFile('${doc.key}')" title="${doc.fileName}"><i class="fa-solid fa-paperclip text-danger"></i> Tải xuống</button>`;
+      }
+
+      tr.innerHTML = `
+        <td class="text-center fw-semibold">${index + 1}</td>
+        <td class="text-center"><span class="badge-info">${doc.nam || ""}</span></td>
+        <td class="text-center fw-bold text-danger">${doc.soMat || ""}</td>
+        <td>${doc['nguoi-nhan'] || ""}</td>
+        <td class="text-center">${doc.ngayNhan || ""}</td>
+        <td>${doc.soCongVan || ""}</td>
+        <td>${doc.tenVanBan || ""}</td>
+        <td class="text-center">${doc.ngayKy || ""}</td>
+        <td>${doc.nguoiKy || ""}</td>
+        <td>${doc.noiBanHanh || ""}</td>
+        <td class="text-center">${doc.soTo || ""}</td>
+        <td><div class="content-preview" onclick="viewFullText('${doc.key}')">${doc.noiDung || ""}</div></td>
+        <td class="text-center">${fileCell}</td>
+        <td>
+          <div class="action-buttons">
+            <button class="action-btn edit" onclick="editDocument('${doc.key}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="action-btn delete" onclick="deleteDocument('${doc.key}')"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Xem đầy đủ nội dung trích yếu mật
+  window.viewFullText = function(key) {
+    const doc = allDocuments[key];
+    if(doc) {
+      document.getElementById('viewTextModalBody').innerText = doc.noiDung;
+      new bootstrap.Modal(document.getElementById('viewTextModal')).show();
+    }
+  };
+
+  // Tải tệp tin mật đính kèm mã hóa cục bộ ra máy tính
+  window.downloadAttachedFile = function(key) {
+    const doc = allDocuments[key];
+    if (!doc || !doc.fileData) return;
+    const arr = doc.fileData.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) { u8arr[n] = bstr.charCodeAt(n); }
+    const blob = new Blob([u8arr], { type: mime });
+    
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = doc.fileName || "tai-lieu-mat";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  // Đồng bộ Cloud Sao Lưu tự động lên GitHub Repository (Không tệp đính kèm để tối ưu dung lượng)
+  async function syncToGithub() {
+    const token = githubConfig.token;
+    const owner = githubConfig.owner;
+    const repo = githubConfig.repo;
+    if (!token || !owner || !repo) return;
+
+    // Lược bớt tệp tin nhị phân Base64 nặng khi đồng bộ lưu File cấu trúc JSON trên Github
+    const cleanBackupData = {};
+    Object.keys(allDocuments).forEach(k => {
+      cleanBackupData[k] = { ...allDocuments[k] };
+      if (cleanBackupData[k].fileData) cleanBackupData[k].fileData = "(Đã lưu trữ cục bộ bảo mật trên Firebase)";
+    });
+
+    const path = "backup_cong_van_mat.json";
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(cleanBackupData, null, 2))));
+
+    try {
+      let sha = "";
+      const resExist = await fetch(url, { headers: { "Authorization": `token ${token}` } });
+      if (resExist.status === 200) {
+        const dataExist = await resExist.json();
+        sha = dataExist.sha;
+      }
+
+      const body = {
+        message: `Hệ thống tự động sao lưu danh mục hồ sơ văn bản mật vào lúc: ${new Date().toLocaleString()}`,
+        content: contentBase64
+      };
+      if (sha) body.sha = sha;
+
+      const resSave = await fetch(url, {
+        method: "PUT",
+        headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      if (resSave.status === 200 || resSave.status === 201) {
+        showToast("Đã đồng bộ & tạo lập điểm sao lưu bảo mật đám mây Github thành công!");
+      }
+    } catch(e) {
+      console.error("Lỗi sao lưu Github: ", e);
+    }
+  }
+
+  // Trích xuất báo cáo Excel cho dữ liệu văn bản mật đang được Filter hiện tại
+  function exportToExcel() {
+    const table = document.getElementById("data-table");
+    const rows = table.querySelectorAll("tbody tr");
+    if(rows.length === 1 && rows[0].innerText.includes("Không tìm thấy")) {
+      showToast("Không có dữ liệu văn bản mật phù hợp hiện tại để xuất file Excel!", true);
+      return;
+    }
+
+    const dataArr = [];
+    // Định nghĩa tiêu đề cột Excel tiếng Việt chuẩn hóa
+    dataArr.push(["STT", "Năm", "Số mật", "Người nhận", "Ngày nhận", "Số công văn", "Tên loại văn bản", "Ngày ký", "Người ký", "Nơi ban hành", "Số tờ", "Nội dung trích yếu"]);
+
+    let idx = 1;
+    // Lặp qua dữ liệu đã lọc trên UI để đưa vào mảng Excel
+    const tbody = document.getElementById('documentsBody');
+    const visibleRows = tbody.querySelectorAll('tr');
+    
+    visibleRows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if(cells.length < 11) return;
+      
+      dataArr.push([
+        idx++,
+        cells[1].innerText,
+        cells[2].innerText,
+        cells[3].innerText,
+        cells[4].innerText,
+        cells[5].innerText,
+        cells[6].innerText,
+        cells[7].innerText,
+        cells[8].innerText,
+        cells[9].innerText,
+        cells[10].innerText,
+        cells[11].innerText
+      ]);
+    });
+
+    const worksheet = XLSX.utils.aoa_to_sheet(dataArr);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "VanBanMat");
+
+    // Định dạng độ rộng tối ưu tự động cho các cột Excel
+    const max_cols = dataArr[0].map((_, i) => dataArr.map(row => row[i] ? row[i].toString().length : 0).reduce((a, b) => Math.max(a, b), 0));
+    worksheet["!cols"] = max_cols.map(w => ({ w: w < 10 ? 10 : w + 3 }));
+
+    XLSX.writeFile(workbook, `Danh_Sach_Quan_Ly_Van_Ban_Mat_${document.getElementById('search-nam').value || 'All'}.xlsx`);
+    showToast("Hệ thống đã trích xuất tệp báo cáo Excel thành công!");
+  }
+</script>
+</body>
+</html>
