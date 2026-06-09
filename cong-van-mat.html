@@ -704,8 +704,16 @@
   };
 
   window.downloadAttachedFile = function(key) {
-    const doc = allDocuments[key];
-    if (!doc || !doc.fileData) return;
+  const doc = allDocuments[key];
+  if (!doc || !doc.fileData) {
+    showToast("Không tìm thấy dữ liệu tệp tin đính kèm!", true);
+    return;
+  }
+  
+  try {
+    // 1. Thông báo cho người dùng biết hệ thống bắt đầu xử lý tệp
+    showToast(`Đang chuẩn bị tải xuống tệp: ${doc.fileName || 'tai-lieu-mat'}`);
+
     const arr = doc.fileData.split(',');
     const mime = arr[0].match(/:(.*?);/)[1];
     const bstr = atob(arr[1]);
@@ -720,7 +728,17 @@
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-  };
+
+    // 2. Thông báo khi trình duyệt đã kích hoạt tải xuống thành công
+    setTimeout(() => {
+      showToast("Đã tải xuống tệp thành công!");
+    }, 500);
+
+  } catch (error) {
+    console.error(error);
+    showToast("Có lỗi xảy ra trong quá trình giải mã và tải tệp!", true);
+  }
+};
 
   async function syncToGithub() {
     const token = githubConfig.token;
