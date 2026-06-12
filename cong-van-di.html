@@ -1201,7 +1201,7 @@
   document.getElementById('them-nguoi-ky-btn').onclick = () => themMoiWithModal('nguoi-ky', 'signers', 'Người ký');
   document.getElementById('them-noi-ban-hanh-btn').onclick = () => themMoiWithModal('noi-ban-hanh', 'issuingPlaces', 'Nơi ban hành');
   
-  document.addEventListener('DOMContentLoaded', function() {
+  // document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('ngay-ky').value = formatDateToDDMMYYYY(new Date());
     document.getElementById('reset-cvdi-btn').onclick = refreshForm;
     document.getElementById('save-cvdi-btn').onclick = addDocument;
@@ -1217,7 +1217,7 @@
         onValue(ref(database, getDbPath('congVanDi')), (snapshot) => displayDocuments(snapshot)); }
       else { window.location.href = 'index.html'; }
     });
-  });
+  //BỎ DÒNG ĐÓNG NÀY: });
   
   function loadCategories(selectId, category) {
     onValue(ref(database, getDbPath(`categories/${category}`)), (snapshot) => {
