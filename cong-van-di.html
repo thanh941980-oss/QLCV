@@ -1217,7 +1217,7 @@
         onValue(ref(database, getDbPath('congVanDi')), (snapshot) => displayDocuments(snapshot)); }
       else { window.location.href = 'index.html'; }
     });
-  //BỎ DÒNG ĐÓNG NÀY: });
+  
   
   function loadCategories(selectId, category) {
     onValue(ref(database, getDbPath(`categories/${category}`)), (snapshot) => {
