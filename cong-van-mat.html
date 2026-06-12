@@ -74,7 +74,7 @@
     
     .search-row th { padding: 3px !important; background: #f1f5f9 !important; }
     .search-row input, .search-row select { width: 100%; font-size: 9px; padding: 2px 4px; border: 1px solid #cbd5e1; border-radius: 4px; height: 20px; }
-    #so-mat { background-color: #f8f9fa; font-weight: 600; color: #b91c1c; }
+    #so-mat, #ky-hieu-mat { background-color: #f8f9fa; font-weight: 600; color: #b91c1c; }
     .date-input-group { position: relative; }
     .date-icon { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #b91c1c; pointer-events: none; z-index: 10; }
   </style>
@@ -114,6 +114,19 @@
           <label class="form-label">Số mật <span class="text-success">(Tự động số)</span> *</label>
           <input type="text" id="so-mat" class="form-control" readonly placeholder="Tự động tăng" required>
         </div>
+        <div class="col-md-1">
+          <label class="form-label">Độ mật *</label>
+          <select id="do-mat" class="form-select" required>
+            <option value="">Chọn</option>
+            <option value="Mật">Mật</option>
+            <option value="Tối mật">Tối mật</option>
+            <option value="Tuyệt mật">Tuyệt mật</option>
+          </select>
+        </div>
+        <div class="col-md-1">
+          <label class="form-label">Ký hiệu</label>
+          <input type="text" id="ky-hieu-mat" class="form-control" readonly placeholder="Ký hiệu">
+        </div>
         <div class="col-md-2">
           <label class="form-label">Người nhận *</label>
           <div class="input-group">
@@ -131,10 +144,6 @@
         <div class="col-md-2">
           <label class="form-label">Số hiệu công văn *</label>
           <input type="text" id="so-cong-van" class="form-control" placeholder="Nhập số/Ký hiệu" required>
-        </div>
-        <div class="col-md-2">
-          <label class="form-label">Số lượng tờ</label>
-          <input type="text" id="so-to" class="form-control" placeholder="Số tờ">
         </div>
         <div class="col-md-2">
           <label class="form-label">Tên loại văn bản *</label>
@@ -164,12 +173,16 @@
             <button class="btn btn-outline-danger btn-sm-custom" id="them-noi-ban-hanh-btn" type="button"><i class="fa fa-plus"></i></button>
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2">
+          <label class="form-label">Số lượng tờ</label>
+          <input type="text" id="so-to" class="form-control" placeholder="Số tờ">
+        </div>
+        <div class="col-md-2">
           <label class="form-label">File tài liệu (Mật)</label>
           <input type="file" id="file-dinh-kem" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.rar">
           <div id="current-file-info" class="current-file-info" style="display: none;"></div>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-12">
           <label class="form-label">Trích yếu nội dung văn bản mật *</label>
           <textarea id="noi-dung" class="form-control" rows="1" placeholder="Tóm tắt thông tin tài liệu mang tính chất bảo mật..." required></textarea>
         </div>
@@ -196,24 +209,35 @@
           <thead>
             <tr>
               <th width="3%">STT</th>
-              <th width="5%">Năm</th>
-              <th width="6%">Số mật</th>
+              <th width="4%">Năm</th>
+              <th width="5%">Số mật</th>
+              <th width="6%">Độ mật</th>
+              <th width="4%">KH</th>
               <th width="7%">Người nhận</th>
               <th width="7%">Ngày nhận</th>
               <th width="6%">Số CV</th>
-              <th width="9%">Tên VB</th>
+              <th width="8%">Tên VB</th>
               <th width="7%">Ngày ký</th>
               <th width="7%">Người ký</th>
               <th width="8%">Nơi BH</th>
-              <th width="4%">Tờ</th>
-              <th width="14%">Nội dung trích yếu</th>
+              <th width="3%">Tờ</th>
+              <th width="12%">Nội dung trích yếu</th>
               <th width="7%">Tệp đính kèm</th>
-              <th width="10%">Thao tác</th>
+              <th width="8%">Thao tác</th>
             </tr>
             <tr class="search-row">
               <th></th>
               <th><select id="search-nam"><option value="">Tất cả</option></select></th>
               <th><input type="text" id="search-so-mat" placeholder="Lọc..."></th>
+              <th>
+                <select id="search-do-mat">
+                  <option value="">Tất cả</option>
+                  <option value="Mật">Mật</option>
+                  <option value="Tối mật">Tối mật</option>
+                  <option value="Tuyệt mật">Tuyệt mật</option>
+                </select>
+              </th>
+              <th><input type="text" id="search-ky-hieu" placeholder="Lọc..."></th>
               <th><input type="text" id="search-nguoi-nhan" placeholder="Lọc..."></th>
               <th><input type="text" id="search-ngay-nhan" placeholder="Lọc..."></th>
               <th><input type="text" id="search-so-cv" placeholder="Lọc..."></th>
@@ -228,7 +252,7 @@
             </tr>
           </thead>
           <tbody id="documentsBody">
-            <tr><td colspan="14" class="text-center text-muted py-3"><i class="fa-solid fa-user-shield fa-2x mb-1 d-block"></i>Hệ thống đang tải cơ sở dữ liệu bảo mật...</td></tr>
+            <tr><td colspan="16" class="text-center text-muted py-3"><i class="fa-solid fa-user-shield fa-2x mb-1 d-block"></i>Hệ thống đang tải cơ sở dữ liệu bảo mật...</td></tr>
           </tbody>
         </table>
       </div>
@@ -274,7 +298,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+  import { getAuth, onAuthStateChanged, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
   import { getDatabase, ref, push, set, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
   const firebaseConfig = {
@@ -315,7 +339,6 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    // SỬA LỖI: Khởi tạo đối tượng Bootstrap Modal đúng cách
     bootstrapCategoryModal = new bootstrap.Modal(document.getElementById('categoryModal'));
     
     flatpickr("#ngay-nhan", { dateFormat: "d/m/Y", locale: "vn", defaultDate: new Date() });
@@ -325,9 +348,18 @@
     document.getElementById('save-github-config').onclick = saveGithubConfig;
     document.getElementById('save-cvmat-btn').onclick = saveDocument;
     document.getElementById('update-cvmat-btn').onclick = updateDocument;
-    document.getElementById('reset-cvmat-btn').onclick = resetForm;
+    document.getElementById('reset-cvmat-btn').onclick = () => resetForm(false);
     document.getElementById('export-excel-btn').onclick = exportToExcel;
     document.getElementById('nam').onchange = updateAutoId;
+
+    document.getElementById('do-mat').onchange = function() {
+      const doMat = this.value;
+      const kyHieuInput = document.getElementById('ky-hieu-mat');
+      if (doMat === 'Mật') kyHieuInput.value = 'C';
+      else if (doMat === 'Tối mật') kyHieuInput.value = 'B';
+      else if (doMat === 'Tuyệt mật') kyHieuInput.value = 'A';
+      else kyHieuInput.value = '';
+    };
 
     setupCategoryTrigger('them-nam-btn', 'nam', 'years');
     setupCategoryTrigger('them-nguoi-nhan-btn', 'nguoi-nhan', 'receivers');
@@ -337,8 +369,15 @@
 
     document.getElementById('file-dinh-kem').addEventListener('change', handleFileSelection);
 
-    const filters = ['search-nam', 'search-so-mat', 'search-nguoi-nhan', 'search-ngay-nhan', 'search-so-cv', 'search-ten-vb', 'search-ngay-ky', 'search-nguoi-ky', 'search-noi-bh', 'search-so-to', 'search-noi-dung'];
-    filters.forEach(id => document.getElementById(id).addEventListener('input', applyFilters));
+    const filters = ['search-nam', 'search-so-mat', 'search-do-mat', 'search-ky-hieu', 'search-nguoi-nhan', 'search-ngay-nhan', 'search-so-cv', 'search-ten-vb', 'search-ngay-ky', 'search-nguoi-ky', 'search-noi-bh', 'search-so-to', 'search-noi-dung'];
+    filters.forEach(id => {
+      const el = document.getElementById(id);
+      if(el.tagName === 'SELECT') {
+        el.addEventListener('change', applyFilters);
+      } else {
+        el.addEventListener('input', applyFilters);
+      }
+    });
 
     document.getElementById('addCategoryBtn').onclick = addNewCategoryItem;
     document.getElementById('newCategoryValue').addEventListener('keypress', (e) => {
@@ -485,11 +524,12 @@
     reader.readAsDataURL(file);
   }
 
-  // SỬA LỖI: Sửa cú pháp chuỗi 'nguoi-nhan' hợp lệ
   function getFormData() {
     return {
       nam: document.getElementById('nam').value,
       soMat: document.getElementById('so-mat').value,
+      doMat: document.getElementById('do-mat').value,
+      kyHieuMat: document.getElementById('ky-hieu-mat').value,
       nguoiNhan: document.getElementById('nguoi-nhan').value,
       ngayNhan: document.getElementById('ngay-nhan').value,
       soCongVan: document.getElementById('so-cong-van').value.trim(),
@@ -505,7 +545,7 @@
 
   async function saveDocument() {
     const data = getFormData();
-    if (!data.nam || !data.soMat || !data.soCongVan || !data.noiDung) {
+    if (!data.nam || !data.soMat || !data.doMat || !data.soCongVan || !data.noiDung) {
       showToast("Vui lòng điền đầy đủ các thông tin có đánh dấu sao (*)", true);
       return;
     }
@@ -529,7 +569,7 @@
       if(githubConfig.token && githubConfig.owner && githubConfig.repo) {
         syncToGithub();
       }
-      resetForm();
+      resetForm(true); 
     } catch (err) {
       showToast("Lỗi hệ thống Firebase: " + err.message, true);
     }
@@ -542,6 +582,8 @@
 
     document.getElementById('nam').value = doc.nam || "";
     document.getElementById('so-mat').value = doc.soMat || "";
+    document.getElementById('do-mat').value = doc.doMat || "";
+    document.getElementById('ky-hieu-mat').value = doc.kyHieuMat || "";
     document.getElementById('nguoi-nhan').value = doc.nguoiNhan || "";
     document.getElementById('ngay-nhan').value = doc.ngayNhan || "";
     document.getElementById('so-cong-van').value = doc.soCongVan || "";
@@ -572,7 +614,7 @@
   async function updateDocument() {
     if(!editingKey) return;
     const data = getFormData();
-    if (!data.nam || !data.soMat || !data.soCongVan || !data.noiDung) {
+    if (!data.nam || !data.soMat || !data.doMat || !data.soCongVan || !data.noiDung) {
       showToast("Vui lòng không để trống các trường dữ liệu quan trọng (*)", true);
       return;
     }
@@ -586,7 +628,7 @@
       await update(ref(database, getDbPath(`congVanMat/${editingKey}`)), data);
       showToast("Cập nhật thông tin văn bản mật thành công!");
       if(githubConfig.token && githubConfig.owner && githubConfig.repo) syncToGithub();
-      resetForm();
+      resetForm(true); 
     } catch (e) {
       showToast("Có lỗi xảy ra: " + e.message, true);
     }
@@ -604,9 +646,23 @@
     }
   };
 
-  function resetForm() {
+  function resetForm(clearAll = false) {
     editingKey = null;
-    document.getElementById('so-cong-van').value = "";
+    
+    if (clearAll === true) {
+      document.getElementById('nam').value = "";
+      document.getElementById('nguoi-nhan').value = "";
+      document.getElementById('so-cong-van').value = "";
+      document.getElementById('ten-van-ban').value = "";
+      document.getElementById('nguoi-ky').value = "";
+      document.getElementById('noi-ban-hanh').value = "";
+      
+      flatpickr("#ngay-nhan", { dateFormat: "d/m/Y", locale: "vn", defaultDate: new Date() });
+      flatpickr("#ngay-ky", { dateFormat: "d/m/Y", locale: "vn", defaultDate: new Date() });
+    }
+
+    document.getElementById('do-mat').value = "";
+    document.getElementById('ky-hieu-mat').value = "";
     document.getElementById('so-to').value = "";
     document.getElementById('noi-dung').value = "";
     document.getElementById('file-dinh-kem').value = "";
@@ -622,6 +678,8 @@
   function applyFilters() {
     const fNam = document.getElementById('search-nam').value.toLowerCase();
     const fSoMat = document.getElementById('search-so-mat').value.toLowerCase();
+    const fDoMat = document.getElementById('search-do-mat').value.toLowerCase();
+    const fKyHieu = document.getElementById('search-ky-hieu').value.toLowerCase();
     const fNguoiNhan = document.getElementById('search-nguoi-nhan').value.toLowerCase();
     const fNgayNhan = document.getElementById('search-ngay-nhan').value.toLowerCase();
     const fSoCv = document.getElementById('search-so-cv').value.toLowerCase();
@@ -639,6 +697,8 @@
       .filter(d => {
         return (!fNam || (d.nam && d.nam.toLowerCase().includes(fNam))) &&
                (!fSoMat || (d.soMat && d.soMat.toLowerCase().includes(fSoMat))) &&
+               (!fDoMat || (d.doMat && d.doMat.toLowerCase().includes(fDoMat))) &&
+               (!fKyHieu || (d.kyHieuMat && d.kyHieuMat.toLowerCase().includes(fKyHieu))) &&
                (!fNguoiNhan || (d.nguoiNhan && d.nguoiNhan.toLowerCase().includes(fNguoiNhan))) &&
                (!fNgayNhan || (d.ngayNhan && d.ngayNhan.toLowerCase().includes(fNgayNhan))) &&
                (!fSoCv || (d.soCongVan && d.soCongVan.toLowerCase().includes(fSoCv))) &&
@@ -653,7 +713,7 @@
     document.getElementById('totalCount').innerText = filteredDocs.length;
 
     if (filteredDocs.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="14" class="text-center text-muted py-3">Không tìm thấy kết quả văn bản mật phù hợp</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="16" class="text-center text-muted py-3">Không tìm thấy kết quả văn bản mật phù hợp</td></tr>`;
       return;
     }
 
@@ -674,6 +734,8 @@
         <td class="text-center fw-semibold">${index + 1}</td>
         <td class="text-center"><span class="badge-info">${doc.nam || ""}</span></td>
         <td class="text-center fw-bold text-danger">${doc.soMat || ""}</td>
+        <td class="text-center fw-semibold text-secondary">${doc.doMat || ""}</td>
+        <td class="text-center fw-bold text-dark">${doc.kyHieuMat || ""}</td>
         <td>${doc.nguoiNhan || ""}</td>
         <td class="text-center">${doc.ngayNhan || ""}</td>
         <td>${doc.soCongVan || ""}</td>
@@ -703,42 +765,56 @@
     }
   };
 
-  window.downloadAttachedFile = function(key) {
-  const doc = allDocuments[key];
-  if (!doc || !doc.fileData) {
-    showToast("Không tìm thấy dữ liệu tệp tin đính kèm!", true);
-    return;
-  }
-  
-  try {
-    // 1. Thông báo cho người dùng biết hệ thống bắt đầu xử lý tệp
-    showToast(`Đang chuẩn bị tải xuống tệp: ${doc.fileName || 'tai-lieu-mat'}`);
-
-    const arr = doc.fileData.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) { u8arr[n] = bstr.charCodeAt(n); }
-    const blob = new Blob([u8arr], { type: mime });
+  window.downloadAttachedFile = async function(key) {
+    const doc = allDocuments[key];
+    if (!doc || !doc.fileData) {
+      showToast("Không tìm thấy dữ liệu tệp tin đính kèm!", true);
+      return;
+    }
     
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = doc.fileName || "tai-lieu-mat";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const password = prompt("Vui lòng nhập lại mật khẩu tài khoản của bạn để xác minh quyền tải tài liệu mật:");
+    
+    if (password === null) return;
+    if (!password.trim()) {
+      showToast("Bạn chưa nhập mật khẩu xác thực!", true);
+      return;
+    }
 
-    // 2. Thông báo khi trình duyệt đã kích hoạt tải xuống thành công
-    setTimeout(() => {
-      showToast("Đã tải xuống tệp thành công!");
-    }, 500);
+    try {
+      showToast("Đang xác thực tài khoản...");
+      const credential = EmailAuthProvider.credential(currentUser.email, password);
+      await reauthenticateWithCredential(auth.currentUser, credential);
+      
+      showToast(`Xác thực thành công! Đang chuẩn bị tải xuống: ${doc.fileName || 'tai-lieu-mat'}`);
 
-  } catch (error) {
-    console.error(error);
-    showToast("Có lỗi xảy ra trong quá trình giải mã và tải tệp!", true);
-  }
-};
+      const arr = doc.fileData.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) { u8arr[n] = bstr.charCodeAt(n); }
+      const blob = new Blob([u8arr], { type: mime });
+      
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = doc.fileName || "tai-lieu-mat";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      setTimeout(() => {
+        showToast("Đã tải xuống tệp thành công!");
+      }, 500);
+
+    } catch (error) {
+      console.error(error);
+      if (error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
+        showToast("Mật khẩu xác thực không chính xác! Tải xuống bị từ chối.", true);
+      } else {
+        showToast("Có lỗi xảy ra trong quá trình xác thực: " + error.message, true);
+      }
+    }
+  };
 
   async function syncToGithub() {
     const token = githubConfig.token;
@@ -793,7 +869,7 @@
     }
 
     const dataArr = [];
-    dataArr.push(["STT", "Năm", "Số mật", "Người nhận", "Ngày nhận", "Số công văn", "Tên loại văn bản", "Ngày ký", "Người ký", "Nơi ban hành", "Số tờ", "Nội dung trích yếu"]);
+    dataArr.push(["STT", "Năm", "Số mật", "Độ mật", "Ký hiệu", "Người nhận", "Ngày nhận", "Số công văn", "Tên loại văn bản", "Ngày ký", "Người ký", "Nơi ban hành", "Số tờ", "Nội dung trích yếu"]);
 
     let idx = 1;
     const tbody = document.getElementById('documentsBody');
@@ -801,7 +877,7 @@
     
     visibleRows.forEach(row => {
       const cells = row.querySelectorAll('td');
-      if(cells.length < 11) return;
+      if(cells.length < 13) return;
       
       dataArr.push([
         idx++,
@@ -815,7 +891,9 @@
         cells[8].innerText,
         cells[9].innerText,
         cells[10].innerText,
-        cells[11].innerText
+        cells[11].innerText,
+        cells[12].innerText,
+        cells[13].innerText
       ]);
     });
 
