@@ -635,14 +635,15 @@
   }
 
   window.deleteDocument = async function(key) {
-    if (confirm("Bạn có chắc chắn muốn xóa văn bản mật này khỏi hệ thống cơ sở dữ liệu?")) {
-      try {
-        await remove(ref(database, getDbPath(`congVanMat/${key}`)));
-        showToast("Đã xóa văn bản mật ra khỏi danh mục bảo mật.");
-        if(githubConfig.token && githubConfig.owner && githubConfig.repo) syncToGithub();
-      } catch (err) {
-        showToast("Xóa thất bại: " + err.message, true);
-      }
+    const confirmDelete = confirm("Bạn có chắc chắn muốn xóa văn bản mật này khỏi hệ thống cơ sở dữ liệu?");
+    if (!confirmDelete) return; // Nếu chọn Cancel (Hủy) thì dừng lại ngay, không xóa.
+
+    try {
+      await remove(ref(database, getDbPath(`congVanMat/${key}`)));
+      showToast("Đã xóa văn bản mật ra khỏi danh mục bảo mật.");
+      if(githubConfig.token && githubConfig.owner && githubConfig.repo) syncToGithub();
+    } catch (err) {
+      showToast("Xóa thất bại: " + err.message, true);
     }
   };
 
