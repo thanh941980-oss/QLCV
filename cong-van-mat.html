@@ -419,26 +419,27 @@
   }
 
   async function loadGithubConfig() {
-    onValue(ref(database, getDbPath('githubConfig')), (snapshot) => {
-      if(snapshot.exists()) {
-        githubConfig = snapshot.val();
-        document.getElementById('github-token').value = githubConfig.token || "";
-        document.getElementById('github-owner').value = githubConfig.owner || "";
-        document.getElementById('github-repo').value = githubConfig.repo || "";
-      }
-    });
-  }
+    onValue(ref(database, "system/githubConfig"), (snapshot) => {
+    if(snapshot.exists()) {
+      githubConfig = snapshot.val();
+      document.getElementById('github-token').value = githubConfig.token || "";
+      document.getElementById('github-owner').value = githubConfig.owner || "";
+      document.getElementById('github-repo').value = githubConfig.repo || "";
+    }
+  });
+}
 
   async function saveGithubConfig() {
     const config = {
-      token: document.getElementById('github-token').value.trim(),
-      owner: document.getElementById('github-owner').value.trim(),
-      repo: document.getElementById('github-repo').value.trim()
-    };
-    await set(ref(database, getDbPath('githubConfig')), config);
-    showToast("Đã lưu thông tin cấu hình GitHub!");
-    toggleGithubPanel();
-  }
+    token: document.getElementById('github-token').value.trim(),
+    owner: document.getElementById('github-owner').value.trim(),
+    repo: document.getElementById('github-repo').value.trim()
+  };
+  // Ghi thẳng vào nút system dùng chung cho mọi tài khoản
+  await set(ref(database, "system/githubConfig"), config);
+  showToast("Đã lưu thông tin cấu hình GitHub hệ thống!");
+  toggleGithubPanel();
+}
 
   function loadCategories(selectId, categoryKey) {
     onValue(ref(database, getDbPath(`categories/${categoryKey}`)), (snapshot) => {
