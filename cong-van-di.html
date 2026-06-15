@@ -893,22 +893,39 @@
   }
 
   async function deleteDocument(id) {
-    // Viết tường minh khối lệnh kiểm tra confirm bằng dấu ngoặc nhọn
-    if (!confirm('Bạn có chắc chắn muốn xóa công văn này?')) {
-      return; // Dừng lại ngay lập tức nếu chọn Cancel
-    }
-    
-    const doc = documentsDataGlobal[id];
-    try { 
-      // Chỉ khi bấm OK mới chạy tiếp các lệnh dưới đây
-      if (doc?.fileData?.path && doc?.fileData?.sha) await deleteFromGitHub(doc.fileData.path, doc.fileData.sha);
-      if (doc?.signedFileData?.path && doc?.signedFileData?.sha) await deleteFromGitHub(doc.signedFileData.path, doc.signedFileData.sha);
-      await remove(ref(database, getDbPath(`congVanDi/${id}`))); 
-      showNotification('Xóa thành công!'); 
-    } catch (error) { 
-      showNotification('Xóa thất bại: ' + error.message, false); 
-    }
+
+  const result = window.confirm("Bạn có chắc chắn muốn xóa công văn này?");
+
+  if (result !== true) {
+    console.log("Đã hủy xóa");
+    return false;
   }
+
+  try {
+    const doc = documentsDataGlobal[id];
+
+    if (doc?.fileData?.path && doc?.fileData?.sha) {
+      await deleteFromGitHub(doc.fileData.path, doc.fileData.sha);
+    }
+
+    if (doc?.signedFileData?.path && doc?.signedFileData?.sha) {
+      await deleteFromGitHub(doc.signedFileData.path, doc.signedFileData.sha);
+    }
+
+    await remove(
+      ref(database, getDbPath(`congVanDi/${id}`))
+    );
+
+    showNotification("Xóa thành công!", true);
+
+    return true;
+
+  } catch(error) {
+
+    showNotification("Xóa thất bại: " + error.message, false);
+    return false;
+  }
+}
 
   function editDocument(id, data) {
     document.getElementById('nam').value = data.year || ''; document.getElementById('so-vb').value = data.documentNumber || ''; document.getElementById('ten-vb').value = data.documentName || '';
@@ -1114,7 +1131,9 @@
   window.openCurrentSignedFile = () => { if (currentSignedFileData?.url) openFileViewModal(editingId); };
   window.viewFullContentFromGlobal = (content) => viewFullContent(content);
   window.editDocumentFromGlobal = (id) => { if (documentsDataGlobal[id]) editDocument(id, documentsDataGlobal[id]); };
-  window.deleteDocumentFromGlobal = (id) => deleteDocument(id);
+  window.deleteDocumentFromGlobal = async function(id){
+    await deleteDocument(id);
+};
 
   async function openCategoryManager(selectId, categoryKey, title) {
     currentCategorySelectId = selectId;
