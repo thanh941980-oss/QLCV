@@ -893,14 +893,21 @@
   }
 
   async function deleteDocument(id) {
-    if (!confirm('Xóa công văn này?')) return;
+    // Viết tường minh khối lệnh kiểm tra confirm bằng dấu ngoặc nhọn
+    if (!confirm('Bạn có chắc chắn muốn xóa công văn này?')) {
+      return; // Dừng lại ngay lập tức nếu chọn Cancel
+    }
+    
     const doc = documentsDataGlobal[id];
     try { 
+      // Chỉ khi bấm OK mới chạy tiếp các lệnh dưới đây
       if (doc?.fileData?.path && doc?.fileData?.sha) await deleteFromGitHub(doc.fileData.path, doc.fileData.sha);
       if (doc?.signedFileData?.path && doc?.signedFileData?.sha) await deleteFromGitHub(doc.signedFileData.path, doc.signedFileData.sha);
       await remove(ref(database, getDbPath(`congVanDi/${id}`))); 
       showNotification('Xóa thành công!'); 
-    } catch (error) { showNotification('Xóa thất bại: ' + error.message, false); }
+    } catch (error) { 
+      showNotification('Xóa thất bại: ' + error.message, false); 
+    }
   }
 
   function editDocument(id, data) {
@@ -1159,7 +1166,9 @@
   }
   
   async function deleteCategoryItem(id, name) {
-    if (!confirm(`Bạn có chắc chắn muốn xóa "${name}"?`)) return;
+    if (!confirm(`Bạn có chắc chắn muốn xóa "${name}"?`)) {
+      return; // Viết thêm ngoặc nhọn cho an toàn
+    }
     const docsSnapshot = await get(ref(database, getDbPath('congVanDi')));
     const docs = docsSnapshot.val() || {};
     let isUsed = false, fieldToCheck = '';
