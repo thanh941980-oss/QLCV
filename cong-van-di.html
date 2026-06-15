@@ -615,6 +615,13 @@
             <button class="btn btn-success btn-sm" id="export-excel-btn"><i class="fa-solid fa-file-excel"></i> Xuất Excel</button>
             <button class="btn btn-primary btn-sm" id="save-cvdi-btn"><i class="fa fa-save"></i> Lưu</button>
             <button class="btn btn-warning btn-sm" id="update-cvdi-btn" style="display: none;"><i class="fa fa-pen"></i> Cập nhật</button>
+            <button class="btn btn-outline-success btn-sm" id="download-template-btn" type="button">
+              <i class="fa-solid fa-download"></i> Tải file mẫu
+            </button>
+            <button class="btn btn-info btn-sm text-white" id="import-excel-btn" type="button" onclick="document.getElementById('import-file-input').click();">
+              <i class="fa-solid fa-file-import"></i> Import Excel
+            </button>
+            <input type="file" id="import-file-input" accept=".xlsx, .xls" style="display: none;">
           </div>
         </div>
       </div>
@@ -1227,6 +1234,142 @@
       if (def && Array.from(select.options).some(opt => opt.value === def)) select.value = def;
     });
   }
+  // ==========================================
+  // CHỨC NĂNG TẠO VÀ TẢI FILE EXCEL MẪU TRỰC TIẾP
+  // ==========================================
+  document.getElementById('download-template-btn').onclick = function() {
+    const templateData = [
+      ['Năm', 'Số VB', 'Tên VB', 'Ngày ký', 'Người ký', 'Nơi BH', 'Nội dung'],
+      ['2026', '01/KH-MTTQ', 'Kế hoạch', '15/06/2026', 'Nguyễn Văn A', 'Ban Thường trực', 'Kế hoạch phối hợp thực hiện mô hình tuyến đường văn minh kiểu mẫu.'],
+      ['2026', '12/QĐ-MTTQ', 'Quyết định', '20/06/2026', 'Trần Thị B', 'Ủy ban MTTQ', 'Quyết định thành lập Ban chỉ đạo chăm lo Tết Nguyên đán.']
+    ];
+    
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(templateData);
+    // Định dạng độ rộng các cột sơ bộ để người dùng dễ nhìn
+    ws['!cols'] = [{wch: 8}, {wch: 15}, {wch: 15}, {wch: 15}, {wch: 18}, {wch: 18}, {wch: 50}];
+    XLSX.utils.book_append_sheet(wb, ws, 'Mau_Import_Cong_Van');
+    XLSX.writeFile(wb, 'Mau_Import_Van_Ban_Di.xlsx');
+    showNotification('Đã tải file Excel mẫu thành công!', true);
+  };
+
+  // ==========================================
+  // HÀM CHUYỂN ĐỔI VÀ CHUẨN HÓA ĐỊNH DẠNG NGÀY THÀNH dd/mm/yyyy
+  // ==========================================
+  function parseExcelDate(excelCell) {
+    if (!excelCell) return formatDateToDDMMYYYY(new Date());
+    
+    // 1. Trường hợp ô Excel đã được cấu hình chuẩn Date Object hoặc chuỗi ISO
+    if (excelCell instanceof Date) {
+      return formatDateToDDMMYYYY(excelCell);
+    }
+    
+    const cellStr = String(excelCell).trim();
+    
+    // 2. Trường hợp ô là dạng Số máy định danh của Excel (Excel Serial Number - VD: 46192)
+    if (/^\d+$/.test(cellStr)) {
+      const dateObj = XLSX.SSF.parse_date_code(Number(cellStr));
+      if (dateObj) {
+        const d = String(dateObj.d).padStart(2, '0');
+        const m = String(dateObj.m).padStart(2, '0');
+        return `${d}/${m}/${dateObj.y}`;
+      }
+    }
+    
+    // 3. Trường hợp người dùng nhập text thô (VD: 15/6/2026, 5-2-2026, 22/02/2026)
+    const match = cellStr.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+    if (match) {
+      const day = match[1].padStart(2, '0');
+      const month = match[2].padStart(2, '0');
+      const year = match[3];
+      return `${day}/${month}/${year}`;
+    }
+    
+    // Trả về mặc định ngày hôm nay nếu ô bị nhập sai hoàn toàn định dạng ngày để tránh lỗi app
+    return formatDateToDDMMYYYY(new Date());
+  }
+
+  // ==========================================
+  // CHỨC NĂNG ĐỌC VÀ IMPORT FILE EXCEL VÀO FIREBASE
+  // ==========================================
+  document.getElementById('import-file-input').onchange = async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!currentUid) {
+      showNotification('Lỗi: Chưa xác thực người dùng!', false);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async function(evt) {
+      try {
+        const data = new Uint8Array(evt.target.result);
+        // cellDates: true ép thư viện đọc định dạng ngày của Excel về dạng Date trong JS
+        const workbook = XLSX.read(data, { type: 'array', cellDates: true }); 
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Chuyển đổi dữ liệu bảng thành mảng JSON Object dựa trên hàng tiêu đề 1
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+        
+        if (jsonData.length === 0) {
+          showNotification('File Excel không có dữ liệu!', false);
+          return;
+        }
+        
+        let importCount = 0;
+        
+        // Duyệt qua từng dòng trong file Excel để ghi vào cơ sở dữ liệu
+        for (const row of jsonData) {
+          const year = String(row['Năm'] || '').trim();
+          const documentNumber = String(row['Số VB'] || '').trim();
+          const documentName = String(row['Tên VB'] || '').trim();
+          const rawSignDate = row['Ngày ký'];
+          const signer = String(row['Người ký'] || '').trim();
+          const issuingPlace = String(row['Nơi BH'] || '').trim();
+          const content = String(row['Nội dung'] || '').trim();
+          
+          // Kiểm tra điều kiện bắt buộc tối thiểu (Phải có Số văn bản và Nội dung trích yếu)
+          if (!documentNumber || !content) continue;
+          
+          // Gọi hàm bóc tách và chuyển đổi định dạng ngày ký sang kiểu dd/mm/yyyy
+          const signDate = parseExcelDate(rawSignDate);
+          
+          // Đẩy trực tiếp lên Firebase Realtime Database tương ứng với tài khoản
+          const newDocRef = push(ref(database, getDbPath('congVanDi')));
+          await set(newDocRef, {
+            year: year || new Date().getFullYear().toString(),
+            documentNumber,
+            documentName: documentName || 'Công văn',
+            signDate,
+            signer: signer || 'Chưa cập nhật',
+            issuingPlace: issuingPlace || 'Chưa cập nhật',
+            content,
+            fileData: null,
+            signedFileData: null,
+            hasFile: false,
+            hasSignedFile: false,
+            createdAt: new Date().toISOString(),
+            createdBy: currentUid
+          });
+          
+          importCount++;
+        }
+        
+        showNotification(`Đã import thành công ${importCount} văn bản!`, true);
+        
+      } catch (error) {
+        console.error(error);
+        showNotification('Lỗi khi xử lý file: ' + error.message, false);
+      } finally {
+        // Đặt lại giá trị trống để có thể chọn lại chính file này nếu cần import tiếp
+        document.getElementById('import-file-input').value = "";
+      }
+    };
+    
+    reader.readAsArrayBuffer(file);
+  };
 </script>
 </body>
 </html>
