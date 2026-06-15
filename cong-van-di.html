@@ -1072,7 +1072,16 @@
         <td><div class="content-preview" onclick='window.viewFullContentFromGlobal(${JSON.stringify(contentText)})'>${escapeHtml(contentPreview)||'Chưa có'}</div></td>
         <td>${doc.hasFile ? `<button class="file-link" onclick='window.openFileViewModal("${id}")'><i class="fa-solid fa-paperclip"></i> ${escapeHtml(fileDisplay)}</button>` : '<span class="text-muted">—</span>'}</td>
         <td>${doc.hasSignedFile ? `<button class="file-link" onclick='window.openFileViewModal("${id}")'><i class="fa-solid fa-file-signature"></i> ${escapeHtml(signedDisplay)}</button>` : '<span class="text-muted">—</span>'}</td>
-        <td><div class="action-buttons"><button class="action-btn view" onclick='window.openFileViewModal("${id}")'><i class="fa-solid fa-eye"></i></button><button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button><button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i></button></div></td>
+        <td>
+          <div class="action-buttons">
+            <button class="action-btn view" onclick='window.openFileViewModal("${id}")'><i class="fa-solid fa-eye"></i></button>
+            <button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button>
+            
+            <button class="action-btn delete" onclick='if(confirm("Bạn có chắc chắn muốn xóa công văn này?")) { window.deleteDocumentFromGlobal("${id}") } else { return false; }'>
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </td>
       </tr>`;
       stt++;
     } totalSpan.textContent = total;
