@@ -894,9 +894,9 @@
 
   async function deleteDocument(id) {
     // Viết tường minh khối lệnh kiểm tra confirm bằng dấu ngoặc nhọn
-   // if (!confirm('Bạn có chắc chắn muốn xóa công văn này?')) {
-   //   return; // Dừng lại ngay lập tức nếu chọn Cancel
-   // }
+    if (!confirm('Bạn có chắc chắn muốn xóa công văn này?')) {
+      return; // Dừng lại ngay lập tức nếu chọn Cancel
+    }
     
     const doc = documentsDataGlobal[id];
     try { 
@@ -1077,7 +1077,7 @@
             <button class="action-btn view" onclick='window.openFileViewModal("${id}")'><i class="fa-solid fa-eye"></i></button>
             <button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button>
             
-            <button class="action-btn delete" onclick='if(confirm("Bạn có chắc chắn muốn xóa công văn này?")) { window.deleteDocumentFromGlobal("${id}"); }'>
+            <button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")'>
               <i class="fa-solid fa-trash"></i>
             </button>
           </div>
