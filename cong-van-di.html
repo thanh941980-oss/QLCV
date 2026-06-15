@@ -893,20 +893,44 @@
   }
 
   async function deleteDocument(id) {
-  // BỎ HOÀN TOÀN dòng window.confirm hoặc if(!confirm) ở đây.
-  
-  const doc = documentsDataGlobal[id];
-  try { 
-    // Khi nhấn OK từ nút bấm ngoài, lệnh sẽ nhảy thẳng vào đây để thực hiện xóa sạch sẽ
-    if (doc?.fileData?.path && doc?.fileData?.sha) await deleteFromGitHub(doc.fileData.path, doc.fileData.sha);
-    if (doc?.signedFileData?.path && doc?.signedFileData?.sha) await deleteFromGitHub(doc.signedFileData.path, doc.signedFileData.sha);
+    // 1. Hiển thị hộp thoại xác nhận (OK / Cancel)
+    const isConfirmed = confirm("Bạn có chắc chắn muốn xóa công văn này?");
     
-    await remove(ref(database, getDbPath(`congVanDi/${id}`))); 
-    showNotification('Xóa thành công!'); 
-  } catch (error) { 
-    showNotification('Xóa thất bại: ' + error.message, false); 
+    // 2. Nếu người dùng bấm Cancel, dừng hàm ngay lập tức và không xử lý tiếp
+    if (!isConfirmed) {
+      console.log("Người dùng đã hủy thao tác xóa công văn.");
+      return false; 
+    }
+
+    // 3. Nếu bấm OK, tiến hành xử lý xóa file trên GitHub và dữ liệu trên Firebase
+    try {
+      const doc = documentsDataGlobal[id];
+
+      // Tự động gỡ bỏ file đính kèm thường trên GitHub nếu có
+      if (doc?.fileData?.path && doc?.fileData?.sha) {
+        await deleteFromGitHub(doc.fileData.path, doc.fileData.sha);
+      }
+
+      // Tự động gỡ bỏ file có chữ ký trên GitHub nếu có
+      if (doc?.signedFileData?.path && doc?.signedFileData?.sha) {
+        await deleteFromGitHub(doc.signedFileData.path, doc.signedFileData.sha);
+      }
+
+      // Xóa bản ghi định danh của công văn trên Firebase Realtime Database
+      await remove(
+        ref(database, getDbPath(`congVanDi/${id}`))
+      );
+
+      // Hiển thị thông báo thành công (Hệ thống tự reload danh sách qua sự kiện onValue)
+      showNotification("Xóa thành công!", true);
+      return true;
+
+    } catch(error) {
+      console.error("Lỗi khi thực hiện xóa văn bản:", error);
+      showNotification("Xóa thất bại: " + error.message, false);
+      return false;
+    }
   }
-}
   function editDocument(id, data) {
     document.getElementById('nam').value = data.year || ''; document.getElementById('so-vb').value = data.documentNumber || ''; document.getElementById('ten-vb').value = data.documentName || '';
     document.getElementById('ngay-ky').value = data.signDate || ''; document.getElementById('nguoi-ky').value = data.signer || ''; document.getElementById('noi-ban-hanh').value = data.issuingPlace || '';
@@ -1074,11 +1098,9 @@
             <button class="action-btn view" onclick='window.openFileViewModal("${id}")'><i class="fa-solid fa-eye"></i></button>
             <button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button>
             
-            <button class="action-btn delete" onclick='return window.deleteDocumentFromGlobal("${id}")'><i class="fa-solid fa-trash"></i></button>
-
-            <button class="action-btn delete" onclick='if(confirm("Bạn có chắc chắn muốn xóa công văn này?")) { window.deleteDocumentFromGlobal("${id}") } else { return false; }'>
-                <i class="fa-solid fa-trash"></i> Xóa
-            </button>
+           <button class="action-btn delete" onclick='window.deleteDocumentFromGlobal("${id}")' title="Xóa văn bản">
+  <i class="fa-solid fa-trash"></i> Xóa
+</button>
           </div>
         </td>
       </tr>`;
