@@ -1077,7 +1077,7 @@
             <button class="action-btn view" onclick='window.openFileViewModal("${id}")'><i class="fa-solid fa-eye"></i></button>
             <button class="action-btn edit" onclick='window.editDocumentFromGlobal("${id}")'><i class="fa-solid fa-pen"></i></button>
             
-            <button class="action-btn delete" onclick='if(confirm("Bạn có chắc chắn muốn xóa công văn này?")) { window.deleteDocumentFromGlobal("${id}") } else { return false; }'>
+            <button class="action-btn delete" onclick='if(confirm("Bạn có chắc chắn muốn xóa công văn này?")) { window.deleteDocumentFromGlobal("${id}"); }'>
               <i class="fa-solid fa-trash"></i>
             </button>
           </div>
