@@ -893,44 +893,39 @@
   }
 
   async function deleteDocument(id) {
-    // 1. Hiển thị hộp thoại xác nhận (OK / Cancel)
-    const isConfirmed = confirm("Bạn có chắc chắn muốn xóa công văn này?");
-    
-    // 2. Nếu người dùng bấm Cancel, dừng hàm ngay lập tức và không xử lý tiếp
-    if (!isConfirmed) {
-      console.log("Người dùng đã hủy thao tác xóa công văn.");
-      return false; 
-    }
-
-    // 3. Nếu bấm OK, tiến hành xử lý xóa file trên GitHub và dữ liệu trên Firebase
-    try {
-      const doc = documentsDataGlobal[id];
-
-      // Tự động gỡ bỏ file đính kèm thường trên GitHub nếu có
-      if (doc?.fileData?.path && doc?.fileData?.sha) {
-        await deleteFromGitHub(doc.fileData.path, doc.fileData.sha);
-      }
-
-      // Tự động gỡ bỏ file có chữ ký trên GitHub nếu có
-      if (doc?.signedFileData?.path && doc?.signedFileData?.sha) {
-        await deleteFromGitHub(doc.signedFileData.path, doc.signedFileData.sha);
-      }
-
-      // Xóa bản ghi định danh của công văn trên Firebase Realtime Database
-      await remove(
-        ref(database, getDbPath(`congVanDi/${id}`))
-      );
-
-      // Hiển thị thông báo thành công (Hệ thống tự reload danh sách qua sự kiện onValue)
-      showNotification("Xóa thành công!", true);
-      return true;
-
-    } catch(error) {
-      console.error("Lỗi khi thực hiện xóa văn bản:", error);
-      showNotification("Xóa thất bại: " + error.message, false);
-      return false;
-    }
+  // 1. Hiển thị hộp thoại xác nhận ngay lập tức
+  const isConfirmed = window.confirm("Bạn có chắc chắn muốn xóa công văn này?");
+  
+  // 2. Nếu người dùng bấm Cancel (isConfirmed = false), thoát hàm ngay lập tức
+  if (!isConfirmed) {
+    console.log("Người dùng đã hủy.");
+    return false;
   }
+
+  // 3. Nếu bấm OK, mới thực hiện các lệnh xóa bên dưới
+  try {
+    const doc = documentsDataGlobal[id];
+    if (!doc) return;
+
+    // Xóa file trên GitHub nếu có
+    if (doc.fileData?.path && doc.fileData?.sha) {
+      await deleteFromGitHub(doc.fileData.path, doc.fileData.sha);
+    }
+    if (doc.signedFileData?.path && doc.signedFileData?.sha) {
+      await deleteFromGitHub(doc.signedFileData.path, doc.signedFileData.sha);
+    }
+
+    // Xóa dữ liệu trên Firebase
+    await remove(ref(database, getDbPath(`congVanDi/${id}`)));
+
+    showNotification("Xóa thành công!", true);
+    return true;
+  } catch (error) {
+    console.error("Lỗi khi xóa:", error);
+    showNotification("Xóa thất bại: " + error.message, false);
+    return false;
+  }
+}
   function editDocument(id, data) {
     document.getElementById('nam').value = data.year || ''; document.getElementById('so-vb').value = data.documentNumber || ''; document.getElementById('ten-vb').value = data.documentName || '';
     document.getElementById('ngay-ky').value = data.signDate || ''; document.getElementById('nguoi-ky').value = data.signer || ''; document.getElementById('noi-ban-hanh').value = data.issuingPlace || '';
