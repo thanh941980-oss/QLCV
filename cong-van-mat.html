@@ -530,9 +530,19 @@
   }
 
   function getFormData() {
+    // Lấy giá trị số mật từ form
+    let soMatValue = document.getElementById('so-mat').value.trim();
+    
+    // Nếu có nhập số mật, tự động chuẩn hóa về dạng 3 chữ số (ví dụ: gõ "3" hoặc "03" đều biến thành "003")
+    if (soMatValue) {
+      const numericPart = parseInt(soMatValue, 10);
+      if (!isNaN(numericPart)) {
+        soMatValue = String(numericPart).padStart(3, '0');
+      }
+    }
     return {
       nam: document.getElementById('nam').value,
-      soMat: document.getElementById('so-mat').value,
+      soMat: soMatValue, // Sử dụng giá trị đã được chuẩn hóa chuỗi có số 0 phía trước
       doMat: document.getElementById('do-mat').value,
       kyHieuMat: document.getElementById('ky-hieu-mat').value,
       nguoiNhan: document.getElementById('nguoi-nhan').value,
