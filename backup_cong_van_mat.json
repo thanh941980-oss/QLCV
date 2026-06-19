@@ -190,5 +190,21 @@
     "soTo": "6",
     "tenVanBan": "Kế hoạch",
     "timestamp": 1781852267850
+  },
+  "-OvTgJpgg3LiLeBtAg_G": {
+    "doMat": "Mật",
+    "kyHieuMat": "C",
+    "nam": "2025",
+    "ngayKy": "31/12/2025",
+    "ngayNhan": "09/01/2026",
+    "nguoiKy": "Phạm Văn Đồng",
+    "nguoiNhan": "Văn Hoài Thanh",
+    "noiBanHanh": "UBND phường",
+    "noiDung": "Kế hoạch đảm bảo ANTT trên địa bàn năm 2026",
+    "soCongVan": "30/KH-UBND",
+    "soMat": "006",
+    "soTo": "4",
+    "tenVanBan": "Kế hoạch",
+    "timestamp": 1781852627706
   }
 }
