@@ -502,10 +502,14 @@
     let maxId = 0;
     Object.values(allDocuments).forEach(doc => {
       if (doc.nam === namSelected && doc.soMat) {
-        const numericPart = parseInt(doc.soMat);
-        if (!isNaN(numericPart) && numericPart > maxId) maxId = numericPart;
+        // Chuyển đổi về số nguyên cơ số 10 để tránh lỗi nhận diện số bát phân (Octal) do có số 0 ở đầu
+        const numericPart = parseInt(doc.soMat, 10); 
+        if (!isNaN(numericPart) && numericPart > maxId) {
+          maxId = numericPart;
+        }
       }
     });
+    // Tăng giá trị lớn nhất lên 1 và đệm đủ 3 chữ số (ví dụ: 001, 002, 010...)
     document.getElementById('so-mat').value = String(maxId + 1).padStart(3, '0');
   }
 
