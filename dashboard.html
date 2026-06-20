@@ -608,7 +608,6 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import { getAuth, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  // Import thêm thư viện quản lý Realtime Database 
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
   const firebaseConfig = {
@@ -623,7 +622,7 @@
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
-  const db = getDatabase(app); // Cấu hình biến DB Realtime
+  const db = getDatabase(app); 
 
   const modules = {
     dashboard: { type: "visual", title: "Tổng quan hệ thống", icon: "fa-solid fa-chart-line" },
@@ -738,7 +737,7 @@
       if (m.type === "visual") {
         contentFrame.style.display = "none";
         dashboardView.style.display = "block";
-        processAndChart(); // Gọi vẽ lại đồ thị từ dữ liệu đã lưu
+        processAndChart();
       } else {
         dashboardView.style.display = "none";
         contentFrame.style.display = "block";
@@ -748,42 +747,54 @@
     localStorage.setItem('currentModule', moduleKey);
   }
 
-  // --- HÀM KHỞI TẠO ĐỌC DỮ LIỆU THỜI GIAN THỰC TỪ FIREBASE ---
-  function initFirebaseRealtimeData() {
-    // Đọc văn bản đến
-    onValue(ref(db, 'cong_van_den'), (snapshot) => {
+  // --- HÀM KHỞI TẠO ĐỌC DỮ LIỆU THỜI GIAN THỰC ĐÃ CẬP NHẬT ĐƯỜNG DẪN UID VÀ TÊN NHÁNH ---
+  function initFirebaseRealtimeData(uid) {
+    console.log("Đang lấy dữ liệu cho user:", uid);
+
+    // 1. Tải Văn bản đến 
+    onValue(ref(db, `users/${uid}/congVanDen`), (snapshot) => {
       rawIncomingData = snapshot.val() || {};
       processAndChart();
     });
 
-    // Đọc văn bản đi
-    onValue(ref(db, 'cong_van_di'), (snapshot) => {
+    // 2. Tải Văn bản đi
+    onValue(ref(db, `users/${uid}/congVanDi`), (snapshot) => {
       rawOutgoingData = snapshot.val() || {};
       processAndChart();
     });
 
-    // Đọc văn bản mật
-    onValue(ref(db, 'cong_van_mat'), (snapshot) => {
+    // 3. Tải Văn bản mật
+    onValue(ref(db, `users/${uid}/congVanMat`), (snapshot) => {
       rawSecretData = snapshot.val() || {};
       processAndChart();
     });
   }
 
-  // SỬA LỖI: Ép kiểu sang String để xử lý triệt để lỗi không nhận diện hàm split/includes
+  // Hàm bóc tách ngày tháng an toàn tuyệt đối
   function getMonthAndYear(doc) {
-    const rawDate = doc.ngay_nhap || doc.ngay_di || doc.ngay_ban_hanh || doc.ngay || "";
+    if (typeof doc !== 'object' || doc === null) return { month: -1, year: -1 };
+
+    // Tự động rà soát các trường có thể chứa ngày tháng (bổ sung timestamp)
+    const rawDate = doc.ngay_nhap || doc.ngay_di || doc.ngay_ban_hanh || doc.ngay || doc.date || doc.createdAt || doc.ngayTao || "";
+    
     if (!rawDate) return { month: -1, year: -1 };
     
+    // Nếu ngày được lưu kiểu Timestamp (số)
+    if (typeof rawDate === 'number') {
+      const d = new Date(rawDate);
+      return { month: d.getMonth(), year: d.getFullYear() };
+    }
+
     const dateStr = String(rawDate).trim();
     
-    // Định dạng chuỗi YYYY-MM-DD
+    // Nếu ngày được lưu dạng YYYY-MM-DD
     if (dateStr.includes('-')) {
       const parts = dateStr.split('-');
       if(parts.length >= 2) {
         return { month: parseInt(parts[1], 10) - 1, year: parseInt(parts[0], 10) };
       }
     } 
-    // Định dạng chuỗi DD/MM/YYYY
+    // Nếu ngày được lưu dạng DD/MM/YYYY
     else if (dateStr.includes('/')) {
       const parts = dateStr.split('/');
       if(parts.length >= 3) {
@@ -793,11 +804,8 @@
     return { month: -1, year: -1 };
   }
 
-  // Xử lý dữ liệu thô thành dữ liệu vẽ biểu đồ tháng
   function processAndChart() {
-    // Chỉ xử lý nếu cấu phần đồ thị Tổng quan đang hiển thị trên màn hình
     if (localStorage.getItem('currentModule') !== 'dashboard') {
-      // Vẫn đếm số lượng tổng hiển thị trên Thẻ thống kê
       document.getElementById('statIncoming').innerText = Object.keys(rawIncomingData).length.toLocaleString('vi-VN');
       document.getElementById('statOutgoing').innerText = Object.keys(rawOutgoingData).length.toLocaleString('vi-VN');
       document.getElementById('statSecret').innerText = Object.keys(rawSecretData).length.toLocaleString('vi-VN');
@@ -810,36 +818,25 @@
     const monthlyOutgoing = Array(12).fill(0);
     const monthlySecret = Array(12).fill(0);
 
-    // Duyệt dữ liệu Đến
     Object.values(rawIncomingData).forEach(doc => {
       const { month, year } = getMonthAndYear(doc);
-      if (year === selectedYear && month >= 0 && month < 12) {
-        monthlyIncoming[month]++;
-      }
+      if (year === selectedYear && month >= 0 && month < 12) monthlyIncoming[month]++;
     });
 
-    // Duyệt dữ liệu Đi
     Object.values(rawOutgoingData).forEach(doc => {
       const { month, year } = getMonthAndYear(doc);
-      if (year === selectedYear && month >= 0 && month < 12) {
-        monthlyOutgoing[month]++;
-      }
+      if (year === selectedYear && month >= 0 && month < 12) monthlyOutgoing[month]++;
     });
 
-    // Duyệt dữ liệu Mật
     Object.values(rawSecretData).forEach(doc => {
       const { month, year } = getMonthAndYear(doc);
-      if (year === selectedYear && month >= 0 && month < 12) {
-        monthlySecret[month]++;
-      }
+      if (year === selectedYear && month >= 0 && month < 12) monthlySecret[month]++;
     });
 
-    // Cập nhật số thẻ Card tổng quan hệ thống
     document.getElementById('statIncoming').innerText = Object.keys(rawIncomingData).length.toLocaleString('vi-VN');
     document.getElementById('statOutgoing').innerText = Object.keys(rawOutgoingData).length.toLocaleString('vi-VN');
     document.getElementById('statSecret').innerText = Object.keys(rawSecretData).length.toLocaleString('vi-VN');
 
-    // Tiến hành vẽ hoặc cập nhật lại giao diện Chart.js
     const canvasElement = document.getElementById('documentChart');
     if (!canvasElement) return;
 
@@ -984,7 +981,6 @@
           });
         }, 1500);
       } catch (error) {
-        console.error(error);
         let errorMsg = 'Đổi mật khẩu thất bại. ';
         if (error.code === 'auth/wrong-password') {
           errorMsg += 'Mật khẩu hiện tại không đúng.';
@@ -1028,11 +1024,13 @@
     currentUserEmail = email;
   }
 
+  // Lắng nghe đăng nhập để tải dữ liệu
   onAuthStateChanged(auth, (user) => {
     if (user) {
       updateEmailTooltip(user.email);
       initModal();
-      initFirebaseRealtimeData(); // Bắt đầu lắng nghe dữ liệu khi user đã xác thực thành công
+      // GỌI HÀM VÀ TRUYỀN UID SAU KHI ĐĂNG NHẬP THÀNH CÔNG
+      initFirebaseRealtimeData(user.uid); 
     } else {
       window.location.href = 'index.html';
     }
@@ -1048,7 +1046,6 @@
 
   loadSidebarState();
   
-  // Khôi phục phân hệ được lưu từ trước, mặc định là trang dashboard tổng quan biểu đồ
   const savedModule = localStorage.getItem('currentModule');
   if (savedModule && modules[savedModule]) {
     setActiveModule(savedModule);
