@@ -234,6 +234,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -375,22 +376,18 @@
     document.getElementById('statOutgoing').innerText = totalOut.toLocaleString('vi-VN');
     document.getElementById('statSecret').innerText = totalSec.toLocaleString('vi-VN');
 
-    // Chỉ vẽ biểu đồ khi đang ở trang Tổng quan
     if (localStorage.getItem('currentModule') !== 'dashboard') return;
 
-    // 1. Tự động tìm kiếm các năm có trong dữ liệu
+    // --- CẦN CÓ: Đăng ký plugin ---
+    Chart.register(ChartDataLabels);
+
     const availableYears = new Set();
     const allDocs = [...Object.values(rawIncomingData), ...Object.values(rawOutgoingData), ...Object.values(rawSecretData)];
-    
-    allDocs.forEach(doc => {
-      let d = smartExtractDate(doc);
-      if (d && d.year > 2000) availableYears.add(d.year);
-    });
+    allDocs.forEach(doc => { let d = smartExtractDate(doc); if (d && d.year > 2000) availableYears.add(d.year); });
 
     let yearsArray = Array.from(availableYears).sort((a,b) => b - a);
-    if (yearsArray.length === 0) yearsArray = [new Date().getFullYear()]; // Mặc định năm hiện tại
+    if (yearsArray.length === 0) yearsArray = [new Date().getFullYear()];
 
-    // Cập nhật thẻ Select (Chỉ cập nhật nếu số lượng option thay đổi để tránh reset lựa chọn của user)
     if (yearFilter.options.length !== yearsArray.length || yearFilter.options[0].value === "") {
       let currentVal = yearFilter.value;
       yearFilter.innerHTML = '';
@@ -400,33 +397,19 @@
         opt.innerText = `Năm ${y}`;
         yearFilter.appendChild(opt);
       });
-      // Giữ nguyên lựa chọn cũ nếu có, nếu không lấy năm mới nhất
-      if (yearsArray.includes(parseInt(currentVal))) {
-        yearFilter.value = currentVal;
-      }
+      if (yearsArray.includes(parseInt(currentVal))) yearFilter.value = currentVal;
     }
 
     const selectedYear = parseInt(yearFilter.value);
-
-    // Tính toán dữ liệu cho Biểu đồ Cột theo Năm đã chọn
     const monthlyIn = Array(12).fill(0);
     const monthlyOut = Array(12).fill(0);
     const monthlySec = Array(12).fill(0);
 
-    Object.values(rawIncomingData).forEach(doc => {
-      let d = smartExtractDate(doc);
-      if (d && d.year === selectedYear) monthlyIn[d.month]++;
-    });
-    Object.values(rawOutgoingData).forEach(doc => {
-      let d = smartExtractDate(doc);
-      if (d && d.year === selectedYear) monthlyOut[d.month]++;
-    });
-    Object.values(rawSecretData).forEach(doc => {
-      let d = smartExtractDate(doc);
-      if (d && d.year === selectedYear) monthlySec[d.month]++;
-    });
+    Object.values(rawIncomingData).forEach(doc => { let d = smartExtractDate(doc); if (d && d.year === selectedYear) monthlyIn[d.month]++; });
+    Object.values(rawOutgoingData).forEach(doc => { let d = smartExtractDate(doc); if (d && d.year === selectedYear) monthlyOut[d.month]++; });
+    Object.values(rawSecretData).forEach(doc => { let d = smartExtractDate(doc); if (d && d.year === selectedYear) monthlySec[d.month]++; });
 
-    // Vẽ Biểu đồ Tròn (Tổng quan tỉ lệ)
+    // Vẽ Biểu đồ Tròn
     const typeCtx = document.getElementById('typeChart').getContext('2d');
     if (typeChartInstance) typeChartInstance.destroy();
     
@@ -446,12 +429,14 @@
         maintainAspectRatio: false,
         cutout: '65%',
         plugins: {
-          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } }
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } },
+          // Cấu hình hiện số trên biểu đồ tròn
+          datalabels: { color: '#fff', font: { weight: 'bold' }, formatter: (v) => v > 0 ? v : null }
         }
       }
     });
 
-    // Vẽ Biểu đồ Cột (Theo Tháng)
+    // Vẽ Biểu đồ Cột
     const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
     if (monthlyChartInstance) monthlyChartInstance.destroy();
 
@@ -470,14 +455,13 @@
         maintainAspectRatio: false,
         plugins: {
           legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8 } },
-          tooltip: { mode: 'index', intersect: false }
+          // Cấu hình hiện số trên biểu đồ cột
+          datalabels: { anchor: 'end', align: 'top', font: { size: 10 }, formatter: (v) => v > 0 ? v : null }
         },
         scales: {
           x: { grid: { display: false } },
-          // Cài đặt bước nhảy bằng 1 để không bao giờ hiện số thập phân (như 0.5 văn bản)
           y: { beginAtZero: true, border: { dash: [4, 4] }, ticks: { stepSize: 1, precision: 0 } }
-        },
-        interaction: { mode: 'nearest', axis: 'x', intersect: false }
+        }
       }
     });
   }
