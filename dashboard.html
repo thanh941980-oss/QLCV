@@ -21,7 +21,6 @@
       overflow: hidden;
     }
 
-    /* Layout chính */
     .app {
       display: flex;
       height: 100vh;
@@ -43,12 +42,10 @@
       z-index: 10;
     }
 
-    /* Trạng thái thu gọn mặc định */
     .sidebar.collapsed {
       width: 65px;
     }
 
-    /* Ẩn text khi thu gọn */
     .sidebar.collapsed .logo-area h3 span,
     .sidebar.collapsed .logo-area small,
     .sidebar.collapsed .nav-item span,
@@ -57,7 +54,6 @@
       display: none;
     }
 
-    /* Canh giữa icon khi thu gọn */
     .sidebar.collapsed .nav-item {
       justify-content: center;
       padding: 12px 0;
@@ -80,7 +76,6 @@
       padding: 20px 12px;
     }
 
-    /* ========= HIỆN TEXT KHI HOVER ========= */
     .sidebar.collapsed .nav-item {
       position: relative;
     }
@@ -347,7 +342,7 @@
       transition: all 0.2s;
     }
 
-    /* Vùng hiển thị trực quan đồ thị */
+    /* Dashboard View Container */
     .dashboard-view-container {
       width: 100%;
       height: 100%;
@@ -519,7 +514,7 @@
               <div class="d-flex align-items-center justify-content-between">
                 <div>
                   <h6 class="text-muted mb-1" style="font-size: 11px;">Tổng Văn Bản Đến</h6>
-                  <h3 class="fw-bold text-primary mb-0" style="font-size: 18px;" id="statIncoming">...</h3>
+                  <h3 class="fw-bold text-primary mb-0" style="font-size: 18px;" id="statIncoming">0</h3>
                 </div>
                 <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-circle">
                   <i class="fa-solid fa-inbox fa-lg"></i>
@@ -532,7 +527,7 @@
               <div class="d-flex align-items-center justify-content-between">
                 <div>
                   <h6 class="text-muted mb-1" style="font-size: 11px;">Tổng Văn Bản Đi</h6>
-                  <h3 class="fw-bold text-success mb-0" style="font-size: 18px;" id="statOutgoing">...</h3>
+                  <h3 class="fw-bold text-success mb-0" style="font-size: 18px;" id="statOutgoing">0</h3>
                 </div>
                 <div class="bg-success bg-opacity-10 text-success p-2 rounded-circle">
                   <i class="fa-solid fa-paper-plane fa-lg"></i>
@@ -545,7 +540,7 @@
               <div class="d-flex align-items-center justify-content-between">
                 <div>
                   <h6 class="text-muted mb-1" style="font-size: 11px;">Tổng Văn Bản Mật</h6>
-                  <h3 class="fw-bold text-danger mb-0" style="font-size: 18px;" id="statSecret">...</h3>
+                  <h3 class="fw-bold text-danger mb-0" style="font-size: 18px;" id="statSecret">0</h3>
                 </div>
                 <div class="bg-danger bg-opacity-10 text-danger p-2 rounded-circle">
                   <i class="fa-solid fa-user-shield fa-lg"></i>
@@ -557,10 +552,11 @@
 
         <div class="chart-wrapper">
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="fw-bold text-secondary mb-0" style="font-size: 13px;"><i class="fa-solid fa-chart-bar me-2"></i>Thống kê văn bản trực quan theo từng tháng</h6>
-            <select class="form-select form-select-sm" id="yearFilter" style="width: 100px; font-size: 11px;">
+            <h6 class="fw-bold text-secondary mb-0" style="font-size: 13px;"><i class="fa-solid fa-chart-bar me-2"></i>Thống kê số lượng văn bản theo tháng</h6>
+            <select class="form-select form-select-sm" id="yearFilter" style="width: 110px; font-size: 11px;">
               <option value="2026" selected>Năm 2026</option>
               <option value="2025">Năm 2025</option>
+              <option value="2024">Năm 2024</option>
             </select>
           </div>
           <div style="position: relative; height: 320px; width: 100%;">
@@ -612,7 +608,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import { getAuth, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-  // Import thêm các hàm làm việc với Realtime Database để đọc dữ liệu thật
+  // Import thêm thư viện quản lý Realtime Database 
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
 
   const firebaseConfig = {
@@ -627,7 +623,7 @@
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
-  const db = getDatabase(app); // Khởi tạo database thời gian thực
+  const db = getDatabase(app); // Cấu hình biến DB Realtime
 
   const modules = {
     dashboard: { type: "visual", title: "Tổng quan hệ thống", icon: "fa-solid fa-chart-line" },
@@ -650,12 +646,11 @@
   let currentUserEmail = '';
   let documentChartInstance = null;
 
-  // Biến lưu trữ dữ liệu gốc từ Firebase
+  // Đối tượng lưu trữ cục bộ dữ liệu từ Firebase
   let rawIncomingData = {};
   let rawOutgoingData = {};
   let rawSecretData = {};
 
-  // Toggle sidebar collapse
   function toggleSidebar(collapse) {
     if (collapse) {
       sidebar.classList.add('collapsed');
@@ -720,7 +715,6 @@
     }
   });
 
-  // Chuyển đổi giữa giao diện biểu đồ trực quan và Iframe quản lý văn bản
   function setActiveModule(moduleKey) {
     document.querySelectorAll('.nav-menu .nav-item').forEach(el => {
       const mod = el.getAttribute('data-module');
@@ -744,7 +738,7 @@
       if (m.type === "visual") {
         contentFrame.style.display = "none";
         dashboardView.style.display = "block";
-        fetchAndRenderData(); // Tải và kết xuất lại đồ thị trực quan
+        processAndChart(); // Gọi vẽ lại đồ thị từ dữ liệu đã lưu
       } else {
         dashboardView.style.display = "none";
         contentFrame.style.display = "block";
@@ -754,92 +748,102 @@
     localStorage.setItem('currentModule', moduleKey);
   }
 
-  // --- HÀM ĐỌC DỮ LIỆU THỰC TẾ VÀ XỬ LÝ BIỂU ĐỒ ---
-  function fetchAndRenderData() {
-    // 1. Lắng nghe dữ liệu Văn bản đến
-    const incomingRef = ref(db, 'cong_van_den');
-    onValue(incomingRef, (snapshot) => {
+  // --- HÀM KHỞI TẠO ĐỌC DỮ LIỆU THỜI GIAN THỰC TỪ FIREBASE ---
+  function initFirebaseRealtimeData() {
+    // Đọc văn bản đến
+    onValue(ref(db, 'cong_van_den'), (snapshot) => {
       rawIncomingData = snapshot.val() || {};
       processAndChart();
     });
 
-    // 2. Lắng nghe dữ liệu Văn bản đi
-    const outgoingRef = ref(db, 'cong_van_di');
-    onValue(outgoingRef, (snapshot) => {
+    // Đọc văn bản đi
+    onValue(ref(db, 'cong_van_di'), (snapshot) => {
       rawOutgoingData = snapshot.val() || {};
       processAndChart();
     });
 
-    // 3. Lắng nghe dữ liệu Văn bản mật
-    const secretRef = ref(db, 'cong_van_mat');
-    onValue(secretRef, (snapshot) => {
+    // Đọc văn bản mật
+    onValue(ref(db, 'cong_van_mat'), (snapshot) => {
       rawSecretData = snapshot.val() || {};
       processAndChart();
     });
   }
 
-  // Phân tích cú pháp ngày tháng từ đối tượng Firebase (hỗ trợ trường ngay_nhap, ngay_di hoặc ngay_ban_hanh)
+  // SỬA LỖI: Ép kiểu sang String để xử lý triệt để lỗi không nhận diện hàm split/includes
   function getMonthAndYear(doc) {
-    const dateStr = doc.ngay_nhap || doc.ngay_di || doc.ngay_ban_hanh || doc.ngay || "";
-    if (!dateStr) return { month: -1, year: -1 };
+    const rawDate = doc.ngay_nhap || doc.ngay_di || doc.ngay_ban_hanh || doc.ngay || "";
+    if (!rawDate) return { month: -1, year: -1 };
     
-    // Định dạng phổ biến thường dùng: YYYY-MM-DD hoặc DD/MM/YYYY
+    const dateStr = String(rawDate).trim();
+    
+    // Định dạng chuỗi YYYY-MM-DD
     if (dateStr.includes('-')) {
       const parts = dateStr.split('-');
-      return { month: parseInt(parts[1], 10) - 1, year: parseInt(parts[0], 10) };
-    } else if (dateStr.includes('/')) {
+      if(parts.length >= 2) {
+        return { month: parseInt(parts[1], 10) - 1, year: parseInt(parts[0], 10) };
+      }
+    } 
+    // Định dạng chuỗi DD/MM/YYYY
+    else if (dateStr.includes('/')) {
       const parts = dateStr.split('/');
-      return { month: parseInt(parts[1], 10) - 1, year: parseInt(parts[2], 10) };
+      if(parts.length >= 3) {
+        return { month: parseInt(parts[1], 10) - 1, year: parseInt(parts[2], 10) };
+      }
     }
     return { month: -1, year: -1 };
   }
 
+  // Xử lý dữ liệu thô thành dữ liệu vẽ biểu đồ tháng
   function processAndChart() {
-    const selectedYear = parseInt(yearFilter.value, 10);
+    // Chỉ xử lý nếu cấu phần đồ thị Tổng quan đang hiển thị trên màn hình
+    if (localStorage.getItem('currentModule') !== 'dashboard') {
+      // Vẫn đếm số lượng tổng hiển thị trên Thẻ thống kê
+      document.getElementById('statIncoming').innerText = Object.keys(rawIncomingData).length.toLocaleString('vi-VN');
+      document.getElementById('statOutgoing').innerText = Object.keys(rawOutgoingData).length.toLocaleString('vi-VN');
+      document.getElementById('statSecret').innerText = Object.keys(rawSecretData).length.toLocaleString('vi-VN');
+      return;
+    }
+
+    const selectedYear = yearFilter ? parseInt(yearFilter.value, 10) : 2026;
     
-    // Khởi tạo bộ đếm 12 tháng bằng 0
     const monthlyIncoming = Array(12).fill(0);
     const monthlyOutgoing = Array(12).fill(0);
     const monthlySecret = Array(12).fill(0);
 
-    let totalIncoming = 0;
-    let totalOutgoing = 0;
-    let totalSecret = 0;
-
-    // Duyệt và đếm Văn bản đến
+    // Duyệt dữ liệu Đến
     Object.values(rawIncomingData).forEach(doc => {
-      totalIncoming++;
       const { month, year } = getMonthAndYear(doc);
       if (year === selectedYear && month >= 0 && month < 12) {
         monthlyIncoming[month]++;
       }
     });
 
-    // Duyệt và đếm Văn bản đi
+    // Duyệt dữ liệu Đi
     Object.values(rawOutgoingData).forEach(doc => {
-      totalOutgoing++;
       const { month, year } = getMonthAndYear(doc);
       if (year === selectedYear && month >= 0 && month < 12) {
         monthlyOutgoing[month]++;
       }
     });
 
-    // Duyệt và đếm Văn bản mật
+    // Duyệt dữ liệu Mật
     Object.values(rawSecretData).forEach(doc => {
-      totalSecret++;
       const { month, year } = getMonthAndYear(doc);
       if (year === selectedYear && month >= 0 && month < 12) {
         monthlySecret[month]++;
       }
     });
 
-    // Cập nhật số liệu hiển thị trực quan lên 3 Thẻ thống kê
-    document.getElementById('statIncoming').innerText = totalIncoming.toLocaleString('vi-VN');
-    document.getElementById('statOutgoing').innerText = totalOutgoing.toLocaleString('vi-VN');
-    document.getElementById('statSecret').innerText = totalSecret.toLocaleString('vi-VN');
+    // Cập nhật số thẻ Card tổng quan hệ thống
+    document.getElementById('statIncoming').innerText = Object.keys(rawIncomingData).length.toLocaleString('vi-VN');
+    document.getElementById('statOutgoing').innerText = Object.keys(rawOutgoingData).length.toLocaleString('vi-VN');
+    document.getElementById('statSecret').innerText = Object.keys(rawSecretData).length.toLocaleString('vi-VN');
 
-    // Khởi tạo đồ thị Chart.js dựa trên dữ liệu thật vừa tính toán
-    const ctx = document.getElementById('documentChart').getContext('2d');
+    // Tiến hành vẽ hoặc cập nhật lại giao diện Chart.js
+    const canvasElement = document.getElementById('documentChart');
+    if (!canvasElement) return;
+
+    const ctx = canvasElement.getContext('2d');
     if (documentChartInstance) {
       documentChartInstance.destroy();
     }
@@ -888,8 +892,7 @@
     });
   }
 
-  // Lắng nghe sự kiện đổi bộ lọc năm để tính toán và cập nhật biểu đồ tương ứng
-  if(yearFilter) {
+  if (yearFilter) {
     yearFilter.addEventListener('change', () => {
       processAndChart();
     });
@@ -907,7 +910,7 @@
     });
   });
 
-  // --- PHẦN CODE XỬ LÝ MODAL ĐỔI MẬT KHẨU ---
+  // --- MODAL ĐỔI MẬT KHẨU ---
   const modalElement = document.getElementById('changePasswordModal');
   let passwordModal = null;
   
@@ -1029,6 +1032,7 @@
     if (user) {
       updateEmailTooltip(user.email);
       initModal();
+      initFirebaseRealtimeData(); // Bắt đầu lắng nghe dữ liệu khi user đã xác thực thành công
     } else {
       window.location.href = 'index.html';
     }
@@ -1044,7 +1048,7 @@
 
   loadSidebarState();
   
-  // Kiểm tra lưu vết trạng thái trang xem trước, mặc định tải trực tiếp module 'dashboard'
+  // Khôi phục phân hệ được lưu từ trước, mặc định là trang dashboard tổng quan biểu đồ
   const savedModule = localStorage.getItem('currentModule');
   if (savedModule && modules[savedModule]) {
     setActiveModule(savedModule);
