@@ -81,7 +81,6 @@
     }
 
     /* ========= HIỆN TEXT KHI HOVER ========= */
-    /* Với sidebar đang thu gọn, khi hover vào nav-item sẽ hiện text bên cạnh */
     .sidebar.collapsed .nav-item {
       position: relative;
     }
@@ -108,7 +107,6 @@
       animation: fadeIn 0.15s ease;
     }
 
-    /* Tooltip cho logo và user section khi collapsed */
     .sidebar.collapsed .logo-area {
       position: relative;
     }
@@ -164,7 +162,6 @@
       margin-top: 4px;
     }
 
-    /* Nút toggle sidebar */
     .toggle-sidebar-btn {
       background: rgba(255, 255, 255, 0.15);
       border: none;
@@ -184,7 +181,6 @@
       transform: scale(1.05);
     }
 
-    /* Menu items */
     .nav-menu {
       flex: 1;
       padding: 0 12px;
@@ -222,7 +218,6 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* User section */
     .user-section {
       margin-top: auto;
       padding: 20px;
@@ -263,7 +258,6 @@
       transform: translateY(-1px);
     }
 
-    /* Tooltip cho user email khi collapsed */
     .sidebar.collapsed .user-section {
       position: relative;
     }
@@ -311,7 +305,6 @@
       gap: 16px;
     }
 
-    /* Nút toggle thứ 2 (hiện khi sidebar ẩn trên mobile) */
     .show-sidebar-btn {
       background: #eef2ff;
       border: none;
@@ -354,21 +347,41 @@
       transition: all 0.2s;
     }
 
-    /* Scrollbar đẹp */
+    /* Vùng chứa nội dung đồ thị trực quan trực tiếp */
+    .dashboard-view-container {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .card-stat {
+      border: none;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      transition: transform 0.2s;
+    }
+    .card-stat:hover {
+      transform: translateY(-2px);
+    }
+    
+    .chart-wrapper {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+
     .sidebar::-webkit-scrollbar {
       width: 3px;
     }
-
     .sidebar::-webkit-scrollbar-track {
       background: #0f2a36;
     }
-
     .sidebar::-webkit-scrollbar-thumb {
       background: #2c6e8f;
       border-radius: 10px;
     }
 
-    /* Modal đổi mật khẩu - custom */
     .change-password-modal .modal-content {
       border-radius: 20px;
       border: none;
@@ -422,7 +435,6 @@
       margin-top: 5px;
     }
 
-    /* Responsive nhỏ */
     @media (max-width: 640px) {
       .sidebar {
         position: fixed;
@@ -447,7 +459,6 @@
 </head>
 <body>
 <div class="app">
-  <!-- Sidebar -->
   <div class="sidebar collapsed" id="sidebar">
     <div class="logo-area">
       <div>
@@ -460,7 +471,10 @@
       <span class="tooltip-text">Văn bản Office</span>
     </div>
     <div class="nav-menu">
-      <div class="nav-item active" data-module="outgoing">
+      <div class="nav-item active" data-module="dashboard">
+        <i class="fa-solid fa-chart-line"></i><span>Tổng quan</span>
+      </div>
+      <div class="nav-item" data-module="outgoing">
         <i class="fa-solid fa-paper-plane"></i><span>Văn bản đi</span>
       </div>
       <div class="nav-item" data-module="incoming">
@@ -475,7 +489,6 @@
       <div class="nav-item" data-module="summary">
         <i class="fa-solid fa-chart-simple"></i><span>Tổng hợp</span>
       </div>
-      <!-- Mục Đổi mật khẩu mới -->
       <div class="nav-item" id="changePasswordNavItem" data-module="changepassword">
         <i class="fa-solid fa-key"></i><span>Đổi mật khẩu</span>
       </div>
@@ -491,21 +504,76 @@
     </div>
   </div>
 
-  <!-- Main content -->
   <div class="main">
     <div class="topbar">
       <button class="show-sidebar-btn" id="showSidebarBtn" title="Hiện menu" style="display: none;">
         <i class="fa-solid fa-bars"></i>
       </button>
-      <h4 id="pageTitle"><i class="fa-solid fa-paper-plane me-2"></i>Văn bản đi</h4>
+      <h4 id="pageTitle"><i class="fa-solid fa-chart-line me-2"></i>Tổng quan hệ thống</h4>
     </div>
     <div class="iframe-container">
-      <iframe id="contentFrame" src="cong-van-di.html"></iframe>
+      <div id="dashboardView" class="dashboard-view-container">
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <div class="card card-stat bg-white p-3 border-start border-primary border-4">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <h6 class="text-muted mb-1" style="font-size: 11px;">Tổng Văn Bản Đến</h6>
+                  <h3 class="fw-bold text-primary mb-0" style="font-size: 18px;" id="statIncoming">--</h3>
+                </div>
+                <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-circle">
+                  <i class="fa-solid fa-inbox fa-lg"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card card-stat bg-white p-3 border-start border-success border-4">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <h6 class="text-muted mb-1" style="font-size: 11px;">Tổng Văn Bản Đi</h6>
+                  <h3 class="fw-bold text-success mb-0" style="font-size: 18px;" id="statOutgoing">--</h3>
+                </div>
+                <div class="bg-success bg-opacity-10 text-success p-2 rounded-circle">
+                  <i class="fa-solid fa-paper-plane fa-lg"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card card-stat bg-white p-3 border-start border-danger border-4">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <h6 class="text-muted mb-1" style="font-size: 11px;">Tổng Văn Bản Mật</h6>
+                  <h3 class="fw-bold text-danger mb-0" style="font-size: 18px;" id="statSecret">--</h3>
+                </div>
+                <div class="bg-danger bg-opacity-10 text-danger p-2 rounded-circle">
+                  <i class="fa-solid fa-user-shield fa-lg"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-wrapper">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold text-secondary mb-0" style="font-size: 13px;"><i class="fa-solid fa-chart-bar me-2"></i>Thống kê văn bản theo từng tháng</h6>
+            <select class="form-select form-select-sm" style="width: 100px; font-size: 11px;">
+              <option selected>Năm 2026</option>
+              <option>Năm 2025</option>
+            </select>
+          </div>
+          <div style="position: relative; height: 320px; width: 100%;">
+            <canvas id="documentChart"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <iframe id="contentFrame" src="" style="display: none;"></iframe>
     </div>
   </div>
 </div>
 
-<!-- Modal Đổi mật khẩu -->
 <div class="modal fade change-password-modal" id="changePasswordModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -539,6 +607,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import { getAuth, signOut, onAuthStateChanged, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
@@ -556,24 +626,26 @@
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  // Modules mapping
+  // Cập nhật mapping modules bao gồm cả trang Dashboard trực quan
   const modules = {
-    outgoing: { url: "cong-van-di.html", title: "Văn bản đi", icon: "fa-solid fa-paper-plane" },
-    incoming: { url: "cong-van-den.html", title: "Văn bản đến", icon: "fa-solid fa-inbox" },
-    secret: { url: "cong-van-mat.html", title: "Văn bản mật", icon: "fa-solid fa-user-shield" },
-    search: { url: "tim-kiem.html", title: "Tìm kiếm", icon: "fa-solid fa-magnifying-glass" },
-    summary: { url: "tong-hop.html", title: "Tổng hợp & Báo cáo", icon: "fa-solid fa-chart-simple" }
+    dashboard: { type: "visual", title: "Tổng quan hệ thống", icon: "fa-solid fa-chart-line" },
+    outgoing: { type: "iframe", url: "cong-van-di.html", title: "Văn bản đi", icon: "fa-solid fa-paper-plane" },
+    incoming: { type: "iframe", url: "cong-van-den.html", title: "Văn bản đến", icon: "fa-solid fa-inbox" },
+    secret: { type: "iframe", url: "cong-van-mat.html", title: "Văn bản mật", icon: "fa-solid fa-user-shield" },
+    search: { type: "iframe", url: "tim-kiem.html", title: "Tìm kiếm", icon: "fa-solid fa-magnifying-glass" },
+    summary: { type: "iframe", url: "tong-hop.html", title: "Tổng hợp & Báo cáo", icon: "fa-solid fa-chart-simple" }
   };
 
-  // DOM elements
   const sidebar = document.getElementById('sidebar');
   const collapseBtn = document.getElementById('collapseSidebarBtn');
   const showSidebarBtn = document.getElementById('showSidebarBtn');
   const contentFrame = document.getElementById('contentFrame');
+  const dashboardView = document.getElementById('dashboardView');
   const pageTitle = document.getElementById('pageTitle');
   const changePasswordNavItem = document.getElementById('changePasswordNavItem');
   
   let currentUserEmail = '';
+  let documentChartInstance = null;
 
   // Toggle sidebar collapse
   function toggleSidebar(collapse) {
@@ -594,7 +666,6 @@
     }
   }
 
-  // Lưu trạng thái sidebar (mặc định là collapsed)
   function loadSidebarState() {
     const isCollapsed = localStorage.getItem('sidebarCollapsed') !== 'false';
     if (isCollapsed) {
@@ -612,7 +683,6 @@
     }
   }
 
-  // Sự kiện nút thu gọn
   if (collapseBtn) {
     collapseBtn.addEventListener('click', () => {
       const isCurrentlyCollapsed = sidebar.classList.contains('collapsed');
@@ -620,14 +690,12 @@
     });
   }
 
-  // Sự kiện nút hiện sidebar (khi đang ẩn trên mobile)
   if (showSidebarBtn) {
     showSidebarBtn.addEventListener('click', () => {
       toggleSidebar(false);
     });
   }
 
-  // Xử lý resize cho responsive
   window.addEventListener('resize', () => {
     if (window.innerWidth <= 640) {
       const isCollapsed = sidebar.classList.contains('collapsed');
@@ -644,9 +712,9 @@
     }
   });
 
-  // Active menu & chuyển iframe
+  // Active menu & chuyển đổi hiển thị giữa Biểu đồ trực quan và file Iframe
   function setActiveModule(moduleKey) {
-    document.querySelectorAll('.nav-item').forEach(el => {
+    document.querySelectorAll('.nav-menu .nav-item').forEach(el => {
       const mod = el.getAttribute('data-module');
       if (mod === moduleKey) {
         el.classList.add('active');
@@ -655,24 +723,90 @@
       }
     });
     
-    // Nếu chọn mục đổi mật khẩu -> mở modal, không load iframe
     if (moduleKey === 'changepassword') {
       const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
       modal.show();
-      // Giữ lại title và iframe như cũ, không thay đổi
       return;
     }
     
     const m = modules[moduleKey];
     if (m) {
-      contentFrame.src = m.url;
       pageTitle.innerHTML = `<i class="${m.icon} me-2"></i>${m.title}`;
+      
+      // Nếu chọn module tổng quan -> Hiện giao diện đồ thị, ẩn iframe
+      if (m.type === "visual") {
+        contentFrame.style.display = "none";
+        dashboardView.style.display = "block";
+        renderDashboardChart(); // Vẽ lại đồ thị
+      } else {
+        // Ngược lại -> Ẩn giao diện đồ thị, hiện iframe và load file tương ứng
+        dashboardView.style.display = "none";
+        contentFrame.style.display = "block";
+        contentFrame.src = m.url;
+      }
     }
     localStorage.setItem('currentModule', moduleKey);
   }
 
-  // Gán sự kiện cho menu (bao gồm cả đổi mật khẩu)
-  document.querySelectorAll('.nav-item').forEach(el => {
+  // Khởi tạo và kết xuất đồ thị trực quan
+  function renderDashboardChart() {
+    // Giả lập hoặc cấu hình dữ liệu thống kê
+    document.getElementById('statIncoming').innerText = "1,420";
+    document.getElementById('statOutgoing').innerText = "985";
+    document.getElementById('statSecret').innerText = "32";
+
+    const ctx = document.getElementById('documentChart').getContext('2d');
+    
+    // Nếu đồ thị đã tồn tại thì phá hủy để vẽ lại tránh trùng lặp bộ nhớ
+    if (documentChartInstance) {
+      documentChartInstance.destroy();
+    }
+
+    const months = ['Th.1', 'Th.2', 'Th.3', 'Th.4', 'Th.5', 'Th.6', 'Th.7', 'Th.8', 'Th.9', 'Th.10', 'Th.11', 'Th.12'];
+    
+    documentChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: months,
+        datasets: [
+          {
+            label: 'Văn bản đến',
+            data: [110, 140, 125, 90, 150, 130, 165, 115, 100, 142, 138, 110],
+            backgroundColor: '#1e6f9f',
+            borderRadius: 5
+          },
+          {
+            label: 'Văn bản đi',
+            data: [75, 98, 85, 70, 110, 95, 120, 80, 72, 105, 90, 85],
+            backgroundColor: '#10b981',
+            borderRadius: 5
+          },
+          {
+            label: 'Văn bản mật',
+            data: [2, 4, 1, 3, 5, 2, 4, 1, 0, 6, 2, 2],
+            backgroundColor: '#dc3545',
+            borderRadius: 5
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { font: { family: 'Segoe UI', size: 11 } }
+          }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  }
+
+  document.querySelectorAll('.nav-menu .nav-item').forEach(el => {
     el.addEventListener('click', () => {
       const moduleKey = el.getAttribute('data-module');
       if (moduleKey) {
@@ -695,7 +829,6 @@
     });
   }
   
-  // Hàm hiển thị thông báo lỗi/ thành công tạm thời
   function showPasswordMessage(message, isError = true) {
     const errorDiv = document.getElementById('passwordErrorMsg');
     if (errorDiv) {
@@ -714,7 +847,6 @@
     }
   }
   
-  // Xử lý đổi mật khẩu
   const changePasswordForm = document.getElementById('changePasswordForm');
   if (changePasswordForm) {
     changePasswordForm.addEventListener('submit', async (e) => {
@@ -723,7 +855,6 @@
       const newPassword = document.getElementById('newPassword').value;
       const confirmPassword = document.getElementById('confirmNewPassword').value;
       
-      // Validate
       if (!currentPassword || !newPassword || !confirmPassword) {
         showPasswordMessage('Vui lòng điền đầy đủ thông tin!', true);
         return;
@@ -743,25 +874,19 @@
         return;
       }
       
-      // Re-authenticate
       const credential = EmailAuthProvider.credential(user.email, currentPassword);
       try {
-        // Hiệu ứng loading trên nút
         const submitBtn = changePasswordForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang xử lý...';
         
         await reauthenticateWithCredential(user, credential);
         await updatePassword(user, newPassword);
         
-        // Thành công
         showPasswordMessage('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.', false);
         setTimeout(() => {
           if (passwordModal) passwordModal.hide();
-          // Reset form
           changePasswordForm.reset();
-          // Đăng xuất và về trang login
           signOut(auth).then(() => {
             window.location.href = 'index.html';
           });
@@ -777,7 +902,6 @@
           errorMsg += error.message;
         }
         showPasswordMessage(errorMsg, true);
-        // Reset nút
         const submitBtn = changePasswordForm.querySelector('button[type="submit"]');
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fa-solid fa-check-circle me-1"></i> Cập nhật mật khẩu';
@@ -785,17 +909,15 @@
     });
   }
   
-  // Reset form khi modal đóng
   if (modalElement) {
     modalElement.addEventListener('hidden.bs.modal', () => {
       const errorDiv = document.getElementById('passwordErrorMsg');
       if (errorDiv) errorDiv.classList.add('d-none');
       const form = document.getElementById('changePasswordForm');
       if (form) form.reset();
-      // active lại module cũ (không làm mất trạng thái)
       const savedModule = localStorage.getItem('currentModule');
       if (savedModule && modules[savedModule]) {
-        document.querySelectorAll('.nav-item').forEach(el => {
+        document.querySelectorAll('.nav-menu .nav-item').forEach(el => {
           if (el.getAttribute('data-module') === savedModule) {
             el.classList.add('active');
           } else {
@@ -806,7 +928,6 @@
     });
   }
 
-  // Cập nhật tooltip email
   function updateEmailTooltip(email) {
     const userEmailSpan = document.getElementById('userEmail');
     const userEmailTooltip = document.getElementById('userEmailTooltip');
@@ -815,7 +936,6 @@
     currentUserEmail = email;
   }
 
-  // Firebase auth
   onAuthStateChanged(auth, (user) => {
     if (user) {
       updateEmailTooltip(user.email);
@@ -825,7 +945,6 @@
     }
   });
 
-  // Logout
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
@@ -834,23 +953,21 @@
     });
   }
 
-  // Khôi phục trạng thái (mặc định sidebar đã thu gọn)
   loadSidebarState();
+  
+  // Kiểm tra module đã lưu, nếu không có thì mặc định hiển thị trang 'dashboard' (Tổng quan trực quan) đầu tiên
   const savedModule = localStorage.getItem('currentModule');
   if (savedModule && modules[savedModule]) {
     setActiveModule(savedModule);
   } else {
-    setActiveModule('outgoing');
+    setActiveModule('dashboard');
   }
   
-  // Đảm bảo rằng khi click vào "Đổi mật khẩu" không ảnh hưởng đến iframe
   if (changePasswordNavItem) {
     changePasswordNavItem.addEventListener('click', (e) => {
       e.preventDefault();
-      // Đã xử lý trong setActiveModule, nhưng cần đảm bảo active class
-      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-menu .nav-item').forEach(el => el.classList.remove('active'));
       changePasswordNavItem.classList.add('active');
-      // Không thay đổi iframe, không lưu module
     });
   }
 </script>
